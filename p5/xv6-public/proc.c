@@ -112,6 +112,13 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  // p5
+  // initialize the memory mapping meta-data
+  p->num_maps = 0;
+  memset(p->start_addr, -1, 16*sizeof(int));
+  memset(p->map_length, -1, 16*sizeof(int));
+  memset(p->pages_in_map, -1, 16*sizeof(int));
+  memset(p->file_desc, -1, 16*sizeof(int));
   return p;
 }
 

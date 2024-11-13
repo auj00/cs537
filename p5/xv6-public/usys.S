@@ -31,4 +31,7 @@ SYSCALL(sleep)
 SYSCALL(uptime)
 
 SYSCALL(wmap)
+SYSCALL(wunmap)
+SYSCALL(va2pa)
+SYSCALL(getwmapinfo)
 SYSCALL(test)

@@ -189,6 +189,7 @@ void            clearpteu(pde_t *pgdir, char *uva);
 // p5
 int             alloc_page (struct proc *, int *);
 int             mappages(pde_t *pgdir, void *, uint , uint , int );
+pte_t *         walkpgdir(pde_t *pgdir, const void *, int );
 
 
 // number of elements in fixed-size array
