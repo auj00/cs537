@@ -112,13 +112,26 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
-  // p5
+  // ----- p5 -----
+
   // initialize the memory mapping meta-data
+  for(int i=0; i<16; i++)
+  {
+    // struct initialization
+    p->mapinfo[i].start_addr = -1;
+    p->mapinfo[i].map_length = -1;
+    p->mapinfo[i].pages_in_map = -1;
+    p->mapinfo[i].file_desc = -1;
+  }
+
+  // set number of memory maps for the process = 0
   p->num_maps = 0;
-  memset(p->start_addr, -1, 16*sizeof(int));
-  memset(p->map_length, -1, 16*sizeof(int));
-  memset(p->pages_in_map, -1, 16*sizeof(int));
-  memset(p->file_desc, -1, 16*sizeof(int));
+
+  
+  // memset(p->start_addr, -1, 16*sizeof(int));
+  // memset(p->map_length, -1, 16*sizeof(int));
+  // memset(p->pages_in_map, -1, 16*sizeof(int));
+  // memset(p->file_desc, -1, 16*sizeof(int));
   return p;
 }
 

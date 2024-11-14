@@ -1,0 +1,3219 @@
+starting build
+
+**********************************************************************
+
+Test build
+build xv6 using make
+
+**********************************************************************
+Trying to build project using make
+make xv6.img fs.img
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie -fno-pic -O -nostdinc -I. -c bootmain.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie -fno-pic -nostdinc -I. -c bootasm.S
+ld -m    elf_i386 -N -e start -Ttext 0x7C00 -o bootblock.o bootasm.o bootmain.o
+objdump -S bootblock.o > bootblock.asm
+objcopy -S -O binary -j .text bootblock.o bootblock
+./sign.pl bootblock
+boot block is 451 bytes (max 510)
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o bio.o bio.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o console.o console.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o exec.o exec.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o file.o file.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o fs.o fs.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o ide.o ide.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o ioapic.o ioapic.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o kalloc.o kalloc.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o kbd.o kbd.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o lapic.o lapic.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o log.o log.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o main.o main.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o mp.o mp.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o picirq.o picirq.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o pipe.o pipe.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o proc.o proc.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sleeplock.o sleeplock.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o spinlock.o spinlock.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o string.o string.c
+gcc -m32 -gdwarf-2 -Wa,-divide   -c -o swtch.o swtch.S
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o syscall.o syscall.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysfile.o sysfile.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sysproc.o sysproc.c
+gcc -m32 -gdwarf-2 -Wa,-divide   -c -o trapasm.o trapasm.S
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o trap.o trap.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o uart.o uart.c
+./vectors.pl > vectors.S
+gcc -m32 -gdwarf-2 -Wa,-divide   -c -o vectors.o vectors.S
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o vm.o vm.c
+gcc -m32 -gdwarf-2 -Wa,-divide   -c -o entry.o entry.S
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie -fno-pic -nostdinc -I. -c entryother.S
+ld -m    elf_i386 -N -e start -Ttext 0x7000 -o bootblockother.o entryother.o
+objcopy -S -O binary -j .text bootblockother.o entryother
+objdump -S bootblockother.o > entryother.asm
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie -nostdinc -I. -c initcode.S
+ld -m    elf_i386 -N -e start -Ttext 0 -o initcode.out initcode.o
+objcopy -S -O binary initcode.out initcode
+objdump -S initcode.o > initcode.asm
+ld -m    elf_i386 -T kernel.ld -o kernel entry.o bio.o console.o exec.o file.o fs.o ide.o ioapic.o kalloc.o kbd.o lapic.o log.o main.o mp.o picirq.o pipe.o proc.o sleeplock.o spinlock.o string.o swtch.o syscall.o sysfile.o sysproc.o trapasm.o trap.o uart.o vectors.o vm.o  -b binary initcode entryother
+objdump -S kernel > kernel.asm
+objdump -t kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > kernel.sym
+dd if=/dev/zero of=xv6.img count=10000
+10000+0 records in
+10000+0 records out
+5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.00997927 s, 513 MB/s
+dd if=bootblock of=xv6.img conv=notrunc
+1+0 records in
+1+0 records out
+512 bytes copied, 0.000109447 s, 4.7 MB/s
+dd if=kernel of=xv6.img seek=1 conv=notrunc
+415+1 records in
+415+1 records out
+212736 bytes (213 kB, 208 KiB) copied, 0.000332243 s, 640 MB/s
+gcc -Werror -Wall -o mkfs mkfs.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o ulib.o ulib.c
+gcc -m32 -gdwarf-2 -Wa,-divide   -c -o usys.o usys.S
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o printf.o printf.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o umalloc.o umalloc.c
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o cat.o cat.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _cat cat.o ulib.o usys.o printf.o umalloc.o
+objdump -S _cat > cat.asm
+objdump -t _cat | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > cat.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o echo.o echo.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _echo echo.o ulib.o usys.o printf.o umalloc.o
+objdump -S _echo > echo.asm
+objdump -t _echo | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > echo.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o forktest.o forktest.c
+# forktest has less library code linked in - needs to be small
+# in order to be able to max out the proc table.
+ld -m    elf_i386 -N -e main -Ttext 0 -o _forktest forktest.o ulib.o usys.o
+objdump -S _forktest > forktest.asm
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o grep.o grep.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _grep grep.o ulib.o usys.o printf.o umalloc.o
+objdump -S _grep > grep.asm
+objdump -t _grep | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > grep.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o init.o init.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _init init.o ulib.o usys.o printf.o umalloc.o
+objdump -S _init > init.asm
+objdump -t _init | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > init.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o kill.o kill.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _kill kill.o ulib.o usys.o printf.o umalloc.o
+objdump -S _kill > kill.asm
+objdump -t _kill | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > kill.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o ln.o ln.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _ln ln.o ulib.o usys.o printf.o umalloc.o
+objdump -S _ln > ln.asm
+objdump -t _ln | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > ln.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o ls.o ls.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _ls ls.o ulib.o usys.o printf.o umalloc.o
+objdump -S _ls > ls.asm
+objdump -t _ls | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > ls.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o mkdir.o mkdir.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _mkdir mkdir.o ulib.o usys.o printf.o umalloc.o
+objdump -S _mkdir > mkdir.asm
+objdump -t _mkdir | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > mkdir.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o rm.o rm.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _rm rm.o ulib.o usys.o printf.o umalloc.o
+objdump -S _rm > rm.asm
+objdump -t _rm | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > rm.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o sh.o sh.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _sh sh.o ulib.o usys.o printf.o umalloc.o
+objdump -S _sh > sh.asm
+objdump -t _sh | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > sh.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o stressfs.o stressfs.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _stressfs stressfs.o ulib.o usys.o printf.o umalloc.o
+objdump -S _stressfs > stressfs.asm
+objdump -t _stressfs | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > stressfs.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o usertests.o usertests.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _usertests usertests.o ulib.o usys.o printf.o umalloc.o
+objdump -S _usertests > usertests.asm
+objdump -t _usertests | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > usertests.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o wc.o wc.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _wc wc.o ulib.o usys.o printf.o umalloc.o
+objdump -S _wc > wc.asm
+objdump -t _wc | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > wc.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o zombie.o zombie.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _zombie zombie.o ulib.o usys.o printf.o umalloc.o
+objdump -S _zombie > zombie.asm
+objdump -t _zombie | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > zombie.sym
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o test.o test.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _test test.o ulib.o usys.o printf.o umalloc.o
+objdump -S _test > test.asm
+objdump -t _test | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > test.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 677 blocks have been allocated
+balloc: write bitmap block at sector 58
+
+
+test build PASSED
+ (build xv6 using make)
+
+starting test_1
+
+**********************************************************************
+
+Test test_1
+Checks the presence of all system calls
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_1.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 728 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ tester
+tester
+
+
+TEST_1
+pte=dee2027
+ppn=dee2000
+offset=0
+pa=dee2000
+INFO: va2pa(0x0) returned 0xDEE2000
+INFO: total_mmaps = 0
+INFO: wmap() returned -1
+INFO: wunmap() returned -1
+[0;32mSUCCESS:[0m TEST_1	 PASSED
+
+$ 
+
+test test_1 PASSED (1 of 1)
+ (Checks the presence of all system calls)
+
+starting test_2
+
+**********************************************************************
+
+Test test_2
+Checks the presence of Segmentation Fault
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_2.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 726 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ tester
+tester
+
+
+TEST_2
+pid 3 tester: trap 14 err 7 on cpu 0 eip 0x23 addr 0x80000001--kill proc
+$ 
+
+test test_2 FAILED (0 of 1)
+ (Checks the presence of Segmentation Fault)
+ killed process
+
+starting test_3
+
+**********************************************************************
+
+Test test_3
+MAP: Place one fixed anonymous map
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_3.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 728 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ tester
+tester
+
+
+TEST_3
+INFO: Initially 0 maps. 	Okay.
+physical address of allocated page 0 : dfbc000
+physical address of allocated page 1 : dfbf000
+physical address of allocated page 2 : dfc0000
+physical address of allocated page 3 : dfc1000
+physical address of allocated page 4 : dfc2000
+INFO: Map 1 at 0x60002000 with length 0x4008. 	Okay.
+[0;32mSUCCESS:[0m TEST_3	 PASSED
+
+$ 
+
+test test_3 PASSED (1 of 1)
+ (MAP: Place one fixed anonymous map)
+
+starting test_4
+
+**********************************************************************
+
+Test test_4
+MAP: Place one fixed filebacked map
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_4.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 727 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ tester
+tester
+
+
+TEST_4
+INFO: Initially 0 maps. 	Okay.
+INFO: Created file small.txt with length 512 bytes. 	Okay.
+physical address of allocated page 0 : dfbc000
+INFO: Map 1 at 0x6002F000 with length 0x200. 	Okay.
+[0;32mSUCCESS:[0m TEST_4	 PASSED
+
+$ 
+
+test test_4 PASSED (1 of 1)
+ (MAP: Place one fixed filebacked map)
+
+starting test_5
+
+**********************************************************************
+
+Test test_5
+MAP: Place multiple maps, verify that overlapping maps are not allowed
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_5.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 730 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ tester
+tester
+
+
+TEST_5
+INFO: Initially 0 maps. 	Okay.
+INFO: Created file small.txt with length 512 bytes. 	Okay.
+physical address of allocated page 0 : dfc5000
+INFO: Map 1 at 0x60000000 with length 512. 	Okay.
+physical address of allocated page 0 : dfc7000
+physical address of allocated page 1 : dfc8000
+INFO: Map 2 at 0x60002000 with length 8192. 	Okay.
+debug1
+INFO: Map 3 does not exist. 	Okay.
+physical address of allocated page 0 : dfc9000
+physical address of allocated page 1 : dfca000
+physical address of allocated page 2 : dfcb000
+physical address of allocated page 3 : dfcc000
+physical address of allocated page 4 : dfcd000
+physical address of allocated page 5 : dfce000
+physical address of allocated page 6 : dfcf000
+physical address of allocated page 7 : dfd0000
+physical address of allocated page 8 : dfd1000
+physical address of allocated page 9 : dfd2000
+physical address of allocated page 10 : dfd3000
+physical address of allocated page 11 : dfd4000
+physical address of allocated page 12 : dfd5000
+physical address of allocated page 13 : dfd6000
+physical address of allocated page 14 : dfd7000
+physical address of allocated page 15 : dfd8000
+physical address of allocated page 16 : dfd9000
+physical address of allocated page 17 : dfda000
+physical address of allocated page 18 : dfdb000
+physical address of allocated page 19 : dfdc000
+physical address of allocated page 20 : dfdd000
+physical address of allocated page 21 : dfde000
+physical address of allocated page 22 : dfdf000
+physical address of allocated page 23 : dfe0000
+physical address of allocated page 24 : dfe1000
+physical address of allocated page 25 : dfe2000
+physical address of allocated page 26 : dfe3000
+physical address of allocated page 27 : dfe4000
+physical address of allocated page 28 : dfe5000
+physical address of allocated page 29 : dfe6000
+physical address of allocated page 30 : dfe7000
+physical address of allocated page 31 : dfe8000
+physical address of allocated page 32 : dfe9000
+physical address of allocated page 33 : dfea000
+physical address of allocated page 34 : dfeb000
+physical address of allocated page 35 : dfec000
+physical address of allocated page 36 : dfed000
+physical address of allocated page 37 : dfee000
+physical address of allocated page 38 : dfef000
+physical address of allocated page 39 : dff0000
+physical address of allocated page 40 : dff1000
+physical address of allocated page 41 : dff2000
+physical address of allocated page 42 : dff3000
+physical address of allocated page 43 : dff4000
+physical address of allocated page 44 : dff5000
+physical address of allocated page 45 : dff6000
+physical address of allocated page 46 : dff7000
+physical address of allocated page 47 : dff8000
+physical address of allocated page 48 : dff9000
+physical address of allocated page 49 : dffa000
+physical address of allocated page 50 : dffb000
+physical address of allocated page 51 : dffc000
+physical address of allocated page 52 : dffd000
+physical address of allocated page 53 : df75000
+physical address of allocated page 54 : df24000
+physical address of allocated page 55 : df25000
+physical address of allocated page 56 : df26000
+physical address of allocated page 57 : df27000
+physical address of allocated page 58 : df28000
+physical address of allocated page 59 : df29000
+physical address of allocated page 60 : df2a000
+physical address of allocated page 61 : df2b000
+physical address of allocated page 62 : df2c000
+physical address of allocated page 63 : df2d000
+physical address of allocated page 64 : dfbd000
+physical address of allocated page 65 : df74000
+physical address of allocated page 66 : dedd000
+physical address of allocated page 67 : dedc000
+physical address of allocated page 68 : dedb000
+physical address of allocated page 69 : deda000
+physical address of allocated page 70 : ded9000
+physical address of allocated page 71 : ded8000
+physical address of allocated page 72 : ded7000
+physical address of allocated page 73 : ded6000
+physical address of allocated page 74 : ded5000
+physical address of allocated page 75 : ded4000
+physical address of allocated page 76 : ded3000
+physical address of allocated page 77 : ded2000
+physical address of allocated page 78 : ded1000
+physical address of allocated page 79 : ded0000
+physical address of allocated page 80 : decf000
+physical address of allocated page 81 : dece000
+physical address of allocated page 82 : decd000
+physical address of allocated page 83 : decc000
+physical address of allocated page 84 : decb000
+physical address of allocated page 85 : deca000
+physical address of allocated page 86 : dec9000
+physical address of allocated page 87 : dec8000
+physical address of allocated page 88 : dec7000
+physical address of allocated page 89 : dec6000
+physical address of allocated page 90 : dec5000
+physical address of allocated page 91 : dec4000
+physical address of allocated page 92 : dec3000
+physical address of allocated page 93 : dec2000
+physical address of allocated page 94 : dec1000
+physical address of allocated page 95 : dec0000
+physical address of allocated page 96 : debf000
+physical address of allocated page 97 : debe000
+physical address of allocated page 98 : debd000
+physical address of allocated page 99 : debc000
+physical address of allocated page 100 : debb000
+physical address of allocated page 101 : deba000
+physical address of allocated page 102 : deb9000
+physical address of allocated page 103 : deb8000
+physical address of allocated page 104 : deb7000
+physical address of allocated page 105 : deb6000
+physical address of allocated page 106 : deb5000
+physical address of allocated page 107 : deb4000
+physical address of allocated page 108 : deb3000
+physical address of allocated page 109 : deb2000
+physical address of allocated page 110 : deb1000
+physical address of allocated page 111 : deb0000
+physical address of allocated page 112 : deaf000
+physical address of allocated page 113 : deae000
+physical address of allocated page 114 : dead000
+physical address of allocated page 115 : deac000
+physical address of allocated page 116 : deab000
+physical address of allocated page 117 : deaa000
+physical address of allocated page 118 : dea9000
+physical address of allocated page 119 : dea8000
+physical address of allocated page 120 : dea7000
+physical address of allocated page 121 : dea6000
+physical address of allocated page 122 : dea5000
+physical address of allocated page 123 : dea4000
+physical address of allocated page 124 : dea3000
+physical address of allocated page 125 : dea2000
+physical address of allocated page 126 : dea1000
+physical address of allocated page 127 : dea0000
+physical address of allocated page 128 : de9f000
+physical address of allocated page 129 : de9e000
+physical address of allocated page 130 : de9d000
+physical address of allocated page 131 : de9c000
+physical address of allocated page 132 : de9b000
+physical address of allocated page 133 : de9a000
+physical address of allocated page 134 : de99000
+physical address of allocated page 135 : de98000
+physical address of allocated page 136 : de97000
+physical address of allocated page 137 : de96000
+physical address of allocated page 138 : de95000
+physical address of allocated page 139 : de94000
+physical address of allocated page 140 : de93000
+physical address of allocated page 141 : de92000
+physical address of allocated page 142 : de91000
+physical address of allocated page 143 : de90000
+physical address of allocated page 144 : de8f000
+physical address of allocated page 145 : de8e000
+physical address of allocated page 146 : de8d000
+physical address of allocated page 147 : de8c000
+physical address of allocated page 148 : de8b000
+physical address of allocated page 149 : de8a000
+physical address of allocated page 150 : de89000
+physical address of allocated page 151 : de88000
+physical address of allocated page 152 : de87000
+physical address of allocated page 153 : de86000
+physical address of allocated page 154 : de85000
+physical address of allocated page 155 : de84000
+physical address of allocated page 156 : de83000
+physical address of allocated page 157 : de82000
+physical address of allocated page 158 : de81000
+physical address of allocated page 159 : de80000
+physical address of allocated page 160 : de7f000
+physical address of allocated page 161 : de7e000
+physical address of allocated page 162 : de7d000
+physical address of allocated page 163 : de7c000
+physical address of allocated page 164 : de7b000
+physical address of allocated page 165 : de7a000
+physical address of allocated page 166 : de79000
+physical address of allocated page 167 : de78000
+physical address of allocated page 168 : de77000
+physical address of allocated page 169 : de76000
+physical address of allocated page 170 : de75000
+physical address of allocated page 171 : de74000
+physical address of allocated page 172 : de73000
+physical address of allocated page 173 : de72000
+physical address of allocated page 174 : de71000
+physical address of allocated page 175 : de70000
+physical address of allocated page 176 : de6f000
+physical address of allocated page 177 : de6e000
+physical address of allocated page 178 : de6d000
+physical address of allocated page 179 : de6c000
+physical address of allocated page 180 : de6b000
+physical address of allocated page 181 : de6a000
+physical address of allocated page 182 : de69000
+physical address of allocated page 183 : de68000
+physical address of allocated page 184 : de67000
+physical address of allocated page 185 : de66000
+physical address of allocated page 186 : de65000
+physical address of allocated page 187 : de64000
+physical address of allocated page 188 : de63000
+physical address of allocated page 189 : de62000
+physical address of allocated page 190 : de61000
+physical address of allocated page 191 : de60000
+physical address of allocated page 192 : de5f000
+physical address of allocated page 193 : de5e000
+physical address of allocated page 194 : de5d000
+physical address of allocated page 195 : de5c000
+physical address of allocated page 196 : de5b000
+physical address of allocated page 197 : de5a000
+physical address of allocated page 198 : de59000
+physical address of allocated page 199 : de58000
+INFO: Map 4 at 0x60004000 with length 819200. 	Okay.
+[0;32mSUCCESS:[0m TEST_5	 PASSED
+
+$ 
+
+test test_5 PASSED (1 of 1)
+ (MAP: Place multiple maps, verify that overlapping maps are not allowed)
+
+starting test_6
+
+**********************************************************************
+
+Test test_6
+MAP+ALLOC: Access fixed anonymous map (checks for memory allocation)
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_6.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 729 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ tester
+tester
+
+
+TEST_6
+INFO: Initially 0 maps. 	Okay.
+physical address of allocated page 0 : dfbc000
+physical address of allocated page 1 : dfbf000
+physical address of allocated page 2 : dfc0000
+INFO: Map 1 at 0x60002000 with length 8292. 	Okay.
+pte=dfbc067
+ppn=dfbc000
+offset=0
+pa=dfbc000
+pte=dfbf067
+ppn=dfbf000
+offset=0
+pa=dfbf000
+pte=dfc0067
+ppn=dfc0000
+offset=0
+pa=dfc0000
+pte=0
+INFO: Accessed all pages of Map 1. 	Okay.
+[0;32mSUCCESS:[0m TEST_6	 PASSED
+
+$ 
+
+test test_6 PASSED (1 of 1)
+ (MAP+ALLOC: Access fixed anonymous map (checks for memory allocation))
+
+starting test_7
+
+**********************************************************************
+
+Test test_7
+MAP+ALLOC: access big filebacked map (checks for memory allocation)
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_7.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 730 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ tester
+tester
+
+
+TEST_7
+INFO: Initially 0 maps. 	Okay.
+INFO: 113
+INFO: 114
+INFO: 115
+INFO: 116
+INFO: 117
+INFO: Created file big.txt with length 20480 bytes. 	Okay.
+physical address of allocated page 0 : dfbc000
+physical address of allocated page 1 : dfbf000
+physical address of allocated page 2 : dfc0000
+physical address of allocated page 3 : dfc1000
+physical address of allocated page 4 : dfc2000
+INFO: Placed map 1 at 0x60000000 with length 20480. 	Okay.
+pte=dfbc067
+ppn=dfbc000
+offset=0
+pa=dfbc000
+pte=dfbf067
+ppn=dfbf000
+offset=0
+pa=dfbf000
+pte=dfc0067
+ppn=dfc0000
+offset=0
+pa=dfc0000
+pte=dfc1067
+ppn=dfc1000
+offset=0
+pa=dfc1000
+pte=dfc2067
+ppn=dfc2000
+offset=0
+pa=dfc2000
+pte=0
+INFO: Accessed all pages of Map 1. 	Okay.
+[0;32mSUCCESS:[0m TEST_7	 PASSED
+
+$ 
+
+test test_7 PASSED (1 of 1)
+ (MAP+ALLOC: access big filebacked map (checks for memory allocation))
+
+starting test_8
+
+**********************************************************************
+
+Test test_8
+MAP+STRESS: Places a large number of maps and accesses all pages of each map
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_8.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 734 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+c[?7l[2J[0mSeaBIOS (version 1.15.0-1)
+
+
+iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+
+Booting from Hard Disk..xv6...
+cpu0: starting 0
+sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
+init: starting sh
+$ tester
+tester
+
+
+TEST_8
+INFO: Initially 0 maps. 	Okay.
+INFO: Created file smallfile with length 512 bytes. 	Okay.
+INFO: 98
+INFO: 99
+INFO: 100
+INFO: 101
+INFO: 102
+INFO: Created file bigfile with length 20480 bytes. 	Okay.
+physical address of allocated page 0 : dfc5000
+physical address of allocated page 1 : dfc7000
+physical address of allocated page 2 : dfc8000
+physical address of allocated page 3 : dfc9000
+physical address of allocated page 4 : dfca000
+physical address of allocated page 5 : dfcb000
+physical address of allocated page 6 : dfcc000
+physical address of allocated page 7 : dfcd000
+physical address of allocated page 8 : dfce000
+physical address of allocated page 9 : dfcf000
+physical address of allocated page 10 : dfd0000
+physical address of allocated page 11 : dfd1000
+physical address of allocated page 12 : dfd2000
+physical address of allocated page 13 : dfd3000
+physical address of allocated page 14 : dfd4000
+physical address of allocated page 15 : dfd5000
+physical address of allocated page 16 : dfd6000
+physical address of allocated page 17 : dfd7000
+physical address of allocated page 18 : dfd8000
+physical address of allocated page 19 : dfd9000
+physical address of allocated page 20 : dfda000
+physical address of allocated page 21 : dfdb000
+physical address of allocated page 22 : dfdc000
+physical address of allocated page 23 : dfdd000
+physical address of allocated page 24 : dfde000
+physical address of allocated page 25 : dfdf000
+physical address of allocated page 26 : dfe0000
+physical address of allocated page 27 : dfe1000
+physical address of allocated page 28 : dfe2000
+physical address of allocated page 29 : dfe3000
+physical address of allocated page 30 : dfe4000
+physical address of allocated page 31 : dfe5000
+physical address of allocated page 32 : dfe6000
+physical address of allocated page 33 : dfe7000
+physical address of allocated page 34 : dfe8000
+physical address of allocated page 35 : dfe9000
+physical address of allocated page 36 : dfea000
+physical address of allocated page 37 : dfeb000
+physical address of allocated page 38 : dfec000
+physical address of allocated page 39 : dfed000
+physical address of allocated page 40 : dfee000
+physical address of allocated page 41 : dfef000
+physical address of allocated page 42 : dff0000
+physical address of allocated page 43 : dff1000
+physical address of allocated page 44 : dff2000
+physical address of allocated page 45 : dff3000
+physical address of allocated page 46 : dff4000
+physical address of allocated page 47 : dff5000
+physical address of allocated page 48 : dff6000
+physical address of allocated page 49 : dff7000
+physical address of allocated page 50 : dff8000
+physical address of allocated page 51 : dff9000
+physical address of allocated page 52 : dffa000
+physical address of allocated page 53 : dffb000
+physical address of allocated page 54 : dffc000
+physical address of allocated page 55 : dffd000
+physical address of allocated page 56 : df75000
+physical address of allocated page 57 : df24000
+physical address of allocated page 58 : df25000
+physical address of allocated page 59 : df26000
+physical address of allocated page 60 : df27000
+physical address of allocated page 61 : df28000
+physical address of allocated page 62 : df29000
+physical address of allocated page 63 : df2a000
+physical address of allocated page 64 : df2b000
+physical address of allocated page 65 : df2c000
+physical address of allocated page 66 : df2d000
+physical address of allocated page 67 : dfbd000
+physical address of allocated page 68 : df74000
+physical address of allocated page 69 : dedd000
+physical address of allocated page 70 : dedc000
+physical address of allocated page 71 : dedb000
+physical address of allocated page 72 : deda000
+physical address of allocated page 73 : ded9000
+physical address of allocated page 74 : ded8000
+physical address of allocated page 75 : ded7000
+physical address of allocated page 76 : ded6000
+physical address of allocated page 77 : ded5000
+physical address of allocated page 78 : ded4000
+physical address of allocated page 79 : ded3000
+physical address of allocated page 80 : ded2000
+physical address of allocated page 81 : ded1000
+physical address of allocated page 82 : ded0000
+physical address of allocated page 83 : decf000
+physical address of allocated page 84 : dece000
+physical address of allocated page 85 : decd000
+physical address of allocated page 86 : decc000
+physical address of allocated page 87 : decb000
+physical address of allocated page 88 : deca000
+physical address of allocated page 89 : dec9000
+physical address of allocated page 90 : dec8000
+physical address of allocated page 91 : dec7000
+physical address of allocated page 92 : dec6000
+physical address of allocated page 93 : dec5000
+physical address of allocated page 94 : dec4000
+physical address of allocated page 95 : dec3000
+physical address of allocated page 96 : dec2000
+physical address of allocated page 97 : dec1000
+physical address of allocated page 98 : dec0000
+physical address of allocated page 99 : debf000
+physical address of allocated page 100 : debe000
+physical address of allocated page 101 : debd000
+physical address of allocated page 102 : debc000
+physical address of allocated page 103 : debb000
+physical address of allocated page 104 : deba000
+physical address of allocated page 105 : deb9000
+physical address of allocated page 106 : deb8000
+physical address of allocated page 107 : deb7000
+physical address of allocated page 108 : deb6000
+physical address of allocated page 109 : deb5000
+physical address of allocated page 110 : deb4000
+physical address of allocated page 111 : deb3000
+physical address of allocated page 112 : deb2000
+physical address of allocated page 113 : deb1000
+physical address of allocated page 114 : deb0000
+physical address of allocated page 115 : deaf000
+physical address of allocated page 116 : deae000
+physical address of allocated page 117 : dead000
+physical address of allocated page 118 : deac000
+physical address of allocated page 119 : deab000
+physical address of allocated page 120 : deaa000
+physical address of allocated page 121 : dea9000
+physical address of allocated page 122 : dea8000
+physical address of allocated page 123 : dea7000
+physical address of allocated page 124 : dea6000
+physical address of allocated page 125 : dea5000
+physical address of allocated page 126 : dea4000
+physical address of allocated page 127 : dea3000
+physical address of allocated page 128 : dea2000
+physical address of allocated page 129 : dea1000
+physical address of allocated page 130 : dea0000
+physical address of allocated page 131 : de9f000
+physical address of allocated page 132 : de9e000
+physical address of allocated page 133 : de9d000
+physical address of allocated page 134 : de9c000
+physical address of allocated page 135 : de9b000
+physical address of allocated page 136 : de9a000
+physical address of allocated page 137 : de99000
+physical address of allocated page 138 : de98000
+physical address of allocated page 139 : de97000
+physical address of allocated page 140 : de96000
+physical address of allocated page 141 : de95000
+physical address of allocated page 142 : de94000
+physical address of allocated page 143 : de93000
+physical address of allocated page 144 : de92000
+physical address of allocated page 145 : de91000
+physical address of allocated page 146 : de90000
+physical address of allocated page 147 : de8f000
+physical address of allocated page 148 : de8e000
+physical address of allocated page 149 : de8d000
+physical address of allocated page 150 : de8c000
+physical address of allocated page 151 : de8b000
+physical address of allocated page 152 : de8a000
+physical address of allocated page 153 : de89000
+physical address of allocated page 154 : de88000
+physical address of allocated page 155 : de87000
+physical address of allocated page 156 : de86000
+physical address of allocated page 157 : de85000
+physical address of allocated page 158 : de84000
+physical address of allocated page 159 : de83000
+physical address of allocated page 160 : de82000
+physical address of allocated page 161 : de81000
+physical address of allocated page 162 : de80000
+physical address of allocated page 163 : de7f000
+physical address of allocated page 164 : de7e000
+physical address of allocated page 165 : de7d000
+physical address of allocated page 166 : de7c000
+physical address of allocated page 167 : de7b000
+physical address of allocated page 168 : de7a000
+physical address of allocated page 169 : de79000
+physical address of allocated page 170 : de78000
+physical address of allocated page 171 : de77000
+physical address of allocated page 172 : de76000
+physical address of allocated page 173 : de75000
+physical address of allocated page 174 : de74000
+physical address of allocated page 175 : de73000
+physical address of allocated page 176 : de72000
+physical address of allocated page 177 : de71000
+physical address of allocated page 178 : de70000
+physical address of allocated page 179 : de6f000
+physical address of allocated page 180 : de6e000
+physical address of allocated page 181 : de6d000
+physical address of allocated page 182 : de6c000
+physical address of allocated page 183 : de6b000
+physical address of allocated page 184 : de6a000
+physical address of allocated page 185 : de69000
+physical address of allocated page 186 : de68000
+physical address of allocated page 187 : de67000
+physical address of allocated page 188 : de66000
+physical address of allocated page 189 : de65000
+physical address of allocated page 190 : de64000
+physical address of allocated page 191 : de63000
+physical address of allocated page 192 : de62000
+physical address of allocated page 193 : de61000
+physical address of allocated page 194 : de60000
+physical address of allocated page 195 : de5f000
+physical address of allocated page 196 : de5e000
+physical address of allocated page 197 : de5d000
+physical address of allocated page 198 : de5c000
+physical address of allocated page 199 : de5b000
+physical address of allocated page 200 : de5a000
+physical address of allocated page 201 : de59000
+physical address of allocated page 202 : de58000
+physical address of allocated page 203 : de57000
+physical address of allocated page 204 : de56000
+physical address of allocated page 205 : de55000
+physical address of allocated page 206 : de54000
+physical address of allocated page 207 : de53000
+physical address of allocated page 208 : de52000
+physical address of allocated page 209 : de51000
+physical address of allocated page 210 : de50000
+physical address of allocated page 211 : de4f000
+physical address of allocated page 212 : de4e000
+physical address of allocated page 213 : de4d000
+physical address of allocated page 214 : de4c000
+physical address of allocated page 215 : de4b000
+physical address of allocated page 216 : de4a000
+physical address of allocated page 217 : de49000
+physical address of allocated page 218 : de48000
+physical address of allocated page 219 : de47000
+physical address of allocated page 220 : de46000
+physical address of allocated page 221 : de45000
+physical address of allocated page 222 : de44000
+physical address of allocated page 223 : de43000
+physical address of allocated page 224 : de42000
+physical address of allocated page 225 : de41000
+physical address of allocated page 226 : de40000
+physical address of allocated page 227 : de3f000
+physical address of allocated page 228 : de3e000
+physical address of allocated page 229 : de3d000
+physical address of allocated page 230 : de3c000
+physical address of allocated page 231 : de3b000
+physical address of allocated page 232 : de3a000
+physical address of allocated page 233 : de39000
+physical address of allocated page 234 : de38000
+physical address of allocated page 235 : de37000
+physical address of allocated page 236 : de36000
+physical address of allocated page 237 : de35000
+physical address of allocated page 238 : de34000
+physical address of allocated page 239 : de33000
+physical address of allocated page 240 : de32000
+physical address of allocated page 241 : de31000
+physical address of allocated page 242 : de30000
+physical address of allocated page 243 : de2f000
+physical address of allocated page 244 : de2e000
+physical address of allocated page 245 : de2d000
+physical address of allocated page 246 : de2c000
+physical address of allocated page 247 : de2b000
+physical address of allocated page 248 : de2a000
+physical address of allocated page 249 : de29000
+physical address of allocated page 250 : de28000
+physical address of allocated page 251 : de27000
+physical address of allocated page 252 : de26000
+physical address of allocated page 253 : de25000
+physical address of allocated page 254 : de24000
+physical address of allocated page 255 : de23000
+physical address of allocated page 256 : de22000
+physical address of allocated page 257 : de21000
+physical address of allocated page 258 : de20000
+physical address of allocated page 259 : de1f000
+physical address of allocated page 260 : de1e000
+physical address of allocated page 261 : de1d000
+physical address of allocated page 262 : de1c000
+physical address of allocated page 263 : de1b000
+physical address of allocated page 264 : de1a000
+physical address of allocated page 265 : de19000
+physical address of allocated page 266 : de18000
+physical address of allocated page 267 : de17000
+physical address of allocated page 268 : de16000
+physical address of allocated page 269 : de15000
+physical address of allocated page 270 : de14000
+physical address of allocated page 271 : de13000
+physical address of allocated page 272 : de12000
+physical address of allocated page 273 : de11000
+physical address of allocated page 274 : de10000
+physical address of allocated page 275 : de0f000
+physical address of allocated page 276 : de0e000
+physical address of allocated page 277 : de0d000
+physical address of allocated page 278 : de0c000
+physical address of allocated page 279 : de0b000
+physical address of allocated page 280 : de0a000
+physical address of allocated page 281 : de09000
+physical address of allocated page 282 : de08000
+physical address of allocated page 283 : de07000
+physical address of allocated page 284 : de06000
+physical address of allocated page 285 : de05000
+physical address of allocated page 286 : de04000
+physical address of allocated page 287 : de03000
+physical address of allocated page 288 : de02000
+physical address of allocated page 289 : de01000
+physical address of allocated page 290 : de00000
+physical address of allocated page 291 : ddff000
+physical address of allocated page 292 : ddfe000
+physical address of allocated page 293 : ddfd000
+physical address of allocated page 294 : ddfc000
+physical address of allocated page 295 : ddfb000
+physical address of allocated page 296 : ddfa000
+physical address of allocated page 297 : ddf9000
+physical address of allocated page 298 : ddf8000
+physical address of allocated page 299 : ddf7000
+physical address of allocated page 300 : ddf6000
+physical address of allocated page 301 : ddf5000
+physical address of allocated page 302 : ddf4000
+physical address of allocated page 303 : ddf3000
+physical address of allocated page 304 : ddf2000
+physical address of allocated page 305 : ddf1000
+physical address of allocated page 306 : ddf0000
+physical address of allocated page 307 : ddef000
+physical address of allocated page 308 : ddee000
+physical address of allocated page 309 : dded000
+physical address of allocated page 310 : ddec000
+physical address of allocated page 311 : ddeb000
+physical address of allocated page 312 : ddea000
+physical address of allocated page 313 : dde9000
+physical address of allocated page 314 : dde8000
+physical address of allocated page 315 : dde7000
+physical address of allocated page 316 : dde6000
+physical address of allocated page 317 : dde5000
+physical address of allocated page 318 : dde4000
+physical address of allocated page 319 : dde3000
+physical address of allocated page 320 : dde2000
+physical address of allocated page 321 : dde1000
+physical address of allocated page 322 : dde0000
+physical address of allocated page 323 : dddf000
+physical address of allocated page 324 : ddde000
+physical address of allocated page 325 : dddd000
+physical address of allocated page 326 : dddc000
+physical address of allocated page 327 : dddb000
+physical address of allocated page 328 : ddda000
+physical address of allocated page 329 : ddd9000
+physical address of allocated page 330 : ddd8000
+physical address of allocated page 331 : ddd7000
+physical address of allocated page 332 : ddd6000
+physical address of allocated page 333 : ddd5000
+physical address of allocated page 334 : ddd4000
+physical address of allocated page 335 : ddd3000
+physical address of allocated page 336 : ddd2000
+physical address of allocated page 337 : ddd1000
+physical address of allocated page 338 : ddd0000
+physical address of allocated page 339 : ddcf000
+physical address of allocated page 340 : ddce000
+physical address of allocated page 341 : ddcd000
+physical address of allocated page 342 : ddcc000
+physical address of allocated page 343 : ddcb000
+physical address of allocated page 344 : ddca000
+physical address of allocated page 345 : ddc9000
+physical address of allocated page 346 : ddc8000
+physical address of allocated page 347 : ddc7000
+physical address of allocated page 348 : ddc6000
+physical address of allocated page 349 : ddc5000
+physical address of allocated page 350 : ddc4000
+physical address of allocated page 351 : ddc3000
+physical address of allocated page 352 : ddc2000
+physical address of allocated page 353 : ddc1000
+physical address of allocated page 354 : ddc0000
+physical address of allocated page 355 : ddbf000
+physical address of allocated page 356 : ddbe000
+physical address of allocated page 357 : ddbd000
+physical address of allocated page 358 : ddbc000
+physical address of allocated page 359 : ddbb000
+physical address of allocated page 360 : ddba000
+physical address of allocated page 361 : ddb9000
+physical address of allocated page 362 : ddb8000
+physical address of allocated page 363 : ddb7000
+physical address of allocated page 364 : ddb6000
+physical address of allocated page 365 : ddb5000
+physical address of allocated page 366 : ddb4000
+physical address of allocated page 367 : ddb3000
+physical address of allocated page 368 : ddb2000
+physical address of allocated page 369 : ddb1000
+physical address of allocated page 370 : ddb0000
+physical address of allocated page 371 : ddaf000
+physical address of allocated page 372 : ddae000
+physical address of allocated page 373 : ddad000
+physical address of allocated page 374 : ddac000
+physical address of allocated page 375 : ddab000
+physical address of allocated page 376 : ddaa000
+physical address of allocated page 377 : dda9000
+physical address of allocated page 378 : dda8000
+physical address of allocated page 379 : dda7000
+physical address of allocated page 380 : dda6000
+physical address of allocated page 381 : dda5000
+physical address of allocated page 382 : dda4000
+physical address of allocated page 383 : dda3000
+physical address of allocated page 384 : dda2000
+physical address of allocated page 385 : dda1000
+physical address of allocated page 386 : dda0000
+physical address of allocated page 387 : dd9f000
+physical address of allocated page 388 : dd9e000
+physical address of allocated page 389 : dd9d000
+physical address of allocated page 390 : dd9c000
+physical address of allocated page 391 : dd9b000
+physical address of allocated page 392 : dd9a000
+physical address of allocated page 393 : dd99000
+physical address of allocated page 394 : dd98000
+physical address of allocated page 395 : dd97000
+physical address of allocated page 396 : dd96000
+physical address of allocated page 397 : dd95000
+physical address of allocated page 398 : dd94000
+physical address of allocated page 399 : dd93000
+INFO: Map 1 is placed at 0x60000000. 	Okay.
+physical address of allocated page 0 : dd92000
+physical address of allocated page 1 : dd91000
+physical address of allocated page 2 : dd90000
+physical address of allocated page 3 : dd8f000
+physical address of allocated page 4 : dd8e000
+INFO: Map 2 is placed at 0x60191000. 	Okay.
+physical address of allocated page 0 : dd8d000
+INFO: Map 3 is placed at 0x60190000. 	Okay.
+physical address of allocated page 0 : dd8c000
+physical address of allocated page 1 : dd8b000
+physical address of allocated page 2 : dd8a000
+physical address of allocated page 3 : dd89000
+physical address of allocated page 4 : dd88000
+physical address of allocated page 5 : dd87000
+physical address of allocated page 6 : dd86000
+physical address of allocated page 7 : dd85000
+physical address of allocated page 8 : dd84000
+physical address of allocated page 9 : dd83000
+physical address of allocated page 10 : dd82000
+physical address of allocated page 11 : dd81000
+physical address of allocated page 12 : dd80000
+physical address of allocated page 13 : dd7f000
+physical address of allocated page 14 : dd7e000
+physical address of allocated page 15 : dd7d000
+physical address of allocated page 16 : dd7c000
+physical address of allocated page 17 : dd7b000
+physical address of allocated page 18 : dd7a000
+physical address of allocated page 19 : dd79000
+physical address of allocated page 20 : dd78000
+physical address of allocated page 21 : dd77000
+physical address of allocated page 22 : dd76000
+physical address of allocated page 23 : dd75000
+physical address of allocated page 24 : dd74000
+physical address of allocated page 25 : dd73000
+physical address of allocated page 26 : dd72000
+physical address of allocated page 27 : dd71000
+physical address of allocated page 28 : dd70000
+physical address of allocated page 29 : dd6f000
+physical address of allocated page 30 : dd6e000
+physical address of allocated page 31 : dd6d000
+physical address of allocated page 32 : dd6c000
+physical address of allocated page 33 : dd6b000
+physical address of allocated page 34 : dd6a000
+physical address of allocated page 35 : dd69000
+physical address of allocated page 36 : dd68000
+physical address of allocated page 37 : dd67000
+physical address of allocated page 38 : dd66000
+physical address of allocated page 39 : dd65000
+physical address of allocated page 40 : dd64000
+physical address of allocated page 41 : dd63000
+physical address of allocated page 42 : dd62000
+physical address of allocated page 43 : dd61000
+physical address of allocated page 44 : dd60000
+physical address of allocated page 45 : dd5f000
+physical address of allocated page 46 : dd5e000
+physical address of allocated page 47 : dd5d000
+physical address of allocated page 48 : dd5c000
+physical address of allocated page 49 : dd5b000
+physical address of allocated page 50 : dd5a000
+physical address of allocated page 51 : dd59000
+physical address of allocated page 52 : dd58000
+physical address of allocated page 53 : dd57000
+physical address of allocated page 54 : dd56000
+physical address of allocated page 55 : dd55000
+physical address of allocated page 56 : dd54000
+physical address of allocated page 57 : dd53000
+physical address of allocated page 58 : dd52000
+physical address of allocated page 59 : dd51000
+physical address of allocated page 60 : dd50000
+physical address of allocated page 61 : dd4f000
+physical address of allocated page 62 : dd4e000
+physical address of allocated page 63 : dd4d000
+physical address of allocated page 64 : dd4c000
+physical address of allocated page 65 : dd4b000
+physical address of allocated page 66 : dd4a000
+physical address of allocated page 67 : dd49000
+physical address of allocated page 68 : dd48000
+physical address of allocated page 69 : dd47000
+physical address of allocated page 70 : dd46000
+physical address of allocated page 71 : dd45000
+physical address of allocated page 72 : dd44000
+physical address of allocated page 73 : dd43000
+physical address of allocated page 74 : dd42000
+physical address of allocated page 75 : dd41000
+physical address of allocated page 76 : dd40000
+physical address of allocated page 77 : dd3f000
+physical address of allocated page 78 : dd3e000
+physical address of allocated page 79 : dd3d000
+physical address of allocated page 80 : dd3c000
+physical address of allocated page 81 : dd3b000
+physical address of allocated page 82 : dd3a000
+physical address of allocated page 83 : dd39000
+physical address of allocated page 84 : dd38000
+physical address of allocated page 85 : dd37000
+physical address of allocated page 86 : dd36000
+physical address of allocated page 87 : dd35000
+physical address of allocated page 88 : dd34000
+physical address of allocated page 89 : dd33000
+physical address of allocated page 90 : dd32000
+physical address of allocated page 91 : dd31000
+physical address of allocated page 92 : dd30000
+physical address of allocated page 93 : dd2f000
+physical address of allocated page 94 : dd2e000
+physical address of allocated page 95 : dd2d000
+physical address of allocated page 96 : dd2c000
+physical address of allocated page 97 : dd2b000
+physical address of allocated page 98 : dd2a000
+physical address of allocated page 99 : dd29000
+physical address of allocated page 100 : dd28000
+physical address of allocated page 101 : dd27000
+physical address of allocated page 102 : dd26000
+physical address of allocated page 103 : dd25000
+physical address of allocated page 104 : dd24000
+physical address of allocated page 105 : dd23000
+physical address of allocated page 106 : dd22000
+physical address of allocated page 107 : dd21000
+physical address of allocated page 108 : dd20000
+physical address of allocated page 109 : dd1f000
+physical address of allocated page 110 : dd1e000
+physical address of allocated page 111 : dd1d000
+physical address of allocated page 112 : dd1c000
+physical address of allocated page 113 : dd1b000
+physical address of allocated page 114 : dd1a000
+physical address of allocated page 115 : dd19000
+physical address of allocated page 116 : dd18000
+physical address of allocated page 117 : dd17000
+physical address of allocated page 118 : dd16000
+physical address of allocated page 119 : dd15000
+physical address of allocated page 120 : dd14000
+physical address of allocated page 121 : dd13000
+physical address of allocated page 122 : dd12000
+physical address of allocated page 123 : dd11000
+physical address of allocated page 124 : dd10000
+physical address of allocated page 125 : dd0f000
+physical address of allocated page 126 : dd0e000
+physical address of allocated page 127 : dd0d000
+physical address of allocated page 128 : dd0c000
+physical address of allocated page 129 : dd0b000
+physical address of allocated page 130 : dd0a000
+physical address of allocated page 131 : dd09000
+physical address of allocated page 132 : dd08000
+physical address of allocated page 133 : dd07000
+physical address of allocated page 134 : dd06000
+physical address of allocated page 135 : dd05000
+physical address of allocated page 136 : dd04000
+physical address of allocated page 137 : dd03000
+physical address of allocated page 138 : dd02000
+physical address of allocated page 139 : dd01000
+physical address of allocated page 140 : dd00000
+physical address of allocated page 141 : dcff000
+physical address of allocated page 142 : dcfe000
+physical address of allocated page 143 : dcfd000
+physical address of allocated page 144 : dcfc000
+physical address of allocated page 145 : dcfb000
+physical address of allocated page 146 : dcfa000
+physical address of allocated page 147 : dcf9000
+physical address of allocated page 148 : dcf8000
+physical address of allocated page 149 : dcf7000
+phy page 269 : dc7f000
+physical address of allocated page 270 : dc7e000
+physical address of allocated page 271 : dc7d000
+physical address of allocated page 272 : dc7c000
+physical address of allocated page 273 : dc7b000
+physical address of allocated page 274 : dc7a000
+physical address of allocated page 275 : dc79000
+physical address of allocated page 276 : dc78000
+physical address of allocated page 277 : dc77000
+physical address of allocated page 278 : dc76000
+physical address of allocated page 279 : dc75000
+physical address of allocated page 280 : dc74000
+physical address of allocated page 281 : dc73000
+physical address of allocated page 282 : dc72000
+physical address of allocated page 283 : dc71000
+physical address of allocated page 284 : dc70000
+physical address of allocated page 285 : dc6f000
+physical address of allocated page 286 : dc6e000
+physical address of allocated page 287 : dc6d000
+physical address of allocated page 288 : dc6c000
+physical address of allocated page 289 : dc6b000
+physical address of allocated page 290 : dc6a000
+physical address of allocated page 291 : dc69000
+physical address of allocated page 292 : dc68000
+physical address of allocated page 293 : dc67000
+physical address of allocated page 294 : dc66000
+physical address of allocated page 295 : dc65000
+physical address of allocated page 296 : dc64000
+physical address of allocated page 297 : dc63000
+physical address of allocated page 298 : dc62000
+physical address of allocated page 299 : dc61000
+physical address of allocated page 300 : dc60000
+physical address of allocated page 301 : dc5f000
+physical address of allocated page 302 : dc5e000
+physical address of allocated page 303 : dc5d000
+physical address of allocated page 304 : dc5c000
+physical address of allocated page 305 : dc5b000
+physical address of allocated page 306 : dc5a000
+physical address of allocated page 307 : dc59000
+physical address of allocated page 308 : dc58000
+physical address of allocated page 309 : dc57000
+physical address of allocatd page 657 : dafa000
+physical address of allocated page 658 : daf9000
+physical address of allocated page 659 : daf8000
+physical address of allocated page 660 : daf7000
+physical address of allocated page 661 : daf6000
+physical address of allocated page 662 : daf5000
+physical address of allocated page 663 : daf4000
+physical address of allocated page 664 : daf3000
+physical address of allocated page 665 : daf2000
+physical address of allocated page 666 : daf1000
+physical address of allocated page 667 : daf0000
+physical address of allocated page 668 : daef000
+physical address of allocated page 669 : daee000
+physical address of allocated page 670 : daed000
+physical address of allocated page 671 : daec000
+physical address of allocated page 672 : daeb000
+physical address of allocated page 673 : daea000
+physical address of allocated page 674 : dae9000
+physical address of allocated page 675 : dae8000
+physical address of allocated page 676 : dae7000
+physical address of allocated page 677 : dae6000
+physical address of allocated page 678 : dae5000
+physical address of allocated page 679 : dae4000
+physical address of allocated page 680 : dae3000
+physical address of allocated page 681 : dae2000
+physical address of allocated page 682 : dae1000
+physical address of allocated page 683 : dae0000
+physical address of allocated page 684 : dadf000
+physical address of allocated page 685 : dade000
+physical address of allocated page 686 : dadd000
+physical address of allocated page 687 : dadc000
+physical address of allocated page 688 : dadb000
+physical address of allocated page 689 : dada000
+physical address of allocated page 690 : dad9000
+physical address of allocated page 691 : dad8000
+physical address of allocated page 692 : dad7000
+physical address of allocated page 693 : dad6000
+physical address of allocated page 694 : dad5000
+physical address of allocated page 695 : dad4000
+physical address of allocated page 696 : dad3000
+physical address of allocated page 697 : dad2000
+physical address of alloca page 1205 : d8d6000
+physical address of allocated page 1206 : d8d5000
+physical address of allocated page 1207 : d8d4000
+physical address of allocated page 1208 : d8d3000
+physical address of allocated page 1209 : d8d2000
+physical address of allocated page 1210 : d8d1000
+physical address of allocated page 1211 : d8d0000
+physical address of allocated page 1212 : d8cf000
+physical address of allocated page 1213 : d8ce000
+physical address of allocated page 1214 : d8cd000
+physical address of allocated page 1215 : d8cc000
+physical address of allocated page 1216 : d8cb000
+physical address of allocated page 1217 : d8ca000
+physical address of allocated page 1218 : d8c9000
+physical address of allocated page 1219 : d8c8000
+physical address of allocated page 1220 : d8c7000
+physical address of allocated page 1221 : d8c6000
+physical address of allocated page 1222 : d8c5000
+physical address of allocated page 1223 : d8c4000
+physical address of allocated page 1224 : d8c3000
+physical address of allocated page 1225 : d8c2000
+physical address of allocated page 1226 : d8c1000
+physical address of allocated page 1227 : d8c0000
+physical address of allocated page 1228 : d8bf000
+physical address of allocated page 1229 : d8be000
+physical address of allocated page 1230 : d8bd000
+physical address of allocated page 1231 : d8bc000
+physical address of allocated page 1232 : d8bb000
+physical address of allocated page 1233 : d8ba000
+physical address of allocated page 1234 : d8b9000
+physical address of allocated page 1235 : d8b8000
+physical address of allocated page 1236 : d8b7000
+physical address of allocated page 1237 : d8b6000
+physical address of allocated page 1238 : d8b5000
+physical address of allocated page 1239 : d8b4000
+physical address of allocated page 1240 : d8b3000
+physical address of allocated page 1241 : d8b2000
+physical address of allocated page 1242 : d8b1000
+physical address of allocated page 1243 : d8b0000
+physical address of allocated page 1244 : d8af000
+physical address of allocated page 12ss of allocated page 1925 : d605000
+physical address of allocated page 1926 : d604000
+physical address of allocated page 1927 : d603000
+physical address of allocated page 1928 : d602000
+physical address of allocated page 1929 : d601000
+physical address of allocated page 1930 : d600000
+physical address of allocated page 1931 : d5ff000
+physical address of allocated page 1932 : d5fe000
+physical address of allocated page 1933 : d5fd000
+physical address of allocated page 1934 : d5fc000
+physical address of allocated page 1935 : d5fb000
+physical address of allocated page 1936 : d5fa000
+physical address of allocated page 1937 : d5f9000
+physical address of allocated page 1938 : d5f8000
+physical address of allocated page 1939 : d5f7000
+physical address of allocated page 1940 : d5f6000
+physical address of allocated page 1941 : d5f5000
+physical address of allocated page 1942 : d5f4000
+physical address of allocated page 1943 : d5f3000
+physical address of allocated page 1944 : d5f2000
+physical address of allocated page 1945 : d5f1000
+physical address of allocated page 1946 : d5f0000
+physical address of allocated page 1947 : d5ef000
+physical address of allocated page 1948 : d5ee000
+physical address of allocated page 1949 : d5ed000
+physical address of allocated page 1950 : d5ec000
+physical address of allocated page 1951 : d5eb000
+physical address of allocated page 1952 : d5ea000
+physical address of allocated page 1953 : d5e9000
+physical address of allocated page 1954 : d5e8000
+physical address of allocated page 1955 : d5e7000
+physical address of allocated page 1956 : d5e6000
+physical address of allocated page 1957 : d5e5000
+physical address of allocated page 1958 : d5e4000
+physical address of allocated page 1959 : d5e3000
+physical address of allocated page 1960 : d5e2000
+physical address of allocated page 1961 : d5e1000
+physical address of allocated page 1962 : d5e0000
+physical address of allocated page 1963 : d5df000
+physical address of allocated page 1964 : d5de000
+physical address of al
+pte=dff7067
+ppn=dff7000
+offset=0
+pa=dff7000
+pte=dff8067
+ppn=dff8000
+offset=0
+pa=dff8000
+pte=dff9067
+ppn=dff9000
+offset=0
+pa=dff9000
+pte=dffa067
+ppn=dffa000
+offset=0
+pa=dffa000
+pte=dffb067
+ppn=dffb000
+offset=0
+pa=dffb000
+pte=dffc067
+ppn=dffc000
+offset=0
+pa=dffc000
+pte=dffd067
+ppn=dffd000
+offset=0
+pa=dffd000
+pte=df75067
+ppn=df75000
+offset=0
+pa=df75000
+pte=df24067
+ppn=df24000
+offset=0
+pa=df24000
+pte=df25067
+ppn=df25000
+offset=0
+pa=df25000
+pte=df26067
+ppn=df26000
+offset=0
+pa=df26000
+pte=df27067
+ppn=df27000
+offset=0
+pa=df27000
+pte=df28067
+ppn=df28000
+offset=0
+pa=df28000
+pte=df29067
+ppn=df29000
+offset=0
+pa=df29000
+pte=df2a067
+ppn=df2a000
+offset=0
+pa=df2a000
+pte=df2b067
+ppn=df2b000
+offset=0
+pa=df2b000
+pte=df2c067
+ppn=df2c000
+offset=0
+pa=df2c000
+pte=df2d067
+ppn=df2d000
+offset=0
+pa=df2d000
+pte=dfbd067
+ppn=dfbd000
+offset=0
+pa=dfbd000
+pte=df74067
+ppn=df74000
+offset=0
+pa=df74000
+pte=dedd067
+ppn=dedd000
+offset=0
+pa=dedd000
+pte=dedc067
+ppn=dedc000
+offset=0
+pa=dedc000
+pte=dedb067
+ppn=dedb000
+offset=0
+pa=dedb000
+pte=deda067
+ppn=deda000
+offset=0
+pa=deda000
+pte=ded9067
+ppn=ded9000
+offset=0
+pa=ded9000
+pte=ded8067
+ppn=ded8000
+offset=0
+pa=ded8000
+pte=ded7067
+ppn=ded7000
+offset=0
+pa=ded7000
+pte=ded6067
+ppn=ded6000
+offset=0
+pa=ded6000
+pte=ded5067
+ppn=ded5000
+offset=0
+pa=ded5000
+pte=ded4067
+ppn=ded4000
+offset=0
+pa=ded4000
+pte=ded3067
+ppn=ded3000
+offset=0
+pa=ded3000
+pte=ded2067
+ppn=ded2000
+offset=0
+pa=ded200
+pa=dd22000
+pte=dd21067
+ppn=dd21000
+offset=0
+pa=dd21000
+pte=dd20067
+ppn=dd20000
+offset=0
+pa=dd20000
+pte=dd1f067
+ppn=dd1f000
+offset=0
+pa=dd1f000
+pte=dd1e067
+ppn=dd1e000
+offset=0
+pa=dd1e000
+pte=dd1d067
+ppn=dd1d000
+offset=0
+pa=dd1d000
+pte=dd1c067
+ppn=dd1c000
+offset=0
+pa=dd1c000
+pte=dd1b067
+ppn=dd1b000
+offset=0
+pa=dd1b000
+pte=dd1a067
+ppn=dd1a000
+offset=0
+pa=dd1a000
+pte=dd19067
+ppn=dd19000
+offset=0
+pa=dd19000
+pte=dd18067
+ppn=dd18000
+offset=0
+pa=dd18000
+pte=dd17067
+ppn=dd17000
+offset=0
+pa=dd17000
+pte=dd16067
+ppn=dd16000
+offset=0
+pa=dd16000
+pte=dd15067
+ppn=dd15000
+offset=0
+pa=dd15000
+pte=dd14067
+ppn=dd14000
+offset=0
+pa=dd14000
+pte=dd13067
+ppn=dd13000
+offset=0
+pa=dd13000
+pte=dd12067
+ppn=dd12000
+offset=0
+pa=dd12000
+pte=dd11067
+ppn=dd11000
+offset=0
+pa=dd11000
+pte=dd10067
+ppn=dd10000
+offset=0
+pa=dd10000
+pte=dd0f067
+ppn=dd0f000
+offset=0
+pa=dd0f000
+pte=dd0e067
+ppn=dd0e000
+offset=0
+pa=dd0e000
+pte=dd0d067
+ppn=dd0d000
+offset=0
+pa=dd0d000
+pte=dd0c067
+ppn=dd0c000
+offset=0
+pa=dd0c000
+pte=dd0b067
+ppn=dd0b000
+offset=0
+pa=dd0b000
+pte=dd0a067
+ppn=dd0a000
+offset=0
+pa=dd0a000
+pte=dd09067
+ppn=dd09000
+offset=0
+pa=dd09000
+pte=dd08067
+ppn=dd08000
+offset=0
+pa=dd08000
+pte=dd07067
+ppn=dd07000
+offset=0
+pa=dd07000
+pte=dd06067
+ppn=dd06000
+offset=0
+pa=dd06000
+pte=dd05067
+ppn=dd05000
+offset=0
+pa=dd05000
+pte=dd04067
+ppn=dd04000
+offset=0
+pa=dd04000
+pte=dd03067
+ppn=dd03000
+offset=0
+pa=dd03000
+pte=dd02067
+ppn=dd02000
+offset=0
+pa=dd02000
+pte=dd01067
+ppn=dd01000
+offset=0
+pa=dd01000
+pte=dd00067
+ppn=dd00000
+offset=0
+pa=dd00000
+pte=dcff067
+ppn=dcff000
+offset=0
+pa=dcff000
+pte=dcfe067
+ppn=dcfe000
+offset=0
+pa=dcfe000
+pte=dcfd067
+ppn=dcfd000
+offset=0
+pa=dcfd000
+pte=dcfc067
+ppn=dcfc000
+offset=0
+pa=dcfc000
+pte=dcfb067
+ppn=dcfb000
+offset=0
+pa=dcfb000
+pte=dcfa067
+ppn=dcfa000
+offset=0
+pa=dcfa000
+pte=dcf9067
+ppn=dcf9000
+offset=0
+pa=dcf9000
+pte=dcf8067
+ppn=dcf8000
+offset=0
+pa=dcf8000
+pte=dcf7067
+ppn=d
+pa=dad2000
+pte=dad1067
+ppn=dad1000
+offset=0
+pa=dad1000
+pte=dad0067
+ppn=dad0000
+offset=0
+pa=dad0000
+pte=dacf067
+ppn=dacf000
+offset=0
+pa=dacf000
+pte=dace067
+ppn=dace000
+offset=0
+pa=dace000
+pte=dacd067
+ppn=dacd000
+offset=0
+pa=dacd000
+pte=dacc067
+ppn=dacc000
+offset=0
+pa=dacc000
+pte=dacb067
+ppn=dacb000
+offset=0
+pa=dacb000
+pte=daca067
+ppn=daca000
+offset=0
+pa=daca000
+pte=dac9067
+ppn=dac9000
+offset=0
+pa=dac9000
+pte=dac8067
+ppn=dac8000
+offset=0
+pa=dac8000
+pte=dac7067
+ppn=dac7000
+offset=0
+pa=dac7000
+pte=dac6067
+ppn=dac6000
+offset=0
+pa=dac6000
+pte=dac5067
+ppn=dac5000
+offset=0
+pa=dac5000
+pte=dac4067
+ppn=dac4000
+offset=0
+pa=dac4000
+pte=dac3067
+ppn=dac3000
+offset=0
+pa=dac3000
+pte=dac2067
+ppn=dac2000
+offset=0
+pa=dac2000
+pte=dac1067
+ppn=dac1000
+offset=0
+pa=dac1000
+pte=dac0067
+ppn=dac0000
+offset=0
+pa=dac0000
+pte=dabf067
+ppn=dabf000
+offset=0
+pa=dabf000
+pte=dabe067
+ppn=dabe000
+offset=0
+pa=dabe000
+pte=dabd067
+ppn=dabd000
+offset=0
+pa=dabd000
+pte=dabc067
+ppn=dabc000
+offset=0
+pa=dabc000
+pte=dabb067
+ppn=dabb000
+offset=0
+pa=dabb000
+pte=daba067
+ppn=daba000
+offset=0
+pa=daba000
+pte=dab9067
+ppn=dab9000
+offset=0
+pa=dab9000
+pte=dab8067
+ppn=dab8000
+offset=0
+pa=dab8000
+pte=dab7067
+ppn=dab7000
+offset=0
+pa=dab7000
+pte=dab6067
+ppn=dab6000
+offset=0
+pa=dab6000
+pte=dab5067
+ppn=dab5000
+offset=0
+pa=dab5000
+pte=dab4067
+ppn=dab4000
+offset=0
+pa=dab4000
+pte=dab3067
+ppn=dab3000
+offset=0
+pa=dab3000
+pte=dab2067
+ppn=dab2000
+offset=0
+pa=dab2000
+pte=dab1067
+ppn=dab1000
+offset=0
+pa=dab1000
+pte=dab0067
+ppn=dab0000
+offset=0
+pa=dab0000
+pte=daaf067
+ppn=daaf000
+offset=0
+pa=daaf000
+pte=daae067
+ppn=daae000
+offset=0
+pa=daae000
+pte=daad067
+ppn=daad000
+offset=0
+pa=daad000
+pte=daac067
+ppn=daac000
+offset=0
+pa=daac000
+pte=daab067
+ppn=daab000
+offset=0
+pa=daab000
+pte=daaa067
+ppn=daaa000
+offset=0
+pa=daaa000
+pte=daa9067
+ppn=daa9000
+offset=0
+pa=daa9000
+pte=daa8067
+ppn=daa8000
+offset=0
+pa=daa8000
+pte=daa7067
+ppn=d
+ppn=d822000
+offset=0
+pa=d822000
+pte=d821067
+ppn=d821000
+offset=0
+pa=d821000
+pte=d820067
+ppn=d820000
+offset=0
+pa=d820000
+pte=d81f067
+ppn=d81f000
+offset=0
+pa=d81f000
+pte=d81e067
+ppn=d81e000
+offset=0
+pa=d81e000
+pte=d81d067
+ppn=d81d000
+offset=0
+pa=d81d000
+pte=d81c067
+ppn=d81c000
+offset=0
+pa=d81c000
+pte=d81b067
+ppn=d81b000
+offset=0
+pa=d81b000
+pte=d81a067
+ppn=d81a000
+offset=0
+pa=d81a000
+pte=d819067
+ppn=d819000
+offset=0
+pa=d819000
+pte=d818067
+ppn=d818000
+offset=0
+pa=d818000
+pte=d817067
+ppn=d817000
+offset=0
+pa=d817000
+pte=d816067
+ppn=d816000
+offset=0
+pa=d816000
+pte=d815067
+ppn=d815000
+offset=0
+pa=d815000
+pte=d814067
+ppn=d814000
+offset=0
+pa=d814000
+pte=d813067
+ppn=d813000
+offset=0
+pa=d813000
+pte=d812067
+ppn=d812000
+offset=0
+pa=d812000
+pte=d811067
+ppn=d811000
+offset=0
+pa=d811000
+pte=d810067
+ppn=d810000
+offset=0
+pa=d810000
+pte=d80f067
+ppn=d80f000
+offset=0
+pa=d80f000
+pte=d80e067
+ppn=d80e000
+offset=0
+pa=d80e000
+pte=d80d067
+ppn=d80d000
+offset=0
+pa=d80d000
+pte=d80c067
+ppn=d80c000
+offset=0
+pa=d80c000
+pte=d80b067
+ppn=d80b000
+offset=0
+pa=d80b000
+pte=d80a067
+ppn=d80a000
+offset=0
+pa=d80a000
+pte=d809067
+ppn=d809000
+offset=0
+pa=d809000
+pte=d808067
+ppn=d808000
+offset=0
+pa=d808000
+pte=d807067
+ppn=d807000
+offset=0
+pa=d807000
+pte=d806067
+ppn=d806000
+offset=0
+pa=d806000
+pte=d805067
+ppn=d805000
+offset=0
+pa=d805000
+pte=d804067
+ppn=d804000
+offset=0
+pa=d804000
+pte=d803067
+ppn=d803000
+offset=0
+pa=d803000
+pte=d802067
+ppn=d802000
+offset=0
+pa=d802000
+pte=d801067
+ppn=d801000
+offset=0
+pa=d801000
+pte=d800067
+ppn=d800000
+offset=0
+pa=d800000
+pte=d7ff067
+ppn=d7ff000
+offset=0
+pa=d7ff000
+pte=d7fe067
+ppn=d7fe000
+offset=0
+pa=d7fe000
+pte=d7fd067
+ppn=d7fd000
+offset=0
+pa=d7fd000
+pte=d7fc067
+ppn=d7fc000
+offset=0
+pa=d7fc000
+pte=d7fb067
+ppn=d7fb000
+offset=0
+pa=d7fb000
+pte=d7fa067
+ppn=d7fa000
+offset=0
+pa=d7fa000
+pte=d7f9067
+ppn=d7f9000
+offset=0
+pa=d7f9000
+pte=d7f8067
+ppn=d7f8000
+offset=0
+pa=d7f
+offset=0
+pa=d4f0000
+pte=d4ef067
+ppn=d4ef000
+offset=0
+pa=d4ef000
+pte=d4ee067
+ppn=d4ee000
+offset=0
+pa=d4ee000
+pte=d4ed067
+ppn=d4ed000
+offset=0
+pa=d4ed000
+pte=d4ec067
+ppn=d4ec000
+offset=0
+pa=d4ec000
+pte=d4eb067
+ppn=d4eb000
+offset=0
+pa=d4eb000
+pte=d4ea067
+ppn=d4ea000
+offset=0
+pa=d4ea000
+pte=d4e9067
+ppn=d4e9000
+offset=0
+pa=d4e9000
+pte=d4e8067
+ppn=d4e800Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1375, in expect_loop
+    raise TIMEOUT ('Timeout exceeded in expect_any().')
+testing.pexpect.TIMEOUT: Timeout exceeded in expect_any().
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_8 FAILED (0 of 1)
+ (MAP+STRESS: Places a large number of maps and accesses all pages of each map)
+ Unexpected exception name 'e' is not defined
+
+starting test_9
+
+**********************************************************************
+
+Test test_9
+MAP+LAZY: Checks for lazy allocation in anon mapping
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_9.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 729 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_9 FAILED (0 of 1)
+ (MAP+LAZY: Checks for lazy allocation in anon mapping)
+ Unexpected exception name 'e' is not defined
+
+starting test_10
+
+**********************************************************************
+
+Test test_10
+MAP+LAZY: Checks for lazy allocation in filebacked mapping
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_10.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 732 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_10 FAILED (0 of 1)
+ (MAP+LAZY: Checks for lazy allocation in filebacked mapping)
+ Unexpected exception name 'e' is not defined
+
+starting test_11
+
+**********************************************************************
+
+Test test_11
+MAP+LAZY+STRESS: Checks for lazy allocation in filebacked mapping
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_11.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 730 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_11 FAILED (0 of 1)
+ (MAP+LAZY+STRESS: Checks for lazy allocation in filebacked mapping)
+ Unexpected exception name 'e' is not defined
+
+starting test_12
+
+**********************************************************************
+
+Test test_12
+UNMAP: Unmap a anonymous map
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_12.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 728 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_12 FAILED (0 of 1)
+ (UNMAP: Unmap a anonymous map)
+ Unexpected exception name 'e' is not defined
+
+starting test_13
+
+**********************************************************************
+
+Test test_13
+UNMAP: Unmaps a filebacked map
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_13.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 728 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_13 FAILED (0 of 1)
+ (UNMAP: Unmaps a filebacked map)
+ Unexpected exception name 'e' is not defined
+
+starting test_14
+
+**********************************************************************
+
+Test test_14
+UNMAP+DEALLOC: Unmap accessed anonymous map and check for memory deallocation
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_14.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 730 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_14 FAILED (0 of 1)
+ (UNMAP+DEALLOC: Unmap accessed anonymous map and check for memory deallocation)
+ Unexpected exception name 'e' is not defined
+
+starting test_15
+
+**********************************************************************
+
+Test test_15
+UNMAP+DEALLOC: Unmap an accessed filebacked map and check for memory deallocation
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_15.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 731 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_15 FAILED (0 of 1)
+ (UNMAP+DEALLOC: Unmap an accessed filebacked map and check for memory deallocation)
+ Unexpected exception name 'e' is not defined
+
+starting test_16
+
+**********************************************************************
+
+Test test_16
+UNMAP: Edit a filebacked map and verify its changes are reflected
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_16.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 733 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_16 FAILED (0 of 1)
+ (UNMAP: Edit a filebacked map and verify its changes are reflected)
+ Unexpected exception name 'e' is not defined
+
+starting test_17
+
+**********************************************************************
+
+Test test_17
+Fork: Same maps exist in both parent and multiple childs
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_17.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 730 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_17 FAILED (0 of 1)
+ (Fork: Same maps exist in both parent and multiple childs)
+ Unexpected exception name 'e' is not defined
+
+starting test_18
+
+**********************************************************************
+
+Test test_18
+Fork: Same map contents exist in both parent and multiple childs
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_18.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 734 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_18 FAILED (0 of 1)
+ (Fork: Same map contents exist in both parent and multiple childs)
+ Unexpected exception name 'e' is not defined
+
+starting test_19
+
+**********************************************************************
+
+Test test_19
+Fork+EDIT: Both parent and child can see each other's edits in anonymous maps
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_19.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 731 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_19 FAILED (0 of 1)
+ (Fork+EDIT: Both parent and child can see each other's edits in anonymous maps)
+ Unexpected exception name 'e' is not defined
+
+starting test_20
+
+**********************************************************************
+
+Test test_20
+FORK+UNMAP: Child unmaps a shared map, parent is not affected
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_20.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 732 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_20 FAILED (0 of 1)
+ (FORK+UNMAP: Child unmaps a shared map, parent is not affected)
+ Unexpected exception name 'e' is not defined
+
+starting test_21
+
+**********************************************************************
+
+Test test_21
+ELF: fix permissions of ELF pages
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_21.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 726 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_21 FAILED (0 of 1)
+ (ELF: fix permissions of ELF pages)
+ Unexpected exception name 'e' is not defined
+
+starting test_22
+
+**********************************************************************
+
+Test test_22
+COW: allocated array has same pa in parent and child before modification
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_22.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 733 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_22 FAILED (0 of 1)
+ (COW: allocated array has same pa in parent and child before modification)
+ Unexpected exception name 'e' is not defined
+
+starting test_23
+
+**********************************************************************
+
+Test test_23
+COW: allocated array has diff pa in parent and child after modification
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_23.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 734 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_23 FAILED (0 of 1)
+ (COW: allocated array has diff pa in parent and child after modification)
+ Unexpected exception name 'e' is not defined
+
+starting test_24
+
+**********************************************************************
+
+Test test_24
+COW: kfreeing child's page does not affect parent's page in COW
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_24.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 735 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_24 FAILED (0 of 1)
+ (COW: kfreeing child's page does not affect parent's page in COW)
+ Unexpected exception name 'e' is not defined
+
+starting test_25
+
+**********************************************************************
+
+Test test_25
+COW+STRESS: static parent arr 50000 pages, can't fork child without COW
+
+**********************************************************************
+Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/test_25.c
+DEBUG: Copying header file to project path
+Trying to build project using make
+make xv6.img fs.img
+/tmp/tmpp4exrcrl/p/Makefile
+/tmp/tmpp4exrcrl/p/Makefile.test
+make: 'xv6.img' is up to date.
+make: 'fs.img' is up to date.
+make qemu-nox CPUS=1
+gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o tester.o tester.c
+ld -m    elf_i386 -N -e main -Ttext 0 -o _tester tester.o ulib.o usys.o printf.o umalloc.o
+objdump -S _tester > tester.asm
+objdump -t _tester | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > tester.sym
+./mkfs fs.img README _cat _echo _forktest _grep _init _kill _ln _ls _tester _mkdir _rm _sh _stressfs _usertests _wc _zombie _test 
+nmeta 59 (boot, super, log blocks 30 inode blocks 26, bitmap blocks 1) blocks 941 total 1000
+balloc: first 728 blocks have been allocated
+balloc: write bitmap block at sector 58
+qemu-system-i386 -nographic -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp 1 -m 512 
+qemu-system-i386: Failed to get "write" lock
+Is another process using the image [xv6.img]?
+make: *** [Makefile.test:233: qemu-nox] Error 1
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 828, in read_nonblocking
+    s = os.read(self.child_fd, size)
+OSError: [Errno 5] Input/output error
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 1377, in expect_loop
+    c = self.read_nonblocking (self.maxread, timeout)
+  File "/home/yashd/private/CS537_Team/cs537/p5/tests/testing/pexpect.py", line 829, in read_nonblocking
+    except OSError(e): # Linux does this
+TypeError: catching classes that do not inherit from BaseException is not allowed
+
+During handling of the above exception, another exception occurred:
+
+NameError: name 'e' is not defined
+
+
+test test_25 FAILED (0 of 1)
+ (COW+STRESS: static parent arr 50000 pages, can't fork child without COW)
+ Unexpected exception name 'e' is not defined
+
+**********************************************************************
+Summary:
+test build PASSED
+ (build xv6 using make)
+
+test test_1 PASSED (1 of 1)
+ (Checks the presence of all system calls)
+
+test test_2 FAILED (0 of 1)
+ (Checks the presence of Segmentation Fault)
+ killed process
+
+test test_3 PASSED (1 of 1)
+ (MAP: Place one fixed anonymous map)
+
+test test_4 PASSED (1 of 1)
+ (MAP: Place one fixed filebacked map)
+
+test test_5 PASSED (1 of 1)
+ (MAP: Place multiple maps, verify that overlapping maps are not allowed)
+
+test test_6 PASSED (1 of 1)
+ (MAP+ALLOC: Access fixed anonymous map (checks for memory allocation))
+
+test test_7 PASSED (1 of 1)
+ (MAP+ALLOC: access big filebacked map (checks for memory allocation))
+
+test test_8 FAILED (0 of 1)
+ (MAP+STRESS: Places a large number of maps and accesses all pages of each map)
+ Unexpected exception name 'e' is not defined
+
+test test_9 FAILED (0 of 1)
+ (MAP+LAZY: Checks for lazy allocation in anon mapping)
+ Unexpected exception name 'e' is not defined
+
+test test_10 FAILED (0 of 1)
+ (MAP+LAZY: Checks for lazy allocation in filebacked mapping)
+ Unexpected exception name 'e' is not defined
+
+test test_11 FAILED (0 of 1)
+ (MAP+LAZY+STRESS: Checks for lazy allocation in filebacked mapping)
+ Unexpected exception name 'e' is not defined
+
+test test_12 FAILED (0 of 1)
+ (UNMAP: Unmap a anonymous map)
+ Unexpected exception name 'e' is not defined
+
+test test_13 FAILED (0 of 1)
+ (UNMAP: Unmaps a filebacked map)
+ Unexpected exception name 'e' is not defined
+
+test test_14 FAILED (0 of 1)
+ (UNMAP+DEALLOC: Unmap accessed anonymous map and check for memory deallocation)
+ Unexpected exception name 'e' is not defined
+
+test test_15 FAILED (0 of 1)
+ (UNMAP+DEALLOC: Unmap an accessed filebacked map and check for memory deallocation)
+ Unexpected exception name 'e' is not defined
+
+test test_16 FAILED (0 of 1)
+ (UNMAP: Edit a filebacked map and verify its changes are reflected)
+ Unexpected exception name 'e' is not defined
+
+test test_17 FAILED (0 of 1)
+ (Fork: Same maps exist in both parent and multiple childs)
+ Unexpected exception name 'e' is not defined
+
+test test_18 FAILED (0 of 1)
+ (Fork: Same map contents exist in both parent and multiple childs)
+ Unexpected exception name 'e' is not defined
+
+test test_19 FAILED (0 of 1)
+ (Fork+EDIT: Both parent and child can see each other's edits in anonymous maps)
+ Unexpected exception name 'e' is not defined
+
+test test_20 FAILED (0 of 1)
+ (FORK+UNMAP: Child unmaps a shared map, parent is not affected)
+ Unexpected exception name 'e' is not defined
+
+test test_21 FAILED (0 of 1)
+ (ELF: fix permissions of ELF pages)
+ Unexpected exception name 'e' is not defined
+
+test test_22 FAILED (0 of 1)
+ (COW: allocated array has same pa in parent and child before modification)
+ Unexpected exception name 'e' is not defined
+
+test test_23 FAILED (0 of 1)
+ (COW: allocated array has diff pa in parent and child after modification)
+ Unexpected exception name 'e' is not defined
+
+test test_24 FAILED (0 of 1)
+ (COW: kfreeing child's page does not affect parent's page in COW)
+ Unexpected exception name 'e' is not defined
+
+test test_25 FAILED (0 of 1)
+ (COW+STRESS: static parent arr 50000 pages, can't fork child without COW)
+ Unexpected exception name 'e' is not defined
+
+Passed 7 of 26 tests.
+Overall 7 of 26
+Points 6 of 25

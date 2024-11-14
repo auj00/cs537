@@ -92,7 +92,7 @@ sys_uptime(void)
 }
 
 
-// -------------------- p5 --------------------
+// ########################### p5 ###########################
 
 // to request physical memory pages 
 int sys_wmap(void)
@@ -101,45 +101,67 @@ int sys_wmap(void)
   int start_va;         // starting virtual address requested by the user
   int mem_length;       // size of memory requested by user 
   int flags_val;        // MAP_FIXED | MAP_SHARED | MAP_ANONYMOUS
-  int k_fd;             // file descriptor 
+  int fd;             // file descriptor 
 
-  // Check if these arguments are present & within allocated address
-  // space
-  if(argint(0, &start_va)<0 || argint(1, &mem_length)<0 || argint(2, &flags_val)<0 || argint(3, &k_fd)<0)
+  // Extract arguments for sys_call
+  // Check : valid arguments provided
+  if(argint(0, &start_va)<0 || argint(1, &mem_length)<0 || argint(2, &flags_val)<0 || argint(3, &fd)<0)
   {
-    return -1;
+    return FAILED;
   }
 
-  // check if provided virtual address is a multiple of page size
+  // check : maximum number of memory maps per process = 16
+  if(myproc()->num_maps >= 16)
+  {
+    return FAILED;
+  }
+
+  // check : virtual address is a multiple of PGSIZE(4096)
   if(start_va%PGSIZE != 0)
   {
+    cprintf("debug\n");
     return FAILED;
   }
   
 
-  // check if the address is within 0x60000000 and 0x80000000 
+  // check : virtual address belongs [0x60000000, 0x80000000)
   if(!(start_va >= 0x60000000 && start_va < 0x80000000))
   {
-    return -1;
+    return FAILED;
   }
 
+  // last va of the user-requested wmap
+  int end_va = start_va + mem_length;
 
-  // check whether this page is already allocated
-  // for (size_t i = 0; i < count; i++)
-  // {
-  //   /* code */
-  // }
+  // check : overlapping maps
+  for (int i = 0; i < 16; i++)
+  {
+    if(myproc()->mapinfo[i].start_addr != -1)
+    {
+      int wmap_start = myproc()->mapinfo[i].start_addr;
+      int wmap_end = myproc()->mapinfo[i].start_addr + myproc()->mapinfo[i].map_length;
+      
+      // new wmap starts within an allocated wmap
+      if(start_va >= wmap_start && start_va < wmap_end)
+      {
+        cprintf("debug1\n");
+        return FAILED;
+      }
+
+      // new wmap ends within an allocated wmap
+      if(end_va >= wmap_start && end_va < wmap_end)
+      {
+        cprintf("debug2\n");
+        return FAILED;
+      }
+    }
+  }
   
-
-  // check if the full space asked by the user is unallocated & within the 
-  
-
-  // copy of the starting address that the user asked
+  // copy of the starting address that the user requested
   int copy_va = start_va; 
 
 
-  // check for flags val
-  // the value will be a 4-bit number e.g. 1110
+  // check : flags val --> 4-bit number e.g. 1110
 
   // check for MAP_SHARED 0x0002
   if(!(flags_val & MAP_SHARED))
@@ -155,74 +177,65 @@ int sys_wmap(void)
     return -1;
   }
 
-  // // check for MAP_ANONYMOUS 0x0004
-  // if((flags_val & MAP_ANONYMOUS))
-  // {
-  //   // MAP_ANONYMOUS set -> Not a file-backed mapping
-    
-  // }
-  // else
-  // {
-  //   // file-backed mapping
-  // }
-
-
-  
-
-
   // single page size = 4096 bytes
   // assign multiple pages if requested memory size > 4096
   // loop to allocate multiple physical pages, if needed
-  int page_size = 4096;
-  int num_pages = mem_length/page_size;
+  int num_pages = mem_length/PGSIZE;
 
   // if requested memory is not a multiple of page size
-  if(mem_length%page_size != 0)
+  if(mem_length%PGSIZE != 0)
   {
     num_pages += 1;
   }
   
   for(int i=0; i<num_pages; i++)
   {
-    // remove the static from mappages()
-    // // allocate pages
+    // allocate single page
     char *mem = kalloc();
-    cprintf("physical address of wmap%x\n", V2P(mem));
+    cprintf("physical address of allocated page %d : %x\n", i, V2P(mem));
 
-    // // create PTE mapping VPN -> PPN
+    // create PTE -> store PPN & flags
     if (mappages(myproc()->pgdir, (char*)copy_va, 4096, V2P(mem), PTE_W | PTE_U) == -1)
     {
       return -1;
     }
 
-    // if (alloc_page(myproc(), &start_va) == -1) 
-    // {
-    //   return -5;
-    // }
-
     // starting address of the next virtual page
     copy_va += 0x1000;
-    
+  }
+
+  // -------------- Handle file-backed mapping --------------
+
+
+  // check for MAP_ANONYMOUS 0x0004
+  if(!(flags_val & MAP_ANONYMOUS))
+  {
+    // MAP_ANONYMOUS not set -> file-backed mapping
+    struct file *f;
+    if((f=myproc()->ofile[fd]) == 0)
+    {
+      return FAILED;
+    }
+    fileread(f, (char*)start_va, mem_length);
     
   }
 
-  // update memory mapping meta-data
+  // -------------- update memory mapping meta-data --------------
+
+  // increment number of wmaps 
   myproc()->num_maps += 1;
-  //int index = -1;
+  
   for(int i=0; i<16; i++)
   {
-    // find the 1st empty slot
-    if(myproc()->start_addr[i] == -1)
+    if(myproc()->mapinfo[i].start_addr == -1)
     {
-      myproc()->start_addr[i] = start_va;
-      myproc()->map_length[i] = mem_length;
-      myproc()->pages_in_map[i] = num_pages;
-      myproc()->file_desc[i] = k_fd;
+      myproc()->mapinfo[i].start_addr = start_va;
+      myproc()->mapinfo[i].map_length = mem_length;
+      myproc()->mapinfo[i].pages_in_map = num_pages;
+      myproc()->mapinfo[i].file_desc = fd;
       break;
     }
   }
-
-  cprintf("debug\n");
 
   // return the starting va of the newly created mapping
   return start_va;
@@ -244,7 +257,7 @@ int sys_wunmap(void)
   int map_index = -1;
   for(int i=0; i<16; i++)
   {
-    if(myproc()->start_addr[i] == start_va)
+    if(myproc()->mapinfo[i].start_addr == start_va)
     {
       map_index = i;
       break;
@@ -257,17 +270,30 @@ int sys_wunmap(void)
     return -1;
   }
 
-  // Handle file-backed mapping
+  // -------- Handle file-backed mapping -------
+  
+  // write the changes made to the mapped memory back to disk 
+  // when you're removing the mapping. 
+  // You can assume that the offset is always 0.
 
+  // check : if file-backed only then do the following
+
+  struct file *f;
+  if((f=myproc()->ofile[myproc()->mapinfo[map_index].file_desc]) == 0)
+  {
+    return FAILED;
+  }
+
+  filewrite(f, (char*)myproc()->mapinfo[map_index].start_addr, myproc()->mapinfo[map_index].map_length);
 
   // reset the metadata
-  myproc()->start_addr[map_index] = -1;
-  myproc()->map_length[map_index] = -1;
-  // myproc()->pages_in_map[map_index] = -1;
-  myproc()->file_desc[map_index] = -1;
+  
+  myproc()->mapinfo[map_index].start_addr = -1;
+  myproc()->mapinfo[map_index].map_length = -1;
+  myproc()->mapinfo[map_index].file_desc = -1;
 
   // free each page in the map
-  for(int i=0; i<myproc()->pages_in_map[map_index]; i++)
+  for(int i=0; i<myproc()->mapinfo[map_index].pages_in_map; i++)
   {
     pte_t *pte = walkpgdir(myproc()->pgdir, (char*)copy_va, 0);   // get the page-table entry
     int physical_address = PTE_ADDR(*pte);                        // Access the upper 20-bit of PTE
@@ -277,7 +303,8 @@ int sys_wunmap(void)
 
   }
 
-  myproc()->pages_in_map[map_index] = -1;
+  // myproc()->pages_in_map[map_index] = -1;
+  myproc()->mapinfo[map_index].pages_in_map = -1;
   myproc()->num_maps -= 1;
 
   return 0;
@@ -291,14 +318,14 @@ according to the page table for the calling process.
 int sys_va2pa(void)
 {
   // 
-  int va_input;
-  if(argint(0, &va_input)<0)
+  int user_va;
+  if(argint(0, &user_va)<0)
   {
     return -1;
   }
 
   // page-table entry for the given virtual address
-  pte_t *pte = walkpgdir(myproc()->pgdir, (char*)va_input, 0);
+  pte_t *pte = walkpgdir(myproc()->pgdir, (char*)user_va, 0);
 
   cprintf("pte=%x\n", *pte);
   // check if PTE is present
@@ -309,7 +336,7 @@ int sys_va2pa(void)
 
   int ppn = PTE_ADDR(*pte);
 
-  int offset = va_input & 0xFFF;
+  int offset = user_va & 0xFFF;
   
   int pa = ppn | offset;
 
@@ -338,11 +365,16 @@ int sys_getwmapinfo(void)
   int index = 0;
   for(int i=0; i<16; i++)
   {
-    if(myproc()->start_addr[i] != -1)
+    if(myproc()->mapinfo[i].start_addr != -1)
     {
-      ptr->addr[index] = myproc()->start_addr[i];
-      ptr->length[index] = myproc()->map_length[i];
-      ptr->n_loaded_pages[index] = myproc()->pages_in_map[i];
+      // ptr->addr[index] = myproc()->start_addr[i];
+      // ptr->length[index] = myproc()->map_length[i];
+      // ptr->n_loaded_pages[index] = myproc()->pages_in_map[i];
+
+
+      ptr->addr[index] = myproc()->mapinfo[i].start_addr;
+      ptr->length[index] = myproc()->mapinfo[i].map_length;
+      ptr->n_loaded_pages[index] = myproc()->mapinfo[i].pages_in_map;
       index++;
     }
     else

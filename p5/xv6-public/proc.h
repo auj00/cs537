@@ -33,11 +33,12 @@ struct context {
 };
 
 struct mapinfo{
-  int num_maps;
-  int start_addr;
-  int map_length;
-  int pages_in_map;
-  int file_desc;
+  int start_addr;       // starting virtual address of the wmap
+  int map_length;       // size of wmap memory 
+  int pages_in_map;     // pages allocated for that wmap
+  int file_desc;        // file descriptor if it is a file-backed mapping, else -1
+  // why am i not storing flags
+
 };
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
@@ -60,12 +61,13 @@ struct proc {
 
   // p5 array of structs
   struct mapinfo mapinfo[16];
-  
   int num_maps;
-  int start_addr[16];
-  int map_length[16];
-  int pages_in_map[16];
-  int file_desc[16];
+  
+  // int num_maps;
+  // int start_addr[16];
+  // int map_length[16];
+  // int pages_in_map[16];
+  // int file_desc[16];
 };
 
 // Process memory is laid out contiguously, low addresses first:
