@@ -23,6 +23,9 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
+//p2 - austin
+int wmap(uint addr, int length, int flags, int fd);
+int wunmap(uint addr);
 
 // ulib.c
 int stat(const char*, struct stat*);

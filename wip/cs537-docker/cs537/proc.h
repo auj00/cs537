@@ -34,6 +34,26 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
+
+
+/*****************************************
+ Per - process MAPPING Metadata:
+ *****************************************/
+struct proc_map_metadata
+{
+  /*all values are intialized to 0, since static array*/
+  /*the virtual address itself*/
+  int va_addr_begin[16];
+  /*virtual address end*/
+  int va_addr_end[16];
+  /*corr length(page count) for each virtual address*/
+  int num_pages[16];
+  /*No of mmpaps  .....do we need that?*/
+};
+
+
+
+
 // Per-process state
 struct proc {
   uint sz;                     // Size of process memory (bytes)
@@ -49,6 +69,8 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+
+  struct proc_map_metadata map_md;
 };
 
 // Process memory is laid out contiguously, low addresses first:
