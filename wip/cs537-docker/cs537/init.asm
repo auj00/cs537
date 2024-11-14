@@ -23,7 +23,7 @@ main(void)
   if(open("console", O_RDWR) < 0){
    f:	83 ec 08             	sub    $0x8,%esp
   12:	6a 02                	push   $0x2
-  14:	68 d8 07 00 00       	push   $0x7d8
+  14:	68 00 10 00 00       	push   $0x1000
   19:	e8 65 03 00 00       	call   383 <open>
   1e:	83 c4 10             	add    $0x10,%esp
   21:	85 c0                	test   %eax,%eax
@@ -44,7 +44,7 @@ main(void)
   for(;;){
     printf(1, "init: starting sh\n");
   48:	83 ec 08             	sub    $0x8,%esp
-  4b:	68 e0 07 00 00       	push   $0x7e0
+  4b:	68 08 10 00 00       	push   $0x1008
   50:	6a 01                	push   $0x1
   52:	e8 59 04 00 00       	call   4b0 <printf>
     pid = fork();
@@ -75,7 +75,7 @@ main(void)
   7b:	74 cb                	je     48 <main+0x48>
       printf(1, "zombie!\n");
   7d:	83 ec 08             	sub    $0x8,%esp
-  80:	68 1f 08 00 00       	push   $0x81f
+  80:	68 47 10 00 00       	push   $0x1047
   85:	6a 01                	push   $0x1
   87:	e8 24 04 00 00       	call   4b0 <printf>
   8c:	83 c4 10             	add    $0x10,%esp
@@ -83,7 +83,7 @@ main(void)
       printf(1, "init: fork failed\n");
   91:	53                   	push   %ebx
   92:	53                   	push   %ebx
-  93:	68 f3 07 00 00       	push   $0x7f3
+  93:	68 1b 10 00 00       	push   $0x101b
   98:	6a 01                	push   $0x1
   9a:	e8 11 04 00 00       	call   4b0 <printf>
       exit();
@@ -91,13 +91,13 @@ main(void)
       exec("sh", argv);
   a4:	50                   	push   %eax
   a5:	50                   	push   %eax
-  a6:	68 34 0b 00 00       	push   $0xb34
-  ab:	68 06 08 00 00       	push   $0x806
+  a6:	68 00 30 00 00       	push   $0x3000
+  ab:	68 2e 10 00 00       	push   $0x102e
   b0:	e8 c6 02 00 00       	call   37b <exec>
       printf(1, "init: exec sh failed\n");
   b5:	5a                   	pop    %edx
   b6:	59                   	pop    %ecx
-  b7:	68 09 08 00 00       	push   $0x809
+  b7:	68 31 10 00 00       	push   $0x1031
   bc:	6a 01                	push   $0x1
   be:	e8 ed 03 00 00       	call   4b0 <printf>
       exit();
@@ -106,13 +106,13 @@ main(void)
   c8:	50                   	push   %eax
   c9:	6a 01                	push   $0x1
   cb:	6a 01                	push   $0x1
-  cd:	68 d8 07 00 00       	push   $0x7d8
+  cd:	68 00 10 00 00       	push   $0x1000
   d2:	e8 b4 02 00 00       	call   38b <mknod>
     open("console", O_RDWR);
   d7:	58                   	pop    %eax
   d8:	5a                   	pop    %edx
   d9:	6a 02                	push   $0x2
-  db:	68 d8 07 00 00       	push   $0x7d8
+  db:	68 00 10 00 00       	push   $0x1000
   e0:	e8 9e 02 00 00       	call   383 <open>
   e5:	83 c4 10             	add    $0x10,%esp
   e8:	e9 3c ff ff ff       	jmp    29 <main+0x29>
@@ -655,10 +655,12 @@ SYSCALL(wunmap)
  3eb:	b8 17 00 00 00       	mov    $0x17,%eax
  3f0:	cd 40                	int    $0x40
  3f2:	c3                   	ret    
- 3f3:	66 90                	xchg   %ax,%ax
- 3f5:	66 90                	xchg   %ax,%ax
- 3f7:	66 90                	xchg   %ax,%ax
- 3f9:	66 90                	xchg   %ax,%ax
+
+000003f3 <va2pa>:
+SYSCALL(va2pa)
+ 3f3:	b8 18 00 00 00       	mov    $0x18,%eax
+ 3f8:	cd 40                	int    $0x40
+ 3fa:	c3                   	ret    
  3fb:	66 90                	xchg   %ax,%ax
  3fd:	66 90                	xchg   %ax,%ax
  3ff:	90                   	nop
@@ -709,7 +711,7 @@ printint(int fd, int xx, int base, int sgn)
  432:	31 d2                	xor    %edx,%edx
  434:	89 cf                	mov    %ecx,%edi
  436:	f7 75 c4             	divl   -0x3c(%ebp)
- 439:	0f b6 92 88 08 00 00 	movzbl 0x888(%edx),%edx
+ 439:	0f b6 92 b0 10 00 00 	movzbl 0x10b0(%edx),%edx
  440:	89 45 c0             	mov    %eax,-0x40(%ebp)
  443:	89 d8                	mov    %ebx,%eax
  445:	8d 5b 01             	lea    0x1(%ebx),%ebx
@@ -842,7 +844,7 @@ printf(int fd, const char *fmt, ...)
  521:	83 e8 63             	sub    $0x63,%eax
  524:	83 f8 15             	cmp    $0x15,%eax
  527:	77 17                	ja     540 <printf+0x90>
- 529:	ff 24 85 30 08 00 00 	jmp    *0x830(,%eax,4)
+ 529:	ff 24 85 58 10 00 00 	jmp    *0x1058(,%eax,4)
         putc(fd, c);
       }
       state = 0;
@@ -970,7 +972,7 @@ printf(int fd, const char *fmt, ...)
  633:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
  637:	90                   	nop
           s = "(null)";
- 638:	ba 28 08 00 00       	mov    $0x828,%edx
+ 638:	ba 50 10 00 00       	mov    $0x1050,%edx
         while(*s != 0){
  63d:	89 5d d4             	mov    %ebx,-0x2c(%ebp)
  640:	b8 28 00 00 00       	mov    $0x28,%eax
@@ -991,7 +993,7 @@ free(void *ap)
 
   bp = (Header*)ap - 1;
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
- 651:	a1 3c 0b 00 00       	mov    0xb3c,%eax
+ 651:	a1 08 30 00 00       	mov    0x3008,%eax
 {
  656:	89 e5                	mov    %esp,%ebp
  658:	57                   	push   %edi
@@ -1036,7 +1038,7 @@ free(void *ap)
 }
  691:	5b                   	pop    %ebx
   freep = p;
- 692:	89 15 3c 0b 00 00    	mov    %edx,0xb3c
+ 692:	89 15 08 30 00 00    	mov    %edx,0x3008
 }
  698:	5e                   	pop    %esi
  699:	5f                   	pop    %edi
@@ -1068,7 +1070,7 @@ free(void *ap)
     p->s.size += bp->s.size;
  6c9:	03 43 fc             	add    -0x4(%ebx),%eax
   freep = p;
- 6cc:	89 15 3c 0b 00 00    	mov    %edx,0xb3c
+ 6cc:	89 15 08 30 00 00    	mov    %edx,0x3008
     p->s.size += bp->s.size;
  6d2:	89 42 04             	mov    %eax,0x4(%edx)
     p->s.ptr = bp->s.ptr;
@@ -1101,7 +1103,7 @@ malloc(uint nbytes)
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  6e9:	8b 45 08             	mov    0x8(%ebp),%eax
   if((prevp = freep) == 0){
- 6ec:	8b 3d 3c 0b 00 00    	mov    0xb3c,%edi
+ 6ec:	8b 3d 08 30 00 00    	mov    0x3008,%edi
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  6f2:	8d 70 07             	lea    0x7(%eax),%esi
  6f5:	c1 ee 03             	shr    $0x3,%esi
@@ -1138,7 +1140,7 @@ malloc(uint nbytes)
       return (void*)(p + 1);
     }
     if(p == freep)
- 731:	8b 3d 3c 0b 00 00    	mov    0xb3c,%edi
+ 731:	8b 3d 08 30 00 00    	mov    0x3008,%edi
  737:	89 c2                	mov    %eax,%edx
  739:	39 d7                	cmp    %edx,%edi
  73b:	75 eb                	jne    728 <malloc+0x48>
@@ -1158,7 +1160,7 @@ malloc(uint nbytes)
  759:	50                   	push   %eax
  75a:	e8 f1 fe ff ff       	call   650 <free>
   return freep;
- 75f:	8b 15 3c 0b 00 00    	mov    0xb3c,%edx
+ 75f:	8b 15 08 30 00 00    	mov    0x3008,%edx
       if((p = morecore(nunits)) == 0)
  765:	83 c4 10             	add    $0x10,%esp
  768:	85 d2                	test   %edx,%edx
@@ -1190,7 +1192,7 @@ malloc(uint nbytes)
         p->s.size = nunits;
  78c:	89 70 04             	mov    %esi,0x4(%eax)
       freep = prevp;
- 78f:	89 15 3c 0b 00 00    	mov    %edx,0xb3c
+ 78f:	89 15 08 30 00 00    	mov    %edx,0x3008
 }
  795:	8d 65 f4             	lea    -0xc(%ebp),%esp
       return (void*)(p + 1);
@@ -1202,17 +1204,17 @@ malloc(uint nbytes)
  79e:	5d                   	pop    %ebp
  79f:	c3                   	ret    
     base.s.ptr = freep = prevp = &base;
- 7a0:	c7 05 3c 0b 00 00 40 	movl   $0xb40,0xb3c
- 7a7:	0b 00 00 
+ 7a0:	c7 05 08 30 00 00 0c 	movl   $0x300c,0x3008
+ 7a7:	30 00 00 
     base.s.size = 0;
- 7aa:	bf 40 0b 00 00       	mov    $0xb40,%edi
+ 7aa:	bf 0c 30 00 00       	mov    $0x300c,%edi
     base.s.ptr = freep = prevp = &base;
- 7af:	c7 05 40 0b 00 00 40 	movl   $0xb40,0xb40
- 7b6:	0b 00 00 
+ 7af:	c7 05 0c 30 00 00 0c 	movl   $0x300c,0x300c
+ 7b6:	30 00 00 
   for(p = prevp->s.ptr; ; prevp = p, p = p->s.ptr){
  7b9:	89 fa                	mov    %edi,%edx
     base.s.size = 0;
- 7bb:	c7 05 44 0b 00 00 00 	movl   $0x0,0xb44
+ 7bb:	c7 05 10 30 00 00 00 	movl   $0x0,0x3010
  7c2:	00 00 00 
     if(p->s.size >= nunits){
  7c5:	e9 42 ff ff ff       	jmp    70c <malloc+0x2c>

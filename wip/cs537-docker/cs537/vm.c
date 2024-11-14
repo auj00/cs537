@@ -52,6 +52,7 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
     // entries, if necessary.
     *pde = V2P(pgtab) | PTE_P | PTE_W | PTE_U;
   }
+  // (((uint)(va) >> 12) & 0x3FF)
   return &pgtab[PTX(va)];
 }
 

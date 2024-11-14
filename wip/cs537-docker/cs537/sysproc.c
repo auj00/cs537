@@ -115,7 +115,7 @@ sys_wmap(void){
   if(addr % PAGESIZE != 0) return FAILED;
   // check if the page is already allocated then return 
 
-  /*get the number of pages assuming it is perfectly divisibile by PAGE_SIZE*/
+  /*get the number of pages*/
   int n = NPAGE(length);
   
 
@@ -141,7 +141,7 @@ sys_wmap(void){
     kalloc only works with/returns kernel virtual address
     */
     phy_addr_tmp = kalloc();
-
+    cprintf("Physical address: %x\n",V2P(phy_addr_tmp));
     /*map the physical page address(kernel virtual address, actually) to the page table*/
     if(mappages(curproc->pgdir, (void *)v_addr_tmp, PAGESIZE, V2P(phy_addr_tmp), PTE_W | PTE_U) != 0) return FAILED;
     // mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm);
@@ -182,7 +182,7 @@ sys_wunmap(void){
   uint va_addr;
   if(argint(0, (int *)&va_addr)<0) return FAILED;
   if(va_addr > 0x80000000 || va_addr < 0x60000000) return FAILED;
-
+  if((uint) va_addr % PGSIZE != 0) return FAILED;
   /*****************************************
    Every process can call wunmap 16 times,
    search through the proc's struct to get the
@@ -224,5 +224,23 @@ sys_wunmap(void){
     va_addr+=PAGESIZE;
   }
 
+	return SUCCESS;
+}
+
+int 
+sys_va2pa(void){
+  // uint va2pa(uint va);
+  int va_addr;
+  if(argint(0,&va_addr) < 0) return FAILED;
+  if(va_addr > 0x80000000 || va_addr < 0x60000000) return FAILED; 
+  if(va_addr % PGSIZE != 0) return FAILED;
+  struct proc * currproc = myproc();
+  pte_t *pte = walkpgdir(currproc->pgdir, (void *)va_addr, 0);
+    if(*pte == 0) return FAILED;
+  return *pte;
+}
+
+int
+sys_getwmapinfo(void){
 	return 0;
 }

@@ -38,7 +38,7 @@ main(int argc, char *argv[])
   char path[] = "stressfs0";
   24:	66 89 85 e6 fd ff ff 	mov    %ax,-0x21a(%ebp)
   printf(1, "stressfs starting\n");
-  2b:	68 28 08 00 00       	push   $0x828
+  2b:	68 00 10 00 00       	push   $0x1000
   30:	6a 01                	push   $0x1
   char path[] = "stressfs0";
   32:	c7 85 de fd ff ff 73 	movl   $0x65727473,-0x222(%ebp)
@@ -73,7 +73,7 @@ main(int argc, char *argv[])
   fd = open(path, O_CREATE | O_RDWR);
   7c:	bb 14 00 00 00       	mov    $0x14,%ebx
   printf(1, "write %d\n", i);
-  81:	68 3b 08 00 00       	push   $0x83b
+  81:	68 13 10 00 00       	push   $0x1013
   86:	6a 01                	push   $0x1
   88:	e8 73 04 00 00       	call   500 <printf>
   path[8] += i;
@@ -111,7 +111,7 @@ main(int argc, char *argv[])
   printf(1, "read\n");
   d0:	58                   	pop    %eax
   d1:	5a                   	pop    %edx
-  d2:	68 45 08 00 00       	push   $0x845
+  d2:	68 1d 10 00 00       	push   $0x101d
   d7:	6a 01                	push   $0x1
   d9:	e8 22 04 00 00       	call   500 <printf>
 
@@ -696,10 +696,12 @@ SYSCALL(wunmap)
  43b:	b8 17 00 00 00       	mov    $0x17,%eax
  440:	cd 40                	int    $0x40
  442:	c3                   	ret    
- 443:	66 90                	xchg   %ax,%ax
- 445:	66 90                	xchg   %ax,%ax
- 447:	66 90                	xchg   %ax,%ax
- 449:	66 90                	xchg   %ax,%ax
+
+00000443 <va2pa>:
+SYSCALL(va2pa)
+ 443:	b8 18 00 00 00       	mov    $0x18,%eax
+ 448:	cd 40                	int    $0x40
+ 44a:	c3                   	ret    
  44b:	66 90                	xchg   %ax,%ax
  44d:	66 90                	xchg   %ax,%ax
  44f:	90                   	nop
@@ -750,7 +752,7 @@ printint(int fd, int xx, int base, int sgn)
  482:	31 d2                	xor    %edx,%edx
  484:	89 cf                	mov    %ecx,%edi
  486:	f7 75 c4             	divl   -0x3c(%ebp)
- 489:	0f b6 92 ac 08 00 00 	movzbl 0x8ac(%edx),%edx
+ 489:	0f b6 92 84 10 00 00 	movzbl 0x1084(%edx),%edx
  490:	89 45 c0             	mov    %eax,-0x40(%ebp)
  493:	89 d8                	mov    %ebx,%eax
  495:	8d 5b 01             	lea    0x1(%ebx),%ebx
@@ -883,7 +885,7 @@ printf(int fd, const char *fmt, ...)
  571:	83 e8 63             	sub    $0x63,%eax
  574:	83 f8 15             	cmp    $0x15,%eax
  577:	77 17                	ja     590 <printf+0x90>
- 579:	ff 24 85 54 08 00 00 	jmp    *0x854(,%eax,4)
+ 579:	ff 24 85 2c 10 00 00 	jmp    *0x102c(,%eax,4)
         putc(fd, c);
       }
       state = 0;
@@ -1011,7 +1013,7 @@ printf(int fd, const char *fmt, ...)
  683:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
  687:	90                   	nop
           s = "(null)";
- 688:	ba 4b 08 00 00       	mov    $0x84b,%edx
+ 688:	ba 23 10 00 00       	mov    $0x1023,%edx
         while(*s != 0){
  68d:	89 5d d4             	mov    %ebx,-0x2c(%ebp)
  690:	b8 28 00 00 00       	mov    $0x28,%eax
@@ -1032,7 +1034,7 @@ free(void *ap)
 
   bp = (Header*)ap - 1;
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
- 6a1:	a1 64 0b 00 00       	mov    0xb64,%eax
+ 6a1:	a1 00 30 00 00       	mov    0x3000,%eax
 {
  6a6:	89 e5                	mov    %esp,%ebp
  6a8:	57                   	push   %edi
@@ -1077,7 +1079,7 @@ free(void *ap)
 }
  6e1:	5b                   	pop    %ebx
   freep = p;
- 6e2:	89 15 64 0b 00 00    	mov    %edx,0xb64
+ 6e2:	89 15 00 30 00 00    	mov    %edx,0x3000
 }
  6e8:	5e                   	pop    %esi
  6e9:	5f                   	pop    %edi
@@ -1109,7 +1111,7 @@ free(void *ap)
     p->s.size += bp->s.size;
  719:	03 43 fc             	add    -0x4(%ebx),%eax
   freep = p;
- 71c:	89 15 64 0b 00 00    	mov    %edx,0xb64
+ 71c:	89 15 00 30 00 00    	mov    %edx,0x3000
     p->s.size += bp->s.size;
  722:	89 42 04             	mov    %eax,0x4(%edx)
     p->s.ptr = bp->s.ptr;
@@ -1142,7 +1144,7 @@ malloc(uint nbytes)
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  739:	8b 45 08             	mov    0x8(%ebp),%eax
   if((prevp = freep) == 0){
- 73c:	8b 3d 64 0b 00 00    	mov    0xb64,%edi
+ 73c:	8b 3d 00 30 00 00    	mov    0x3000,%edi
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  742:	8d 70 07             	lea    0x7(%eax),%esi
  745:	c1 ee 03             	shr    $0x3,%esi
@@ -1179,7 +1181,7 @@ malloc(uint nbytes)
       return (void*)(p + 1);
     }
     if(p == freep)
- 781:	8b 3d 64 0b 00 00    	mov    0xb64,%edi
+ 781:	8b 3d 00 30 00 00    	mov    0x3000,%edi
  787:	89 c2                	mov    %eax,%edx
  789:	39 d7                	cmp    %edx,%edi
  78b:	75 eb                	jne    778 <malloc+0x48>
@@ -1199,7 +1201,7 @@ malloc(uint nbytes)
  7a9:	50                   	push   %eax
  7aa:	e8 f1 fe ff ff       	call   6a0 <free>
   return freep;
- 7af:	8b 15 64 0b 00 00    	mov    0xb64,%edx
+ 7af:	8b 15 00 30 00 00    	mov    0x3000,%edx
       if((p = morecore(nunits)) == 0)
  7b5:	83 c4 10             	add    $0x10,%esp
  7b8:	85 d2                	test   %edx,%edx
@@ -1231,7 +1233,7 @@ malloc(uint nbytes)
         p->s.size = nunits;
  7dc:	89 70 04             	mov    %esi,0x4(%eax)
       freep = prevp;
- 7df:	89 15 64 0b 00 00    	mov    %edx,0xb64
+ 7df:	89 15 00 30 00 00    	mov    %edx,0x3000
 }
  7e5:	8d 65 f4             	lea    -0xc(%ebp),%esp
       return (void*)(p + 1);
@@ -1243,17 +1245,17 @@ malloc(uint nbytes)
  7ee:	5d                   	pop    %ebp
  7ef:	c3                   	ret    
     base.s.ptr = freep = prevp = &base;
- 7f0:	c7 05 64 0b 00 00 68 	movl   $0xb68,0xb64
- 7f7:	0b 00 00 
+ 7f0:	c7 05 00 30 00 00 04 	movl   $0x3004,0x3000
+ 7f7:	30 00 00 
     base.s.size = 0;
- 7fa:	bf 68 0b 00 00       	mov    $0xb68,%edi
+ 7fa:	bf 04 30 00 00       	mov    $0x3004,%edi
     base.s.ptr = freep = prevp = &base;
- 7ff:	c7 05 68 0b 00 00 68 	movl   $0xb68,0xb68
- 806:	0b 00 00 
+ 7ff:	c7 05 04 30 00 00 04 	movl   $0x3004,0x3004
+ 806:	30 00 00 
   for(p = prevp->s.ptr; ; prevp = p, p = p->s.ptr){
  809:	89 fa                	mov    %edi,%edx
     base.s.size = 0;
- 80b:	c7 05 6c 0b 00 00 00 	movl   $0x0,0xb6c
+ 80b:	c7 05 08 30 00 00 00 	movl   $0x0,0x3008
  812:	00 00 00 
     if(p->s.size >= nunits){
  815:	e9 42 ff ff ff       	jmp    75c <malloc+0x2c>

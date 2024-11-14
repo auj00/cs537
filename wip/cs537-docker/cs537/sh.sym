@@ -1,12 +1,12 @@
 00000000 sh.c
-00001a00 buf.0
+00004020 buf.0
 00000000 ulib.c
 00000000 printf.c
 00000ee0 printint
-00001400 digits.0
+00002148 digits.0
 00000000 umalloc.c
-00001a64 freep
-00001a68 base
+00004084 freep
+00004088 base
 00000bd0 strcpy
 00000f90 printf
 00000df0 memmove
@@ -21,8 +21,9 @@
 00000650 parseredirs
 00000470 gettoken
 000011c0 malloc
+00000ed3 va2pa
 00000eb3 sleep
-000019dc whitespace
+00004008 whitespace
 00000ecb wunmap
 00000190 fork1
 00000ab0 nulterminate
@@ -37,7 +38,7 @@
 00000a20 parseblock
 00000e5b exec
 00000e2b wait
-000019d4 symbols
+00004000 symbols
 00000e3b read
 00000790 parseexec
 00000e73 unlink
@@ -45,7 +46,7 @@
 00000e1b fork
 00000eab sbrk
 00000ebb uptime
-000019e2 __bss_start
+0000400e __bss_start
 00000c90 memset
 00000000 main
 00000c00 strcmp
@@ -54,8 +55,8 @@
 00000370 redircmd
 00000d60 stat
 00000ec3 wmap
-000019e2 _edata
-00001a70 _end
+0000400e _edata
+00004090 _end
 00000e83 link
 00000e23 exit
 00000db0 atoi

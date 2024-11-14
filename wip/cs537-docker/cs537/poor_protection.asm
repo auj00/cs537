@@ -19,11 +19,11 @@ int main() {
    d:	51                   	push   %ecx
    e:	83 ec 08             	sub    $0x8,%esp
 str[1] = 'O';
-  11:	a1 5c 0a 00 00       	mov    0xa5c,%eax
+  11:	a1 00 30 00 00       	mov    0x3000,%eax
   16:	c6 40 01 4f          	movb   $0x4f,0x1(%eax)
 printf(1,"%s\n", str);
-  1a:	ff 35 5c 0a 00 00    	push   0xa5c
-  20:	68 28 07 00 00       	push   $0x728
+  1a:	ff 35 00 30 00 00    	push   0x3000
+  20:	68 00 10 00 00       	push   $0x1000
   25:	6a 01                	push   $0x1
   27:	e8 d4 03 00 00       	call   400 <printf>
 return 0;
@@ -574,10 +574,12 @@ SYSCALL(wunmap)
  33b:	b8 17 00 00 00       	mov    $0x17,%eax
  340:	cd 40                	int    $0x40
  342:	c3                   	ret    
- 343:	66 90                	xchg   %ax,%ax
- 345:	66 90                	xchg   %ax,%ax
- 347:	66 90                	xchg   %ax,%ax
- 349:	66 90                	xchg   %ax,%ax
+
+00000343 <va2pa>:
+SYSCALL(va2pa)
+ 343:	b8 18 00 00 00       	mov    $0x18,%eax
+ 348:	cd 40                	int    $0x40
+ 34a:	c3                   	ret    
  34b:	66 90                	xchg   %ax,%ax
  34d:	66 90                	xchg   %ax,%ax
  34f:	90                   	nop
@@ -628,7 +630,7 @@ printint(int fd, int xx, int base, int sgn)
  382:	31 d2                	xor    %edx,%edx
  384:	89 cf                	mov    %ecx,%edi
  386:	f7 75 c4             	divl   -0x3c(%ebp)
- 389:	0f b6 92 ac 07 00 00 	movzbl 0x7ac(%edx),%edx
+ 389:	0f b6 92 84 10 00 00 	movzbl 0x1084(%edx),%edx
  390:	89 45 c0             	mov    %eax,-0x40(%ebp)
  393:	89 d8                	mov    %ebx,%eax
  395:	8d 5b 01             	lea    0x1(%ebx),%ebx
@@ -761,7 +763,7 @@ printf(int fd, const char *fmt, ...)
  471:	83 e8 63             	sub    $0x63,%eax
  474:	83 f8 15             	cmp    $0x15,%eax
  477:	77 17                	ja     490 <printf+0x90>
- 479:	ff 24 85 54 07 00 00 	jmp    *0x754(,%eax,4)
+ 479:	ff 24 85 2c 10 00 00 	jmp    *0x102c(,%eax,4)
         putc(fd, c);
       }
       state = 0;
@@ -889,7 +891,7 @@ printf(int fd, const char *fmt, ...)
  583:	8d 74 26 00          	lea    0x0(%esi,%eiz,1),%esi
  587:	90                   	nop
           s = "(null)";
- 588:	ba 4a 07 00 00       	mov    $0x74a,%edx
+ 588:	ba 22 10 00 00       	mov    $0x1022,%edx
         while(*s != 0){
  58d:	89 5d d4             	mov    %ebx,-0x2c(%ebp)
  590:	b8 28 00 00 00       	mov    $0x28,%eax
@@ -910,7 +912,7 @@ free(void *ap)
 
   bp = (Header*)ap - 1;
   for(p = freep; !(bp > p && bp < p->s.ptr); p = p->s.ptr)
- 5a1:	a1 60 0a 00 00       	mov    0xa60,%eax
+ 5a1:	a1 04 30 00 00       	mov    0x3004,%eax
 {
  5a6:	89 e5                	mov    %esp,%ebp
  5a8:	57                   	push   %edi
@@ -955,7 +957,7 @@ free(void *ap)
 }
  5e1:	5b                   	pop    %ebx
   freep = p;
- 5e2:	89 15 60 0a 00 00    	mov    %edx,0xa60
+ 5e2:	89 15 04 30 00 00    	mov    %edx,0x3004
 }
  5e8:	5e                   	pop    %esi
  5e9:	5f                   	pop    %edi
@@ -987,7 +989,7 @@ free(void *ap)
     p->s.size += bp->s.size;
  619:	03 43 fc             	add    -0x4(%ebx),%eax
   freep = p;
- 61c:	89 15 60 0a 00 00    	mov    %edx,0xa60
+ 61c:	89 15 04 30 00 00    	mov    %edx,0x3004
     p->s.size += bp->s.size;
  622:	89 42 04             	mov    %eax,0x4(%edx)
     p->s.ptr = bp->s.ptr;
@@ -1020,7 +1022,7 @@ malloc(uint nbytes)
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  639:	8b 45 08             	mov    0x8(%ebp),%eax
   if((prevp = freep) == 0){
- 63c:	8b 3d 60 0a 00 00    	mov    0xa60,%edi
+ 63c:	8b 3d 04 30 00 00    	mov    0x3004,%edi
   nunits = (nbytes + sizeof(Header) - 1)/sizeof(Header) + 1;
  642:	8d 70 07             	lea    0x7(%eax),%esi
  645:	c1 ee 03             	shr    $0x3,%esi
@@ -1057,7 +1059,7 @@ malloc(uint nbytes)
       return (void*)(p + 1);
     }
     if(p == freep)
- 681:	8b 3d 60 0a 00 00    	mov    0xa60,%edi
+ 681:	8b 3d 04 30 00 00    	mov    0x3004,%edi
  687:	89 c2                	mov    %eax,%edx
  689:	39 d7                	cmp    %edx,%edi
  68b:	75 eb                	jne    678 <malloc+0x48>
@@ -1077,7 +1079,7 @@ malloc(uint nbytes)
  6a9:	50                   	push   %eax
  6aa:	e8 f1 fe ff ff       	call   5a0 <free>
   return freep;
- 6af:	8b 15 60 0a 00 00    	mov    0xa60,%edx
+ 6af:	8b 15 04 30 00 00    	mov    0x3004,%edx
       if((p = morecore(nunits)) == 0)
  6b5:	83 c4 10             	add    $0x10,%esp
  6b8:	85 d2                	test   %edx,%edx
@@ -1109,7 +1111,7 @@ malloc(uint nbytes)
         p->s.size = nunits;
  6dc:	89 70 04             	mov    %esi,0x4(%eax)
       freep = prevp;
- 6df:	89 15 60 0a 00 00    	mov    %edx,0xa60
+ 6df:	89 15 04 30 00 00    	mov    %edx,0x3004
 }
  6e5:	8d 65 f4             	lea    -0xc(%ebp),%esp
       return (void*)(p + 1);
@@ -1121,17 +1123,17 @@ malloc(uint nbytes)
  6ee:	5d                   	pop    %ebp
  6ef:	c3                   	ret    
     base.s.ptr = freep = prevp = &base;
- 6f0:	c7 05 60 0a 00 00 64 	movl   $0xa64,0xa60
- 6f7:	0a 00 00 
+ 6f0:	c7 05 04 30 00 00 08 	movl   $0x3008,0x3004
+ 6f7:	30 00 00 
     base.s.size = 0;
- 6fa:	bf 64 0a 00 00       	mov    $0xa64,%edi
+ 6fa:	bf 08 30 00 00       	mov    $0x3008,%edi
     base.s.ptr = freep = prevp = &base;
- 6ff:	c7 05 64 0a 00 00 64 	movl   $0xa64,0xa64
- 706:	0a 00 00 
+ 6ff:	c7 05 08 30 00 00 08 	movl   $0x3008,0x3008
+ 706:	30 00 00 
   for(p = prevp->s.ptr; ; prevp = p, p = p->s.ptr){
  709:	89 fa                	mov    %edi,%edx
     base.s.size = 0;
- 70b:	c7 05 68 0a 00 00 00 	movl   $0x0,0xa68
+ 70b:	c7 05 0c 30 00 00 00 	movl   $0x0,0x300c
  712:	00 00 00 
     if(p->s.size >= nunits){
  715:	e9 42 ff ff ff       	jmp    65c <malloc+0x2c>
