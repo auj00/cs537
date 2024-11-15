@@ -8,6 +8,16 @@
 #include "traps.h"
 #include "spinlock.h"
 
+struct file {
+  enum { FD_NONE, FD_PIPE, FD_INODE } type;
+  int ref; // reference count
+  char readable;
+  char writable;
+  struct pipe *pipe;
+  struct inode *ip;
+  uint off;
+};
+
 // Interrupt descriptor table (shared by all CPUs).
 struct gatedesc idt[256];
 extern uint vectors[];  // in vectors.S: array of 256 entry pointers
@@ -122,6 +132,8 @@ trap(struct trapframe *tf)
     // starting address of the page to be allocated
     int alloc_va = PGROUNDDOWN(pgflt_va);
 
+    //int file_start = alloc_va - myproc()->mapinfo[map_index].start_addr;
+
     // allocate single page
     char *mem = kalloc();
     // cprintf("physical address of allocated page %d : %x\n", i, V2P(mem));
@@ -150,6 +162,7 @@ trap(struct trapframe *tf)
         // kill the process
         kill(myproc()->pid);
       }
+      f->off = alloc_va - myproc()->mapinfo[map_index].start_addr;
       fileread(f, (char*)alloc_va, 4096);
       
     }

@@ -73,7 +73,7 @@ int main() {
     char *arr = (char *)smallmap;
     for (int i = 0; i < smallfilelen; i++) {
         if (arr[i] != smallval) {
-            printerr("addr 0x%x contains %d, expected %d\n", smallmap + i, arr[i],
+            printerr("addr 0x%x in smallmap contains %d, expected %d\n", smallmap + i, arr[i],
                      smallval);
             failed();
         }
@@ -81,7 +81,7 @@ int main() {
     arr = (char *)bigmap;
     for (int i = 0; i < PGSIZE; i++) {
         if (arr[PGSIZE + i] != bigval + 1) {
-            printerr("addr 0x%x contains %d, expected %d\n", bigmap + PGSIZE + i,
+            printerr("addr 0x%x in bigmap contains %d, expected %d\n", bigmap + PGSIZE + i,
                      arr[PGSIZE + i], bigval + 1);
             failed();
         }
