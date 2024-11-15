@@ -9,6 +9,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
+struct file;
 
 // bio.c
 void            binit(void);
@@ -155,6 +156,9 @@ int             argstr(int, char**);
 int             fetchint(uint, int*);
 int             fetchstr(uint, char**);
 void            syscall(void);
+
+// sysfile.c
+int             fdalloc(struct file *f);
 
 // timer.c
 void            timerinit(void);

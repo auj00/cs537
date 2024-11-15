@@ -15,15 +15,15 @@ class test1(Xv6Test):
     failure_pattern = "Segmentation Fault"
 
 
-# class test2(Xv6Test):
-#     name = "test_2"
-#     description = "Checks the presence of Segmentation Fault"
-#     tester = "ctests/test_2.c"
-#     header = "ctests/tester.h"
-#     make_qemu_args = "CPUS=1"
-#     point_value = 1
-#     success_pattern = "Segmentation Fault"
-#     failure_pattern = "PASSED"
+class test2(Xv6Test):
+    name = "test_2"
+    description = "Checks the presence of Segmentation Fault"
+    tester = "ctests/test_2.c"
+    header = "ctests/tester.h"
+    make_qemu_args = "CPUS=1"
+    point_value = 1
+    success_pattern = "Segmentation Fault"
+    failure_pattern = "PASSED"
 
 
 class test3(Xv6Test):
@@ -285,7 +285,7 @@ main(
     Xv6Build,
     all_tests=[
         test1,
-        # test2,
+        test2,
         test3,
         test4,
         test5,

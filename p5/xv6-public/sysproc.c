@@ -101,7 +101,7 @@ int sys_wmap(void)
   int start_va;         // starting virtual address requested by the user
   int mem_length;       // size of memory requested by user 
   int flags_val;        // MAP_FIXED | MAP_SHARED | MAP_ANONYMOUS
-  int fd;             // file descriptor 
+  int fd;               // file descriptor 
 
   // Extract arguments for sys_call
   // Check : valid arguments provided
@@ -236,7 +236,11 @@ int sys_wmap(void)
 
       if(!(flags_val & MAP_ANONYMOUS))
       {
-        myproc()->mapinfo[i].file_desc = fd;
+        int dup_fd;
+        struct file* f=myproc()->ofile[fd];
+        dup_fd = fdalloc(f);
+        filedup(f);
+        myproc()->mapinfo[i].file_desc = dup_fd;
       }
       break;
     }
@@ -302,15 +306,15 @@ int sys_wunmap(void)
   myproc()->mapinfo[map_index].file_desc = -1;
 
   // free each page in the map
-  for(int i=0; i<myproc()->mapinfo[map_index].pages_in_map; i++)
-  {
-    // pte_t *pte = walkpgdir(myproc()->pgdir, (char*)copy_va, 0);   // get the page-table entry
-    // int physical_address = PTE_ADDR(*pte);                        // Access the upper 20-bit of PTE
-    // kfree(P2V(physical_address));                                 // free the physical memory
-    // *pte = 0;                                                     // convert to kernel va, free the PTE
-    // copy_va += 0x1000;                                            // Increment va to next va
+  // for(int i=; i<16; i++)
+  // {
+  //   // pte_t *pte = walkpgdir(myproc()->pgdir, (char*)copy_va, 0);   // get the page-table entry
+  //   // int physical_address = PTE_ADDR(*pte);                        // Access the upper 20-bit of PTE
+  //   // kfree(P2V(physical_address));                                 // free the physical memory
+  //   // *pte = 0;                                                     // convert to kernel va, free the PTE
+  //   // copy_va += 0x1000;                                            // Increment va to next va
 
-  }
+  // }
 
   // myproc()->pages_in_map[map_index] = -1;
   myproc()->mapinfo[map_index].pages_in_map = -1;
@@ -336,7 +340,12 @@ int sys_va2pa(void)
   // page-table entry for the given virtual address
   pte_t *pte = walkpgdir(myproc()->pgdir, (char*)user_va, 0);
 
-  cprintf("pte=%x\n", *pte);
+  if(!pte)
+  {
+    return FAILED;
+  }
+
+  //cprintf("pte=%x\n", pte);
   // check if PTE is present
   if((*pte & PTE_P) == 0)
   {

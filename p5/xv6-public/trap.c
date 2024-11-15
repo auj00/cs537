@@ -80,10 +80,16 @@ trap(struct trapframe *tf)
 
   case T_PGFLT: // T_PGFLT = 14
 
-    cprintf("Page Fault\n");
+    //cprintf("Page Fault\n");
 
     // address that caused the page fault
     int pgflt_va = rcr2();
+
+    // 
+    if(pgflt_va == -1)
+    {
+      exit();
+    }
 
     // check if pgflt_va is present within any allocated map
 
@@ -103,6 +109,7 @@ trap(struct trapframe *tf)
       cprintf("Segmentation Fault\n");
       // kill the process
       // should i call kill() or exit()
+      exit();
     }
 
 
@@ -119,6 +126,8 @@ trap(struct trapframe *tf)
     char *mem = kalloc();
     // cprintf("physical address of allocated page %d : %x\n", i, V2P(mem));
 
+    // set all the bytes of the page to 0
+    memset(mem, 0, PGSIZE);
     // create PTE -> store PPN & flags
     if (mappages(myproc()->pgdir, (char*)alloc_va, 4096, V2P(mem), PTE_W | PTE_U) == -1)
     {
@@ -127,15 +136,19 @@ trap(struct trapframe *tf)
     }
 
     int fd = myproc()->mapinfo[map_index].file_desc;
-
+    // cprintf("fd = %d\n", fd);
     if(fd != -1)
     {
       // MAP_ANONYMOUS not set -> file-backed mapping
+      
       struct file *f;
       if((f=myproc()->ofile[fd]) == 0)
       {
+        cprintf("fd = %d\n", fd);
+        cprintf("file struct pointer = %p\n", f);
         cprintf("Can't find the file struct\n");
         // kill the process
+        kill(myproc()->pid);
       }
       fileread(f, (char*)alloc_va, 4096);
       
