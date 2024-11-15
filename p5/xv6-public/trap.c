@@ -78,6 +78,75 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
 
+  case T_PGFLT: // T_PGFLT = 14
+
+    cprintf("Page Fault\n");
+
+    // address that caused the page fault
+    int pgflt_va = rcr2();
+
+    // check if pgflt_va is present within any allocated map
+
+    // location of wmap in proc struct
+    int map_index = -1;                   
+    for(int i=0; i<16; i++)
+    {
+      if(pgflt_va >= myproc()->mapinfo[i].start_addr && pgflt_va <= myproc()->mapinfo[i].end_addr)
+      {
+        map_index = i;
+        break;
+      }
+    }
+
+    if(map_index == -1)
+    {
+      cprintf("Segmentation Fault\n");
+      // kill the process
+      // should i call kill() or exit()
+    }
+
+
+    // -------- handle lazy allocation --------
+
+
+    // calculate : which page of the map to allocate
+    // int offset = pgflt_va - myproc()->mapinfo[map_index].start_addr;
+
+    // starting address of the page to be allocated
+    int alloc_va = PGROUNDDOWN(pgflt_va);
+
+    // allocate single page
+    char *mem = kalloc();
+    // cprintf("physical address of allocated page %d : %x\n", i, V2P(mem));
+
+    // create PTE -> store PPN & flags
+    if (mappages(myproc()->pgdir, (char*)alloc_va, 4096, V2P(mem), PTE_W | PTE_U) == -1)
+    {
+      cprintf("mappages() failed\n");
+      // kill the process
+    }
+
+    int fd = myproc()->mapinfo[map_index].file_desc;
+
+    if(fd != -1)
+    {
+      // MAP_ANONYMOUS not set -> file-backed mapping
+      struct file *f;
+      if((f=myproc()->ofile[fd]) == 0)
+      {
+        cprintf("Can't find the file struct\n");
+        // kill the process
+      }
+      fileread(f, (char*)alloc_va, 4096);
+      
+    }
+    myproc()->mapinfo[map_index].pages_in_map += 1;
+    
+    // else:
+    break;  
+        
+
+
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){

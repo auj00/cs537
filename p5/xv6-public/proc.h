@@ -34,6 +34,7 @@ struct context {
 
 struct mapinfo{
   int start_addr;       // starting virtual address of the wmap
+  int end_addr;         // ending virtual address of the wmap
   int map_length;       // size of wmap memory 
   int pages_in_map;     // pages allocated for that wmap
   int file_desc;        // file descriptor if it is a file-backed mapping, else -1

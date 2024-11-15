@@ -119,6 +119,7 @@ found:
   {
     // struct initialization
     p->mapinfo[i].start_addr = -1;
+    p->mapinfo[i].end_addr = -1;
     p->mapinfo[i].map_length = -1;
     p->mapinfo[i].pages_in_map = -1;
     p->mapinfo[i].file_desc = -1;
