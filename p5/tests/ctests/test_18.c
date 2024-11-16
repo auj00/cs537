@@ -74,6 +74,21 @@ int main() {
         va_exists(map2 + i, TRUE);
     }
 
+
+    // ##################### mod #####################
+    // // validate contents of map 2
+    // for (int i = 0; i < length2; i++) 
+    // {
+    //     if (arr2[i] != val2) 
+    //     {
+    //         printerr(
+    //             "Parent (pid %d) sees addr 0x%x contains %d, expected %d\n",
+    //             getpid(), map2 + i, arr2[i], val2);
+    //         failed();
+    //     }
+    // }
+    // ##################### mod #####################
+
     //
     // Fork multiple child processes
     //

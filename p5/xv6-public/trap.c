@@ -120,7 +120,8 @@ trap(struct trapframe *tf)
       cprintf("Segmentation Fault\n");
       // kill the process
       // should i call kill() or exit()
-      exit();
+      kill(myproc()->pid);
+      break;
     }
 
 

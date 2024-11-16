@@ -195,7 +195,7 @@ inituvm(pde_t *pgdir, char *init, uint sz)
 // Load a program segment into pgdir.  addr must be page-aligned
 // and the pages from addr to addr+sz must already be mapped.
 int
-loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
+loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz, uint flags)
 {
   uint i, pa, n;
   pte_t *pte;
@@ -205,6 +205,17 @@ loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, addr+i, 0)) == 0)
       panic("loaduvm: address should exist");
+
+    // Update flags with appropriate conditions
+    if(flags & PTE_W)
+    {
+      *pte |= PTE_W;      // set writable if ELF flags allow writing 
+    }
+    else
+    {
+      *pte &= ~PTE_W;     // ensure its not writable if the flag disallows it
+    }
+
     pa = PTE_ADDR(*pte);
     if(sz - i < PGSIZE)
       n = sz - i;
@@ -332,7 +343,7 @@ copyuvm(pde_t *pgdir, uint sz)
     if((mem = kalloc()) == 0)
       goto bad;
     memmove(mem, (char*)P2V(pa), PGSIZE);
-    // cprintf("\nmemmove called for pid = %d\n", myproc()->pid);
+    // cprintf("\nmemmove called by pid = %d\n", myproc()->pid);
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
       kfree(mem);
       goto bad;
