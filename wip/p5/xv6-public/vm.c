@@ -32,7 +32,6 @@ seginit(void)
 // Return the address of the PTE in page table pgdir
 // that corresponds to virtual address va.  If alloc!=0,
 // create any required page table pages.
-//static -- removed p5 , made global defined in defs.h
 pte_t *
 walkpgdir(pde_t *pgdir, const void *va, int alloc)
 {
@@ -52,14 +51,12 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
     // entries, if necessary.
     *pde = V2P(pgtab) | PTE_P | PTE_W | PTE_U;
   }
-  // (((uint)(va) >> 12) & 0x3FF)
   return &pgtab[PTX(va)];
 }
 
 // Create PTEs for virtual addresses starting at va that refer to
 // physical addresses starting at pa. va and size might not
 // be page-aligned.
-//static --removed for mmap - p5 global access (defined in defs.h)
 int
 mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
 {
@@ -208,20 +205,17 @@ loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz, uint f
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walkpgdir(pgdir, addr+i, 0)) == 0)
       panic("loaduvm: address should exist");
-
-    /*set the flags on the pte:*/
-    // cprintf("ph.flags : %x\n" ,flags);
-
-    // cprintf("pte before : %x\n" ,*pte);
-
-    if(flags & PTE_P)
-      *pte |= PTE_P;
-    if(flags & PTE_W)
-      *pte |= PTE_W;
-    if(flags & PTE_U)
-      *pte |= PTE_U;
-
-    // cprintf("pte after : %x\n" ,*pte);
+    
+     cprintf("pte=%x\n", *pte);
+    if(*pte == 0x4244c8d)
+      cprintf("GOTCHA!\n");
+    
+    // Update PTE with appropriate permissions
+        if(flags & PTE_W) {
+            *pte |= PTE_W;  // Set writable if the ELF flag allows writing
+        } else {
+            *pte &= ~PTE_W; // Ensure it's not writable if the flag disallows it
+        }
 
     pa = PTE_ADDR(*pte);
     if(sz - i < PGSIZE)
@@ -402,6 +396,19 @@ copyout(pde_t *pgdir, uint va, void *p, uint len)
   }
   return 0;
 }
+
+// p5
+// allocate a page from kernel & create a PTE
+int alloc_page (struct proc *p, int * start_ptr)
+{
+  // allocate pages
+    char *mem = kalloc();
+
+    // create PTE mapping VPN -> PPN
+    return mappages(p->pgdir, start_ptr, 4096, V2P(mem), PTE_W | PTE_U);
+
+}
+
 
 //PAGEBREAK!
 // Blank page.

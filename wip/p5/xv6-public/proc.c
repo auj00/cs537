@@ -7,6 +7,17 @@
 #include "proc.h"
 #include "spinlock.h"
 
+/*file struct access*/
+struct file {
+  enum { FD_NONE, FD_PIPE, FD_INODE } type;
+  int ref; // reference count
+  char readable;
+  char writable;
+  struct pipe *pipe;
+  struct inode *ip;
+  uint off;
+};
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -112,6 +123,27 @@ found:
   memset(p->context, 0, sizeof *p->context);
   p->context->eip = (uint)forkret;
 
+  // ----- p5 -----
+
+  // initialize the memory mapping meta-data
+  for(int i=0; i<16; i++)
+  {
+    // struct initialization
+    p->mapinfo[i].start_addr = -1;
+    p->mapinfo[i].end_addr = -1;
+    p->mapinfo[i].map_length = -1;
+    p->mapinfo[i].pages_in_map = -1;
+    p->mapinfo[i].file_desc = -1;
+  }
+
+  // set number of memory maps for the process = 0
+  p->num_maps = 0;
+
+  
+  // memset(p->start_addr, -1, 16*sizeof(int));
+  // memset(p->map_length, -1, 16*sizeof(int));
+  // memset(p->pages_in_map, -1, 16*sizeof(int));
+  // memset(p->file_desc, -1, 16*sizeof(int));
   return p;
 }
 
@@ -209,6 +241,19 @@ fork(void)
   np->cwd = idup(curproc->cwd);
 
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
+
+
+  // copy the mapping metadata:
+  for (int i = 0; i < NOFILE; i++)
+  {
+    np->mapinfo[i].file_desc = curproc->mapinfo[i].file_desc;
+    np->mapinfo[i].end_addr = curproc->mapinfo[i].end_addr;
+    np->mapinfo[i].start_addr = curproc->mapinfo[i].start_addr;
+    np->mapinfo[i].map_length = curproc->mapinfo[i].map_length;
+    np->mapinfo[i].pages_in_map = curproc->mapinfo[i].file_desc;
+  }
+  np->num_maps = curproc->num_maps;
+  // cprintf("num of maps %d\n",curproc->num_maps);
 
   pid = np->pid;
 
@@ -531,4 +576,89 @@ procdump(void)
     }
     cprintf("\n");
   }
+}
+
+
+
+//unmap global function:
+int 
+wunmap_function(void)
+{
+  int start_va;
+  if(argint(0, &start_va)<0)
+  {
+    cprintf("argint failed\n");
+    return -1;
+  }
+  int map_index = -1;
+  for(int i=0; i<16; i++)
+  {
+    if(myproc()->mapinfo[i].start_addr == start_va)
+    {
+      // cprintf("mapping found\n");
+      map_index = i;
+      break;
+    }
+  }
+
+  // no such memory map exists, has to be a start address
+  if(map_index == -1)
+  {
+    cprintf("map_index = -1\n");
+    return -1;
+  }
+
+  // free each page in the map, write back to all files that have valid file-backed flag as well
+  int fd_2 = myproc()->mapinfo[map_index].file_desc;
+  //begin from the starting address
+  int curr_addr = myproc()->mapinfo[map_index].start_addr;
+
+  struct file *f = 0;
+      if(fd_2 != -1){
+        if ((f = myproc()->ofile[fd_2]) == 0)
+          {
+            // kill the process ...do we?
+            kill(myproc()->pid);
+          }
+      }
+  
+  int num_pages_total = myproc()->mapinfo[map_index].map_length/PGSIZE;
+  if (myproc()->mapinfo[map_index].map_length % PGSIZE != 0)
+  {
+    num_pages_total += 1;
+  }
+  for(int i=0; i<num_pages_total; i++)
+  {
+    
+    pte_t *pte = walkpgdir(myproc()->pgdir, (char*)curr_addr, 0);   // get the page-table entry
+    if (pte == 0)
+    {
+      // page not allocated
+      curr_addr += PGSIZE;
+      continue;
+    }
+    // check if it is filebacked, then write back
+    // writeback before deleting the page
+    if(fd_2 != -1){
+       // File-backed mapping
+      f->off = curr_addr - myproc()->mapinfo[map_index].start_addr;
+      filewrite(f, (char *)curr_addr, 4096);
+    }
+
+    int physical_address = PTE_ADDR(*pte);                        // Access the upper 20-bit of PTE kernbase address
+    kfree(P2V(physical_address));                                 // free the physical memory
+    *pte = 0; 
+                                                 
+    curr_addr += 0x1000;                                          // Increment va to next va
+  }
+
+  // myproc()->pages_in_map[map_index] = -1;
+  myproc()->mapinfo[map_index].start_addr = -1;
+  myproc()->mapinfo[map_index].end_addr = -1;
+  myproc()->mapinfo[map_index].map_length = -1;
+  myproc()->mapinfo[map_index].file_desc = -1;
+  myproc()->mapinfo[map_index].pages_in_map = -1;
+  myproc()->num_maps -= 1;
+
+  return 0;
 }

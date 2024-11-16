@@ -146,7 +146,6 @@ vectors.S: vectors.pl
 ULIB = ulib.o usys.o printf.o umalloc.o
 
 _%: %.o $(ULIB)
-# Getting rid of the -N flag to separate code and data segments
 	$(LD) $(LDFLAGS) -e main -Ttext 0 -o $@ $^
 	$(OBJDUMP) -S $@ > $*.asm
 	$(OBJDUMP) -t $@ | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $*.sym
@@ -182,7 +181,7 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
-	_austin_test\
+	_test\
 	_poor_protection\
 
 fs.img: mkfs README $(UPROGS)

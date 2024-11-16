@@ -141,7 +141,7 @@ void va_exists(uint va, int expected) {
     }
     // va is allocated
     if (!expected) {
-        printerr("va 0x%x has pa, expected it to be not allocated\n", va);
+        printerr("va 0x%x has pa, expected it to be not allocated %x\n", va, ret);
         failed();
     }
     uint pa = (uint)ret;

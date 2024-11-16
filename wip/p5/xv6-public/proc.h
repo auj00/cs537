@@ -32,27 +32,17 @@ struct context {
   uint eip;
 };
 
-enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
+struct mapinfo{
+  int start_addr;       // starting virtual address of the wmap
+  int end_addr;         // ending virtual address of the wmap
+  int map_length;       // size of wmap memory 
+  int pages_in_map;     // pages allocated for that wmap
+  int file_desc;        // file descriptor if it is a file-backed mapping, else -1
+  // why am i not storing flags
 
-
-
-/*****************************************
- Per - process MAPPING Metadata:
- *****************************************/
-struct proc_map_metadata
-{
-  /*all values are intialized to 0, since static array*/
-  /*the virtual address itself*/
-  int va_addr_begin[16];
-  /*virtual address end*/
-  int va_addr_end[16];
-  /*corr length(page count) for each virtual address*/
-  int num_pages[16];
-  /*No of mmpaps  .....do we need that?*/
 };
 
-
-
+enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
 // Per-process state
 struct proc {
@@ -70,7 +60,15 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 
-  struct proc_map_metadata map_md;
+  // p5 array of structs
+  struct mapinfo mapinfo[16];
+  int num_maps;
+  
+  // int num_maps;
+  // int start_addr[16];
+  // int map_length[16];
+  // int pages_in_map[16];
+  // int file_desc[16];
 };
 
 // Process memory is laid out contiguously, low addresses first:

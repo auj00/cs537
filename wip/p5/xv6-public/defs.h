@@ -9,7 +9,7 @@ struct spinlock;
 struct sleeplock;
 struct stat;
 struct superblock;
-struct wmapinfo;
+struct file;
 
 // bio.c
 void            binit(void);
@@ -121,6 +121,7 @@ void            userinit(void);
 int             wait(void);
 void            wakeup(void*);
 void            yield(void);
+int             wunmap_function(void);
 
 // swtch.S
 void            swtch(struct context**, struct context*);
@@ -186,9 +187,12 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
-/*converted from static to global*/
-int             mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm);
-pte_t *         walkpgdir(pde_t *pgdir, const void *va, int alloc);
+
+// p5
+int             alloc_page (struct proc *, int *);
+int             mappages(pde_t *pgdir, void *, uint , uint , int );
+pte_t *         walkpgdir(pde_t *pgdir, const void *, int );
+
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

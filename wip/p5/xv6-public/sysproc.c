@@ -6,7 +6,17 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
-#include "wmap.h"
+#include "wmap.h"         // p5
+/*file struct access*/
+struct file {
+  enum { FD_NONE, FD_PIPE, FD_INODE } type;
+  int ref; // reference count
+  char readable;
+  char writable;
+  struct pipe *pipe;
+  struct inode *ip;
+  uint off;
+};
 
 int
 sys_fork(void)
@@ -90,157 +100,298 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
-// p5 - austin
-//uint wmap(uint addr, int length, int flags, int fd);
-int
-sys_wmap(void){
-  
-  /*virtual address*/
-  uint addr;
-  /*length of mapping in bytes*/
-  int length;
-  /*as defined in wmap.h*/
-  int flags;
-  /*kind of memory mapping you are requesting for*/
-  int fd;
-
-  /*fetch from userspace and check for redundancy*/
-  if(argint(0, (int *)&addr)<0 || argint(1, &length)<0 || argint(2, &flags) || argint(3, &fd)) return FAILED;
-  // MAP_SHARED should always be set. If it's not, return error.
-  if(MAP_SHARED != (flags & MAP_SHARED)) return FAILED;
-  //In this project, you only implement the case with MAP_FIXED . Return error if this flag is not set. 
-  if(MAP_FIXED != (flags & MAP_FIXED)) return FAILED;
-  // Also, a valid addr (+ no of pages ) will be a multiple of page size and within 0x60000000 and 0x80000000 
-  if(addr > 0x80000000 || addr < 0x60000000) return FAILED;
-  if(addr % PAGESIZE != 0) return FAILED;
-  // check if the page is already allocated then return 
-
-  /*get the number of pages*/
-  int n = NPAGE(length);
-  
-
-  uint v_addr_tmp = addr;
-  uint v_addr_tmp_last = addr + (n*PAGESIZE);
-  /*check if the total address' requirement is within the addr range*/
-  if(v_addr_tmp_last >= 0x80000000) return FAILED;
-
-  /*get the current process*/
-  struct proc *curproc = myproc();
-
-  /*check if the page has already been allocated for the same process*/
-  for (int i = 0; i < 16; i++)
-    if(v_addr_tmp  > curproc->map_md.va_addr_begin[i] && v_addr_tmp_last < curproc->map_md.va_addr_end[i]) return FAILED;
 
 
-  /*loop around to allocate physical pages and store the mapping in the process' page table*/
-  char* phy_addr_tmp;
-  for (int i = 0; i < n; i++)
+// ########################### p5 ###########################
+
+// to request physical memory pages 
+int sys_wmap(void)
+{
+  // code here
+  int start_va;         // starting virtual address requested by the user
+  int mem_length;       // size of memory requested by user 
+  int flags_val;        // MAP_FIXED | MAP_SHARED | MAP_ANONYMOUS
+  int fd;             // file descriptor 
+
+  // Extract arguments for sys_call
+  // Check : valid arguments provided
+  if(argint(0, &start_va)<0 || argint(1, &mem_length)<0 || argint(2, &flags_val)<0 || argint(3, &fd)<0)
   {
-    /*
-    allocate free physical page
-    kalloc only works with/returns kernel virtual address
-    */
-    phy_addr_tmp = kalloc();
-    cprintf("Physical address: %x\n",V2P(phy_addr_tmp));
-    /*map the physical page address(kernel virtual address, actually) to the page table*/
-    if(mappages(curproc->pgdir, (void *)v_addr_tmp, PAGESIZE, V2P(phy_addr_tmp), PTE_W | PTE_U) != 0) return FAILED;
-    // mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm);
-
-    v_addr_tmp += PAGESIZE;
+    return FAILED;
   }
-  /*
-  TODO:
-  if(MAP_ANONYMOUS == (flags & MAP_ANONYMOUS)){
-    //ignore fd
+
+  // check : maximum number of memory maps per process = 16
+  if(myproc()->num_maps >= 16)
+  {
+    return FAILED;
   }
-  */
 
-  /*****************************************
-   populate the current mapping in the process'
-   mapped table:
-   *****************************************/
-  /*get an empty index*/
-  int idx = 0;
-  for (int i = 0; i < 16; i++)
-    if(curproc->map_md.num_pages[i] == 0){
-      idx = i;
-      break;
-    }
+  // check : virtual address is a multiple of PGSIZE(4096)
+  if(start_va%PGSIZE != 0)
+  {
+    // cprintf("debug\n");
+    return FAILED;
+  }
+  
 
-  curproc->map_md.num_pages[idx] = n;
-  curproc->map_md.va_addr_begin[idx] = addr;
-  curproc->map_md.va_addr_end[idx] = v_addr_tmp_last;
-  /*****************************************/
+  // check : virtual address belongs [0x60000000, 0x80000000)
+  if(!(start_va >= 0x60000000 && start_va < 0x80000000))
+  {
+    return FAILED;
+  }
 
-  return addr;
-}
+  // last va of the user-requested wmap
+  int end_va = start_va + mem_length;
 
-int 
-sys_wunmap(void){
-  /*int wunmap(uint addr);*/
-  /*get the address from user space*/
-  uint va_addr;
-  if(argint(0, (int *)&va_addr)<0) return FAILED;
-  if(va_addr > 0x80000000 || va_addr < 0x60000000) return FAILED;
-  if((uint) va_addr % PGSIZE != 0) return FAILED;
-  /*****************************************
-   Every process can call wunmap 16 times,
-   search through the proc's struct to get the
-   details of the va passed.
-   ASSUME:
-   The va passed will be the begin index.
-   *****************************************/
-  struct proc * currproc = myproc();
-  /*get the length of the allocated physical size*/
-  int n = 0;
+  // check : overlapping maps
   for (int i = 0; i < 16; i++)
   {
-    if(currproc->map_md.va_addr_begin[i] == va_addr){
-      n = currproc->map_md.num_pages[i];
-      /*clear the num of pages for this mem_index*/
-      currproc->map_md.num_pages[i] = 0;
-      break;
+    if(myproc()->mapinfo[i].start_addr != -1)
+    {
+      int wmap_start = myproc()->mapinfo[i].start_addr;
+      int wmap_end = myproc()->mapinfo[i].end_addr;
+      
+      // new wmap starts within an allocated wmap
+      //  if(start_va >= wmap_start && start_va < wmap_end + PGSIZE -1)
+      if(start_va >= wmap_start && start_va < wmap_end)
+      {
+        // cprintf("debug1\n");
+        return FAILED;
+      }
+
+      // new wmap ends within an allocated wmap
+      if(end_va >= wmap_start && end_va < wmap_end)
+      {
+        // cprintf("debug2\n");
+        return FAILED;
+      }
     }
   }
   
-  /*free the index's contents*/
-  for (int i = 0; i < n; i++)
+  // copy of the starting address that the user requested
+  // int copy_va = start_va; 
+
+
+  // check : flags val --> 4-bit number e.g. 1110
+
+  // check for MAP_SHARED 0x0002
+  if(!(flags_val & MAP_SHARED))
   {
-    /*get the pte for the given virtual address*/
-    pte_t *pte = walkpgdir(currproc->pgdir, (void *)va_addr, 0);
-    /*don't need the last 12 bits for the PPN*/
-    int physical_address = PTE_ADDR(*pte);
-
-    if(pte == 0 || physical_address == 0) return -1;
-
-    /*kfree can only work with kernel virtual address'
-    so convert using P2V
-    */
-    kfree(P2V(physical_address));
-
-    /* future reference to that virtual address to fail*/
-    *pte = 0;
-
-    va_addr+=PAGESIZE;
+    // MAP_SHARED not set
+    return -1;
   }
 
-	return SUCCESS;
+  // check for MAP_FIXED 0x0004
+  if(!(flags_val & MAP_FIXED))
+  {
+    // MAP_FIXED not set
+    return -1;
+  }
+
+  // single page size = 4096 bytes
+  // assign multiple pages if requested memory size > 4096
+  // loop to allocate multiple physical pages, if needed
+  int num_pages = mem_length/PGSIZE;
+
+  // if requested memory is not a multiple of page size
+  if(mem_length%PGSIZE != 0)
+  {
+    num_pages += 1;
+  }
+  
+  // for(int i=0; i<num_pages; i++)
+  // {
+  //   // allocate single page
+  //   char *mem = kalloc();
+  //   // cprintf("physical address of allocated page %d : %x\n", i, V2P(mem));
+
+  //   // create PTE -> store PPN & flags
+  //   if (mappages(myproc()->pgdir, (char*)copy_va, 4096, V2P(mem), PTE_W | PTE_U) == -1)
+  //   {
+  //     return -1;
+  //   }
+
+  //   // starting address of the next virtual page
+  //   copy_va += 0x1000;
+  // }
+
+  // -------------- Handle file-backed mapping --------------
+
+
+  // // check for MAP_ANONYMOUS 0x0004
+  // if(!(flags_val & MAP_ANONYMOUS))
+  // {
+  //   // MAP_ANONYMOUS not set -> file-backed mapping
+  //   struct file *f;
+  //   if((f=myproc()->ofile[fd]) == 0)
+  //   {
+  //     return FAILED;
+  //   }
+  //   fileread(f, (char*)start_va, mem_length);
+    
+  // }
+
+  // -------------- update memory mapping meta-data --------------
+
+  // increment number of wmaps 
+  myproc()->num_maps += 1;
+  
+  for(int i=0; i<16; i++)
+  {
+    if(myproc()->mapinfo[i].start_addr == -1)
+    {
+      myproc()->mapinfo[i].start_addr = start_va;
+      myproc()->mapinfo[i].end_addr = start_va+mem_length-1;
+      myproc()->mapinfo[i].map_length = mem_length;
+      myproc()->mapinfo[i].pages_in_map = 0;
+
+      if(!(flags_val & MAP_ANONYMOUS))
+        {
+
+          /*Copy the fd to avoid loosing the file on close*/
+          // Call the kernel function directly
+  struct file *f = filedup(myproc()->ofile[fd]); // Duplicate the file descriptor
+  if (f == 0) {
+      return -1;  // Duplication failed
+  }
+
+  // Find a free slot in the process's file descriptor table
+  int newfd = -1;
+  for (int i = 0; i < NOFILE; i++) {
+      if (myproc()->ofile[i] == 0) { // Free slot found
+          myproc()->ofile[i] = f;    // Assign the duplicated file
+          newfd = i;
+          break;
+      }
+  }
+
+  if (newfd == -1) {
+      fileclose(f); // Close the duplicated file if no slot was found
+      return -1;
+  }
+  /*store the new fd*/
+  myproc()->mapinfo[i].file_desc = newfd;
+
+
+        cprintf("flag is set to : %d\n",fd);
+        if(myproc()->ofile[fd] == 0)
+          cprintf("NULL NULL");
+
+        
+      }
+      break;
+    }
+  }
+  //   /*clear any dangling page table entries*/
+  //   pte_t *pte = walkpgdir(myproc()->pgdir, (char*)start_va, 0);    // get the page-table entry
+  //   if((*pte & PTE_P) == 1)
+  // {
+  //   cprintf("GOTCHA pte present : %x\n", *pte);
+  //   // *pte &= ~PTE_P; IF iclear this address then page fault probably beacause i don't have read write permissions?
+  //   cprintf("GOTCHA pte present : %x\n", *pte);
+  // }
+
+  //   if(start_va == 0x60000000){
+  //     cprintf("GOTCHA pte : %x\n", *pte);
+  //   }
+
+  // return the starting va of the newly created mapping
+  return start_va;
 }
 
-int 
-sys_va2pa(void){
-  // uint va2pa(uint va);
-  int va_addr;
-  if(argint(0,&va_addr) < 0) return FAILED;
-  if(va_addr > 0x80000000 || va_addr < 0x60000000) return FAILED; 
-  if(va_addr % PGSIZE != 0) return FAILED;
-  struct proc * currproc = myproc();
-  pte_t *pte = walkpgdir(currproc->pgdir, (void *)va_addr, 0);
-    if(*pte == 0) return FAILED;
-  return *pte;
+
+
+int sys_wunmap(void)
+{
+  return wunmap_function();
 }
 
-int
-sys_getwmapinfo(void){
-	return 0;
+
+/*
+To translate a virtual address to physical address 
+according to the page table for the calling process.
+*/
+int sys_va2pa(void)
+{
+  // 
+  int user_va;
+  if(argint(0, &user_va)<0)
+  {
+    return -1;
+  }
+
+  // page-table entry for the given virtual address
+  pte_t *pte = walkpgdir(myproc()->pgdir, (char*)user_va, 0);
+  /*null check*/
+  if(pte==0)
+  {
+    return -1;
+  }
+
+  // cprintf("pte=%x\n", *pte);
+  // check if PTE is present
+  if((*pte & PTE_P) == 0)
+  {
+    cprintf("YAS!\n");
+    return FAILED;
+  }
+
+  int ppn = PTE_ADDR(*pte);
+
+  int offset = user_va & 0xFFF;
+  
+  int pa = ppn | offset;
+
+  // cprintf("ppn=%x\noffset=%x\npa=%x\n", ppn, offset, pa);
+  return pa;
+}
+
+int sys_getwmapinfo(void)
+{
+  // pointer for the struct argument
+  struct wmapinfo *ptr;
+
+  // check if argument are present & within allocated 
+  // address space
+  if(argptr(0, (void*)&ptr, sizeof(*ptr)) < 0)
+  {
+    return -1;
+  }
+
+  // Null pointer handled
+  if(ptr==0)
+  {
+    return -1;
+  }
+
+  int index = 0;
+  for(int i=0; i<16; i++)
+  {
+    if(myproc()->mapinfo[i].start_addr != -1)
+    {
+      // ptr->addr[index] = myproc()->start_addr[i];
+      // ptr->length[index] = myproc()->map_length[i];
+      // ptr->n_loaded_pages[index] = myproc()->pages_in_map[i];
+
+
+      ptr->addr[index] = myproc()->mapinfo[i].start_addr;
+      ptr->length[index] = myproc()->mapinfo[i].map_length;
+      ptr->n_loaded_pages[index] = myproc()->mapinfo[i].pages_in_map;
+      index++;
+    }
+    else
+    {
+      ptr->addr[index] = 0;
+      ptr->length[index] = 0;
+      ptr->n_loaded_pages[index] = 0;
+    }
+  }
+  ptr->total_mmaps = index;
+  return 0;
+}
+
+
+int sys_test(void)
+{
+  return myproc()->pid;
 }

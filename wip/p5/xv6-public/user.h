@@ -24,11 +24,14 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-//p5 - austin
-int wmap(uint addr, int length, int flags, int fd);
-int wunmap(uint addr);
-int va2pa(uint va);
-int getwmapinfo(struct wmapinfo *wminfo);
+
+//p5
+uint wmap(uint addr, int length, int flags, int fd);    // Task 1
+int wunmap(uint addr);                                  // Task 2
+uint va2pa(uint va);                                    // Task 5
+int getwmapinfo(struct wmapinfo *wminfo);               // Task 6
+
+int test (void);
 
 // ulib.c
 int stat(const char*, struct stat*);

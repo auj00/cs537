@@ -1,7 +1,0 @@
-what if a virtual address is requested where already allocatin has happend? overwrite or FAILURE:
-
-will the unmap address passed always be the begin address that was given during the mmap comand.
-
-why not use walkpgdir to allocate instead of Kalloc? ref:https://github.com/YehudaShapira/xv6-explained/blob/master/xv6%20Code%20Explained.md#1654-walkpgdirpde_t-pgdir-const-void-va-int-alloc
-
-verify the loaduvm in vm.c and exec.c
