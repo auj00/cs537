@@ -7,6 +7,22 @@
 #include "proc.h"
 #include "spinlock.h"
 
+struct file
+{
+  enum
+  {
+    FD_NONE,
+    FD_PIPE,
+    FD_INODE
+  } type;
+  int ref; // reference count
+  char readable;
+  char writable;
+  struct pipe *pipe;
+  struct inode *ip;
+  uint off;
+};
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -239,6 +255,18 @@ fork(void)
 
   release(&ptable.lock);
 
+  // p5
+  // np is the child process
+  for(int i=0; i<16; i++)
+  {
+    np->mapinfo[i].start_addr = curproc->mapinfo[i].start_addr;
+    np->mapinfo[i].end_addr = curproc->mapinfo[i].end_addr;
+    np->mapinfo[i].map_length = curproc->mapinfo[i].map_length;
+    np->mapinfo[i].pages_in_map = curproc->mapinfo[i].pages_in_map;
+    np->mapinfo[i].file_desc = curproc->mapinfo[i].file_desc;
+
+  }
+  np->num_maps = curproc->num_maps;
   return pid;
 }
 
@@ -553,3 +581,125 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+// p5
+int unmap(void)
+{
+  int start_va;
+  if (argint(0, &start_va) < 0)
+  {
+    cprintf("argint failed\n");
+    return -1;
+  }
+
+  // int copy_va = start_va;
+
+  // find if a memory map for start_va exists
+  int map_index = -1;
+  for (int i = 0; i < 16; i++)
+  {
+    if (myproc()->mapinfo[i].start_addr == start_va)
+    {
+      // cprintf("mapping found\n");
+      map_index = i;
+      break;
+    }
+  }
+
+  // no such memory map exists
+  if (map_index == -1)
+  {
+    cprintf("map_index = -1\n");
+    return -1;
+  }
+
+  // -------- Handle file-backed mapping -------
+
+  // write the changes made to the mapped memory back to disk
+  // when you're removing the mapping.
+  // You can assume that the offset is always 0.
+
+  // check : if file-backed only then do the following
+  int fd = myproc()->mapinfo[map_index].file_desc;
+  // if(fd != -1)
+  // {
+  // calculate the number of pages in wmap
+  int num_pages = myproc()->mapinfo[map_index].map_length / PGSIZE;
+
+  // if requested memory is not a multiple of page size
+  if (myproc()->mapinfo[map_index].map_length % PGSIZE != 0)
+  {
+    num_pages += 1;
+  }
+
+  int addr = myproc()->mapinfo[map_index].start_addr;
+  for (int i = 0; i < num_pages; i++)
+  {
+    pte_t *pte = walkpgdir(myproc()->pgdir, (char *)addr, 0); // get the page-table entry
+    if (pte == 0)
+    {
+      // page not allocated
+      addr += 4096;
+      continue;
+    }
+
+    if((*pte & PTE_P)==0)
+    {
+      cprintf("%d\n", *pte);
+    }
+
+    if (fd != -1)
+    {
+      // File-backed mapping
+      struct file *f;
+      if ((f = myproc()->ofile[fd]) == 0)
+      {
+        // kill the process
+        kill(myproc()->pid);
+      }
+      f->off = addr - myproc()->mapinfo[map_index].start_addr;
+      filewrite(f, (char *)addr, 4096);
+    }
+    addr += 4096;
+
+    int physical_address = PTE_ADDR(*pte); // Access the upper 20-bit of PTE
+    kfree(P2V(physical_address));          // free the physical memory
+    *pte = 0;                              // convert to kernel va, free the PTE
+    // copy_va += 0x1000;                                            // Increment va to next va
+    // myproc()->mapinfo[map_index].pages_in_map -= 1;
+  }
+  // }
+
+  // struct file *f;
+  // if((f=myproc()->ofile[myproc()->mapinfo[map_index].file_desc]) == 0)
+  // {
+  //   return FAILED;
+  // }
+
+  // filewrite(f, (char*)myproc()->mapinfo[map_index].start_addr, myproc()->mapinfo[map_index].map_length);
+
+  // reset the metadata
+
+  myproc()->mapinfo[map_index].start_addr = -1;
+  myproc()->mapinfo[map_index].end_addr = -1;
+  myproc()->mapinfo[map_index].map_length = -1;
+  myproc()->mapinfo[map_index].file_desc = -1;
+
+  // free each page in the map
+  // for(int i=; i<16; i++)
+  // {
+  //   // pte_t *pte = walkpgdir(myproc()->pgdir, (char*)copy_va, 0);   // get the page-table entry
+  //   // int physical_address = PTE_ADDR(*pte);                        // Access the upper 20-bit of PTE
+  //   // kfree(P2V(physical_address));                                 // free the physical memory
+  //   // *pte = 0;                                                     // convert to kernel va, free the PTE
+  //   // copy_va += 0x1000;                                            // Increment va to next va
+
+  // }
+
+  // myproc()->pages_in_map[map_index] = -1;
+  myproc()->mapinfo[map_index].pages_in_map = -1;
+  myproc()->num_maps -= 1;
+
+  return 0;
+}
+

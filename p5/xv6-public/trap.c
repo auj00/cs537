@@ -8,6 +8,7 @@
 #include "traps.h"
 #include "spinlock.h"
 
+
 struct file {
   enum { FD_NONE, FD_PIPE, FD_INODE } type;
   int ref; // reference count
@@ -90,11 +91,11 @@ trap(struct trapframe *tf)
 
   case T_PGFLT: // T_PGFLT = 14
 
-    //cprintf("Page Fault\n");
+    
 
     // address that caused the page fault
     int pgflt_va = rcr2();
-
+    // cprintf("Page Fault for address %x for pid=%d\n", pgflt_va, myproc()->pid);
     // 
     if(pgflt_va == -1)
     {
@@ -140,6 +141,7 @@ trap(struct trapframe *tf)
 
     // set all the bytes of the page to 0
     memset(mem, 0, PGSIZE);
+    // cprintf("setting page value = 0 for pid = %d\n", myproc()->pid);
     // create PTE -> store PPN & flags
     if (mappages(myproc()->pgdir, (char*)alloc_va, 4096, V2P(mem), PTE_W | PTE_U) == -1)
     {

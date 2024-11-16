@@ -11,3 +11,6 @@ e.g.
     // does watching remzi's video from p2 help for better understanding trap? no
     // should i implement lazy allocation or file-backed mapping first ?yes
     // do further tests like tc16 need lazy allocation for passing ?yes
+
+
+when unmapping how do i unmap the the last page ? full page or only worth the size of the memory

@@ -332,6 +332,7 @@ copyuvm(pde_t *pgdir, uint sz)
     if((mem = kalloc()) == 0)
       goto bad;
     memmove(mem, (char*)P2V(pa), PGSIZE);
+    // cprintf("\nmemmove called for pid = %d\n", myproc()->pid);
     if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
       kfree(mem);
       goto bad;
@@ -340,6 +341,7 @@ copyuvm(pde_t *pgdir, uint sz)
   return d;
 
 bad:
+  // cprintf("BAD\n");
   freevm(d);
   return 0;
 }
