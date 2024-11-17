@@ -7,6 +7,13 @@
 #include "proc.h"
 #include "elf.h"
 
+// array for page reference count
+char pg_ref_cnt [KERNBASE/PGSIZE] = {0};
+
+
+
+
+
 extern char data[];  // defined by kernel.ld
 pde_t *kpgdir;  // for use in scheduler()
 
@@ -408,6 +415,45 @@ int alloc_page (struct proc *p, int * start_ptr)
     // create PTE mapping VPN -> PPN
     return mappages(p->pgdir, start_ptr, 4096, V2P(mem), PTE_W | PTE_U);
 
+}
+
+
+int copy_mappings(struct proc* parent, struct proc *child)
+{
+  //pde_t *d;
+  pte_t *pte;
+  uint pa, flags;
+  //char *mem;
+  // cprintf("copy_mappings called\n");
+  for(int i = 0x60000000; i < (0x80000000-PGSIZE); i += PGSIZE)
+  {
+    //cprintf("i = %x\n", i);
+    if((pte = walkpgdir(parent->pgdir, (void *) i, 0)) == 0)
+    {
+      continue;
+    }
+    
+    // cprintf("inside for loop 2\n");
+    if(!(*pte & PTE_P))
+    {
+      // cprintf("inside pte* condition\n");
+      continue;
+    }
+
+    pa = PTE_ADDR(*pte);
+    flags = PTE_FLAGS(*pte);
+    // if((mem = kalloc()) == 0)
+      
+    // memmove(mem, (char*)P2V(pa), PGSIZE);
+    // cprintf("\nmemmove called by pid = %d\n", myproc()->pid);
+    if(mappages(child->pgdir, (void*)i, PGSIZE, pa, flags) < 0) 
+    {
+      cprintf("inside mappages\n");
+      return -1;
+    }
+  }
+  // cprintf("outside the for loop\n");
+  return 0;
 }
 
 
