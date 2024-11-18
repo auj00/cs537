@@ -500,6 +500,10 @@ int unmap(void)
   }
 
   int addr = myproc()->mapinfo[map_index].start_addr;
+
+  // check : if file-backed only then do the following
+  int fd = myproc()->mapinfo[map_index].file_desc;
+
   for (int i = 0; i < num_pages; i++)
   {
     pte_t *pte = walkpgdir(myproc()->pgdir, (char *)addr, 0); // get the page-table entry
@@ -514,11 +518,7 @@ int unmap(void)
     {
       cprintf("%d\n", *pte);
     }
-
-    // check : if file-backed only then do the following
-    int fd = myproc()->mapinfo[map_index].file_desc;
   
-
     if (fd != -1)
     {
       // File-backed mapping
@@ -538,7 +538,16 @@ int unmap(void)
     addr += 4096;
 
     int physical_address = PTE_ADDR(*pte); // Access the upper 20-bit of PTE
-    kfree(P2V(physical_address));          // free the physical memory
+    
+    // don't free page if reference count greater than 1
+    if(pg_ref_cnt[physical_address/PGSIZE] > 1)
+    {
+      pg_ref_cnt[physical_address/PGSIZE]--;
+    }
+    else{
+        kfree(P2V(physical_address));          // free the physical memory
+    }
+    
     *pte = 0;                              // convert to kernel va, free the PTE
     // copy_va += 0x1000;                                            // Increment va to next va
     // myproc()->mapinfo[map_index].pages_in_map -= 1;
@@ -626,7 +635,7 @@ int copy_mappings(struct proc* parent, struct proc *child)
 int remove_mappings(struct proc * child_proc)
 {
   pte_t *pte;
-  for(int i=0; i< KERNBASE-PGSIZE; i+=PGSIZE)
+  for(int i=0x60000000; i< KERNBASE-PGSIZE; i+=PGSIZE)
   {
     if((pte = walkpgdir(child_proc->pgdir, (void *) i, 0)) == 0)
     {
