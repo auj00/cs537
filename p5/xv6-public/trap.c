@@ -91,17 +91,32 @@ trap(struct trapframe *tf)
 
   case T_PGFLT: // T_PGFLT = 14
 
-    
+    // cprintf("Page Fault Handler invoked\n");
 
     // address that caused the page fault
     int pgflt_va = rcr2();
     // cprintf("Page Fault for address %x for pid=%d\n", pgflt_va, myproc()->pid);
-    // 
+     
     if(pgflt_va == -1)
     {
       exit();
     }
 
+    if(pgflt_va >= KERNBASE)
+    {
+      cprintf("Segmentation Fault\n");
+      kill(myproc()->pid);
+      break;
+    }
+
+    // Reasons for invoking the page fault handler
+    // 1. Page not found -> wmap lazy allocation
+    // 2. Page found in read-only memory (ELF)
+    // 3. Page found but readable only -> Copy-on-Write (need to implement permission bit)
+
+
+
+    // ############################### WMAP #######################################
     // check if pgflt_va is present within any allocated map
 
     // location of wmap in proc struct
@@ -142,6 +157,10 @@ trap(struct trapframe *tf)
 
     // set all the bytes of the page to 0
     memset(mem, 0, PGSIZE);
+
+    // increment reference page counter
+    // ref_cnt_incrementer(V2P(mem));
+
     // cprintf("setting page value = 0 for pid = %d\n", myproc()->pid);
     // create PTE -> store PPN & flags
     if (mappages(myproc()->pgdir, (char*)alloc_va, 4096, V2P(mem), PTE_W | PTE_U) == -1)

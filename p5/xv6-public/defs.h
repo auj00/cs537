@@ -191,6 +191,8 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
+int             ref_cnt_incrementer(uint);
+int             ref_cnt_decrementer(char *);
 
 // p5
 int             alloc_page (struct proc *, int *);

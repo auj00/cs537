@@ -43,7 +43,6 @@ int main() {
     // 2. Place Map 2 at MMABASE + 401 pages with length bigfilelen
     //
     int bigfd = open_file(bigfile, bigfilelen);
-    // printf(1, "bigfd = %d\n", bigfd);
     addr = MMAPBASE + PGSIZE * 401;
     length = bigfilelen;
     map = wmap(addr, length, filebacked, bigfd);
