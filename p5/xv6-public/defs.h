@@ -123,6 +123,7 @@ void            wakeup(void*);
 void            yield(void);
 int             unmap(void);
 int             copy_mappings(struct proc*, struct proc*);
+int             remove_mappings(struct proc *);
 
 // swtch.S
 void            swtch(struct context**, struct context*);

@@ -24,7 +24,9 @@ struct file
 };
 
 // array for page reference count
-uchar pg_ref_cnt [KERNBASE/PGSIZE] = {0};
+// number of pages = 4GB/4KB = 1MB = 1024*1024
+// uchar pg_ref_cnt [1024*1024];
+extern unsigned char pg_ref_cnt[1024*1024];
 
 
 
@@ -434,28 +436,29 @@ int alloc_page (struct proc *p, int * start_ptr)
 }
 
 // incrementer function for ref_cnt of each physical page
-int ref_cnt_incrementer(uint pa)
-{
-  // if(pa > KERNBASE)
-  // {
-  //   return -1;
-  // }
-  pg_ref_cnt[pa]++;
-  cprintf("incremented page ref cnt %d to %d\n", pa, pg_ref_cnt[pa]);
-  return 0;
-}
+// int ref_cnt_incrementer(uint pa)
+// {
+//   // if(pa > KERNBASE)
+//   // {
+//   //   return -1;
+//   // }
+//   pg_ref_cnt[pa]++;
+//   cprintf("incremented page ref cnt %d to %d\n", pa, pg_ref_cnt[pa]);
+//   return 0;
+// }
 
-int ref_cnt_decrementer(char * pa)
-{
-  pg_ref_cnt[(int) pa]--;
-  return 0;
-}
+// int ref_cnt_decrementer(char * pa)
+// {
+//   pg_ref_cnt[(int) pa]--;
+//   return 0;
+// }
 
 
 
 // p5
 int unmap(void)
 {
+  // get the starting address of the wmap to be unmapped
   int start_va;
   if (argint(0, &start_va) < 0)
   {
@@ -463,9 +466,8 @@ int unmap(void)
     return -1;
   }
 
-  // int copy_va = start_va;
 
-  // find if a memory map for start_va exists
+  // find if a wmap for that start_va exists
   int map_index = -1;
   for (int i = 0; i < 16; i++)
   {
@@ -477,27 +479,21 @@ int unmap(void)
     }
   }
 
-  // no such memory map exists
+  // no such wmap exists
   if (map_index == -1)
   {
     cprintf("map_index = -1\n");
     return -1;
   }
+  
+  // ##################### Wmap Exists #####################
 
-  // -------- Handle file-backed mapping -------
+  // -------- Removing mappings -------
 
-  // write the changes made to the mapped memory back to disk
-  // when you're removing the mapping.
-  // You can assume that the offset is always 0.
-
-  // check : if file-backed only then do the following
-  int fd = myproc()->mapinfo[map_index].file_desc;
-  // if(fd != -1)
-  // {
   // calculate the number of pages in wmap
   int num_pages = myproc()->mapinfo[map_index].map_length / PGSIZE;
 
-  // if requested memory is not a multiple of page size
+  // wmap memory not a multiple of page size
   if (myproc()->mapinfo[map_index].map_length % PGSIZE != 0)
   {
     num_pages += 1;
@@ -519,9 +515,17 @@ int unmap(void)
       cprintf("%d\n", *pte);
     }
 
+    // check : if file-backed only then do the following
+    int fd = myproc()->mapinfo[map_index].file_desc;
+  
+
     if (fd != -1)
     {
       // File-backed mapping
+      // write the changes made to the mapped memory back to disk
+      // when you're removing the mapping.
+      // You can assume that the offset is always 0.
+
       struct file *f;
       if ((f = myproc()->ofile[fd]) == 0)
       {
@@ -608,8 +612,35 @@ int copy_mappings(struct proc* parent, struct proc *child)
       cprintf("inside mappages\n");
       return -1;
     }
+
+    // increment the reference count of the page
+    int index = pa/PGSIZE;
+    pg_ref_cnt [index] += 1;
+    // cprintf("reference count for %x is %d\n", index, pg_ref_cnt [index]);
+
   }
   // cprintf("outside the for loop\n");
+  return 0;
+}
+
+int remove_mappings(struct proc * child_proc)
+{
+  pte_t *pte;
+  for(int i=0; i< KERNBASE-PGSIZE; i+=PGSIZE)
+  {
+    if((pte = walkpgdir(child_proc->pgdir, (void *) i, 0)) == 0)
+    {
+      continue;
+    }
+    
+    // cprintf("inside for loop 2\n");
+    if(!(*pte & PTE_P))
+    {
+      // cprintf("inside pte* condition\n");
+      continue;
+    }
+    *pte = 0;
+  }
   return 0;
 }
 

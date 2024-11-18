@@ -23,6 +23,8 @@ struct file
   uint off;
 };
 
+extern unsigned char pg_ref_cnt[1024*1024];
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -304,23 +306,28 @@ exit(void)
     }
   }
 
-  // remove all the mappings
-  pte_t *pte;
-  for(int i=0; i< KERNBASE-PGSIZE; i+=PGSIZE)
-  {
-    if((pte = walkpgdir(curproc->pgdir, (void *) i, 0)) == 0)
-    {
-      continue;
-    }
+  // p5
+  
+  // #####################  remove all the mappings  #####################
+  // pte_t *pte;
+  // for(int i=0; i< KERNBASE-PGSIZE; i+=PGSIZE)
+  // {
+  //   if((pte = walkpgdir(curproc->pgdir, (void *) i, 0)) == 0)
+  //   {
+  //     continue;
+  //   }
     
-    // cprintf("inside for loop 2\n");
-    if(!(*pte & PTE_P))
-    {
-      // cprintf("inside pte* condition\n");
-      continue;
-    }
-    *pte = 0;
-  }
+  //   // cprintf("inside for loop 2\n");
+  //   if(!(*pte & PTE_P))
+  //   {
+  //     // cprintf("inside pte* condition\n");
+  //     continue;
+  //   }
+  //   *pte = 0;
+  // }
+  remove_mappings(curproc);
+
+  // #########################################################################
 
   begin_op();
   iput(curproc->cwd);

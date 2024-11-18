@@ -9,6 +9,8 @@
 #include "mmu.h"
 #include "spinlock.h"
 
+unsigned char pg_ref_cnt[1024*1024]={0};
+
 void freerange(void *vstart, void *vend);
 extern char end[]; // first address after kernel loaded from ELF file
                    // defined by the kernel linker script in kernel.ld
@@ -91,6 +93,14 @@ kalloc(void)
     kmem.freelist = r->next;
   if(kmem.use_lock)
     release(&kmem.lock);
+
+  // p5
+  // increment the reference count of the pages
+  char * mem = (char*)r;
+  int index = V2P(mem)/PGSIZE;
+  pg_ref_cnt [index] += 1;
+  // cprintf("reference count for %x is %d\n", index, pg_ref_cnt [index]);
+
   return (char*)r;
 }
 
