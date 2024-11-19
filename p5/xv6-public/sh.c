@@ -57,6 +57,7 @@ struct cmd *parsecmd(char*);
 void
 runcmd(struct cmd *cmd)
 {
+  // printf(1, "runcmd called\n");
   int p[2];
   struct backcmd *bcmd;
   struct execcmd *ecmd;
@@ -74,7 +75,9 @@ runcmd(struct cmd *cmd)
   case EXEC:
     ecmd = (struct execcmd*)cmd;
     if(ecmd->argv[0] == 0)
-      exit();
+      {
+        printf(1, "exit before exec\n");
+        exit();}
     exec(ecmd->argv[0], ecmd->argv);
     printf(2, "exec %s failed\n", ecmd->argv[0]);
     break;
@@ -186,6 +189,8 @@ fork1(void)
   pid = fork();
   if(pid == -1)
     panic("fork");
+
+  printf(1, "pid returned by fork is %d\n", pid);
   return pid;
 }
 

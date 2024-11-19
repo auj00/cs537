@@ -219,6 +219,7 @@ growproc(int n)
 int
 fork(void)
 {
+  // cprintf("fork called\n");
   int i, pid;
   struct proc *np;
   struct proc *curproc = myproc();
@@ -233,6 +234,7 @@ fork(void)
     kfree(np->kstack);
     np->kstack = 0;
     np->state = UNUSED;
+    cprintf("copyuvm failed\n");
     return -1;
   }
   np->sz = curproc->sz;
@@ -273,8 +275,10 @@ fork(void)
   }
   np->num_maps = curproc->num_maps;
 
+
   if(copy_mappings(curproc, np) == -1)
   {
+    cprintf("copy_mappings failed\n");
     return -1;
   }
 

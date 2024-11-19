@@ -69,6 +69,7 @@ char*           kalloc(void);
 void            kfree(char*);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
+void            duplicate_page(pte_t *, struct proc *, int );
 
 // kbd.c
 void            kbdintr(void);
@@ -193,7 +194,7 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 int             ref_cnt_incrementer(uint);
-int             ref_cnt_decrementer(char *);
+int             ref_cnt_decrementer(uint);
 
 // p5
 int             alloc_page (struct proc *, int *);

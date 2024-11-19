@@ -134,7 +134,7 @@ the other ?? MAP_SHARED
 confusion :: MAP_SHARED says it should be visible -> COW says in 2 different physical pages
 
 
-
+is reference count only for cow pages ?
 
 
 
@@ -174,3 +174,16 @@ TEST_17 Summary: Fork: Same maps exist in both parent and multiple childs
 TEST_18 Summary: Fork: Same map contents exist in both parent and multiple childs
 
 TEST_19 Summary: Fork+EDIT: Both parent and child can see each other's edits in anonymous shared mappings
+
+TEST_22 Summary: COW: allocated array has same pa in parent and child before modification
+
+TEST_23 Summary: COW: allocated array has diff pa in parent and child after modification
+//
+// Checks whether the child process sees old contents of the mapping
+// Checks whether the parent process sees the old contents of the mapping after child
+// unmaps Does not check for deallocation of pages Does not check for lazy allocation
+// of pages
+
+TEST_24 Summary: COW: kfreeing child's page does not affect parent's page in COW
+
+TEST_25 Summary: COW+STRESS: static parent arr 50000 pages, can't fork child without COW

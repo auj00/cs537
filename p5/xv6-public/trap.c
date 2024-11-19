@@ -8,6 +8,7 @@
 #include "traps.h"
 #include "spinlock.h"
 
+extern unsigned char pg_ref_cnt[1024*1024];
 
 struct file {
   enum { FD_NONE, FD_PIPE, FD_INODE } type;
@@ -89,9 +90,11 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
 
+  // ###################################################### P5 ##########################################################
+
   case T_PGFLT: // T_PGFLT = 14
 
-    // cprintf("Page Fault Handler invoked\n");
+    // cprintf("Page Fault Handler invoked by pid=%d\n", myproc()->pid);
 
     // address that caused the page fault
     int pgflt_va = rcr2();
@@ -99,7 +102,8 @@ trap(struct trapframe *tf)
      
     if(pgflt_va == -1)
     {
-      exit();
+      kill(myproc()->pid);
+      break;
     }
 
     if(pgflt_va >= KERNBASE)
@@ -109,12 +113,86 @@ trap(struct trapframe *tf)
       break;
     }
 
+    // starting va of the page which faulted
+    int alloc_va = PGROUNDDOWN(pgflt_va);
+
+    // ######################## check within sz ########################
+    if(pgflt_va >= 0x0 && pgflt_va < 0x60000000)
+    {
+      pte_t *pte;
+      pte = walkpgdir(myproc()->pgdir, (void *)alloc_va, 0);
+
+      if(pte == 0)
+      {
+          cprintf("%d %d\n",  ((*pte & PTE_P)), (*pte & PTE_COW));
+          cprintf("Segmentation Fault 1\n");
+          kill(myproc()->pid);
+          break;
+      }
+
+      else if( (*pte & PTE_P) == 0 )
+      {
+          cprintf("Segmentation Fault 2\n");
+          kill(myproc()->pid);
+          break;
+      }
+      else if((*pte & PTE_COW) == 0)
+      {
+          cprintf("Segmentation Fault 3\n");
+          kill(myproc()->pid);
+          break;
+      }
+
+      // // determine the flags & pa
+      // // pde_t *d;
+      // uint pa, flags; 
+      // flags = PTE_FLAGS(*pte);
+      // pa = PTE_ADDR(*pte);
+
+      // cprintf("%d process are accessing this page\n", pg_ref_cnt[pa/PGSIZE]);
+
+      // // decrement the page reference count 
+      // pg_ref_cnt[pa/PGSIZE]--;
+
+      // // single reference remaining to the page
+      // if(pg_ref_cnt[pa/PGSIZE] == 1)
+      // {
+      //   // make the page READ/WRITE
+      //   cprintf("Less than 2 references\n");
+      //   pte_t *pte_parent;
+      //   pte_parent = walkpgdir(myproc()->parent->pgdir, (void *)alloc_va, 0);
+      //   *pte_parent |=  PTE_W;
+      //   lcr3(V2P(myproc()->parent->pgdir));
+      //   // break; 
+      // }
+
+      // // make the new page writable
+      // flags = flags | PTE_W;
+
+      // // clear out the pte of the child
+      // *pte = 0;
+
+      // // allocate new page
+      // char *mem = kalloc();
+      // memmove(mem, (char*)P2V(pa), PGSIZE);
+      // mappages(myproc()->pgdir, (void*)alloc_va, PGSIZE, V2P(mem), flags);
+      // // pg_ref_cnt[pa/PGSIZE]--;
+      // // cprintf("reference count of page %x to %d in trap\n", pa/PGSIZE, pg_ref_cnt[pa/PGSIZE]);
+    
+      // lcr3(V2P(myproc()->pgdir));
+      duplicate_page(pte, myproc(), alloc_va);
+      // cprintf("entering wmap condition\n");
+      break;
+    }
+    
+    // ###########################################################################
+
     // Reasons for invoking the page fault handler
     // 1. Page not found -> wmap lazy allocation
     // 2. Page found in read-only memory (ELF)
     // 3. Page found but readable only -> Copy-on-Write (need to implement permission bit)
 
-
+    // cprintf("entered wmap\n");
 
     // ############################### WMAP #######################################
     // check if pgflt_va is present within any allocated map
@@ -146,8 +224,8 @@ trap(struct trapframe *tf)
     // calculate : which page of the map to allocate
     // int offset = pgflt_va - myproc()->mapinfo[map_index].start_addr;
 
-    // starting address of the page to be allocated
-    int alloc_va = PGROUNDDOWN(pgflt_va);
+    // // starting address of the page to be allocated
+    // int alloc_va = PGROUNDDOWN(pgflt_va);
 
     //int file_start = alloc_va - myproc()->mapinfo[map_index].start_addr;
 
@@ -189,7 +267,7 @@ trap(struct trapframe *tf)
       
     }
     myproc()->mapinfo[map_index].pages_in_map += 1;
-    
+    lcr3(V2P(myproc()->pgdir));
     // else:
     break;  
         

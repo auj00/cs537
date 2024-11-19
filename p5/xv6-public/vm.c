@@ -351,29 +351,71 @@ clearpteu(pde_t *pgdir, char *uva)
 pde_t*
 copyuvm(pde_t *pgdir, uint sz)
 {
+  // cprintf("copyuvm called\n");
   pde_t *d;
   pte_t *pte;
   uint pa, i, flags;
-  char *mem;
+  // char *mem;
 
   if((d = setupkvm()) == 0)
     return 0;
-  for(i = 0; i < sz; i += PGSIZE){
+  for(i = 0; i < sz; i += PGSIZE)
+  {
     if((pte = walkpgdir(pgdir, (void *) i, 0)) == 0)
       panic("copyuvm: pte should exist");
     if(!(*pte & PTE_P))
       panic("copyuvm: page not present");
     pa = PTE_ADDR(*pte);
     flags = PTE_FLAGS(*pte);
-    if((mem = kalloc()) == 0)
-      goto bad;
-    memmove(mem, (char*)P2V(pa), PGSIZE);
-    // cprintf("\nmemmove called by pid = %d\n", myproc()->pid);
-    if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
-      kfree(mem);
+    // if((mem = kalloc()) == 0)
+    //   goto bad;
+    // memmove(mem, (char*)P2V(pa), PGSIZE);
+    // // cprintf("\nmemmove called by pid = %d\n", myproc()->pid);
+    // if(mappages(d, (void*)i, PGSIZE, V2P(mem), flags) < 0) {
+    //   kfree(mem);
+    //   goto bad;
+    // }
+    // ######################## p5 #############################
+    
+    // set the COW bit on the flags -> using bit-9
+    // cprintf("PTE_W = %d\n",flags & PTE_W);
+    if((flags & PTE_W))
+    {
+      flags = flags | PTE_COW;              // page was READ/WRITE in past
+    }
+    else
+    {
+      flags = flags & ~PTE_COW;             // page was READ-ONLY in past
+    }
+    // cprintf("%x\n", flags);
+    // set the flags to READ-ONLY
+    flags &= ~PTE_W;
+
+    // make the parent's page READ-ONLY
+    *pte = (*pte | flags);
+
+    // cprintf("PTE_COW = %d\n", (*pte)&PTE_COW);
+
+    lcr3(V2P(pgdir));
+
+    // create P->V mapping in child's page table
+    if(mappages(d, (void*)i, PGSIZE, pa, flags) < 0) {
+      // kfree(mem);
       goto bad;
     }
+
+    // increment the reference count
+    // pg_ref_cnt[pa/PGSIZE]++;
+    ref_cnt_incrementer(pa);
+    //cprintf("ref count of page %x in copyuvm to %d\n", pa/PGSIZE, pg_ref_cnt[pa/PGSIZE]);
+    
+
+    
+    // ########################################################
+    
   }
+  lcr3(V2P(pgdir));
+  // cprintf("copyuvm folr loop end\n");
   return d;
 
 bad:
@@ -435,15 +477,15 @@ int alloc_page (struct proc *p, int * start_ptr)
 
 }
 
-// incrementer function for ref_cnt of each physical page
+// // incrementer function for ref_cnt of each physical page
 // int ref_cnt_incrementer(uint pa)
 // {
 //   // if(pa > KERNBASE)
 //   // {
 //   //   return -1;
 //   // }
-//   pg_ref_cnt[pa]++;
-//   cprintf("incremented page ref cnt %d to %d\n", pa, pg_ref_cnt[pa]);
+//   pg_ref_cnt[pa/PGSIZe]++;
+//   // cprintf("incremented page ref cnt %d to %d\n", pa, pg_ref_cnt[pa]);
 //   return 0;
 // }
 
@@ -649,7 +691,12 @@ int remove_mappings(struct proc * child_proc)
       continue;
     }
     *pte = 0;
+
+    uint pa = PTE_ADDR(*pte);
+    int index = pa/PGSIZE;
+    pg_ref_cnt [index] -= 1;
   }
+  lcr3(V2P(child_proc->pgdir));
   return 0;
 }
 
