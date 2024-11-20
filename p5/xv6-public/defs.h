@@ -69,7 +69,7 @@ char*           kalloc(void);
 void            kfree(char*);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
-void            duplicate_page(pte_t *, struct proc *, int );
+
 
 // kbd.c
 void            kbdintr(void);
@@ -193,14 +193,20 @@ void            switchuvm(struct proc*);
 void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
-int             ref_cnt_incrementer(uint);
-int             ref_cnt_decrementer(uint);
+
 
 // p5
 int             alloc_page (struct proc *, int *);
 int             mappages(pde_t *pgdir, void *, uint , uint , int );
 pte_t *         walkpgdir(pde_t *pgdir, const void *, int );
 
+// functions to access & modify the reference count of the physical pages
+int             ref_cnt_incrementer(uint);
+int             ref_cnt_decrementer(uint);
+int             get_ref_cnt(uint);
+
+// handle page fault from 0-60000000
+void            duplicate_page(pte_t *, int );
 
 // number of elements in fixed-size array
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

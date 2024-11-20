@@ -190,7 +190,7 @@ fork1(void)
   if(pid == -1)
     panic("fork");
 
-  printf(1, "pid returned by fork is %d\n", pid);
+  //printf(1, "pid returned by fork is %d\n", pid);
   return pid;
 }
 

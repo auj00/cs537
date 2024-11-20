@@ -94,11 +94,11 @@ trap(struct trapframe *tf)
 
   case T_PGFLT: // T_PGFLT = 14
 
-    // cprintf("Page Fault Handler invoked by pid=%d\n", myproc()->pid);
+    //cprintf("Page Fault Handler invoked by pid=%d\n", myproc()->pid);
 
     // address that caused the page fault
     int pgflt_va = rcr2();
-    // cprintf("Page Fault for address %x for pid=%d\n", pgflt_va, myproc()->pid);
+    //cprintf("Page Fault for address %x for pid=%d\n", pgflt_va, myproc()->pid);
      
     if(pgflt_va == -1)
     {
@@ -115,6 +115,7 @@ trap(struct trapframe *tf)
 
     // starting va of the page which faulted
     int alloc_va = PGROUNDDOWN(pgflt_va);
+    //cprintf("pg fault address = %x\n", pgflt_va);
 
     // ######################## check within sz ########################
     if(pgflt_va >= 0x0 && pgflt_va < 0x60000000)
@@ -125,65 +126,49 @@ trap(struct trapframe *tf)
       if(pte == 0)
       {
           cprintf("%d %d\n",  ((*pte & PTE_P)), (*pte & PTE_COW));
-          cprintf("Segmentation Fault 1\n");
+          cprintf("Segmentation Fault\n");
           kill(myproc()->pid);
           break;
       }
 
       else if( (*pte & PTE_P) == 0 )
       {
-          cprintf("Segmentation Fault 2\n");
+          cprintf("Segmentation Fault\n");
           kill(myproc()->pid);
           break;
       }
       else if((*pte & PTE_COW) == 0)
       {
-          cprintf("Segmentation Fault 3\n");
+          //cprintf("pte in trap = %x\n", *pte);
+          cprintf("Segmentation Fault\n");
+          //panic("panic");
           kill(myproc()->pid);
           break;
       }
 
-      // // determine the flags & pa
-      // // pde_t *d;
-      // uint pa, flags; 
-      // flags = PTE_FLAGS(*pte);
-      // pa = PTE_ADDR(*pte);
-
-      // cprintf("%d process are accessing this page\n", pg_ref_cnt[pa/PGSIZE]);
-
-      // // decrement the page reference count 
-      // pg_ref_cnt[pa/PGSIZE]--;
-
-      // // single reference remaining to the page
-      // if(pg_ref_cnt[pa/PGSIZE] == 1)
-      // {
-      //   // make the page READ/WRITE
-      //   cprintf("Less than 2 references\n");
-      //   pte_t *pte_parent;
-      //   pte_parent = walkpgdir(myproc()->parent->pgdir, (void *)alloc_va, 0);
-      //   *pte_parent |=  PTE_W;
-      //   lcr3(V2P(myproc()->parent->pgdir));
-      //   // break; 
-      // }
-
-      // // make the new page writable
-      // flags = flags | PTE_W;
-
-      // // clear out the pte of the child
-      // *pte = 0;
-
-      // // allocate new page
-      // char *mem = kalloc();
-      // memmove(mem, (char*)P2V(pa), PGSIZE);
-      // mappages(myproc()->pgdir, (void*)alloc_va, PGSIZE, V2P(mem), flags);
-      // // pg_ref_cnt[pa/PGSIZE]--;
-      // // cprintf("reference count of page %x to %d in trap\n", pa/PGSIZE, pg_ref_cnt[pa/PGSIZE]);
-    
-      // lcr3(V2P(myproc()->pgdir));
-      duplicate_page(pte, myproc(), alloc_va);
+      // handle page fault
+      duplicate_page(pte, alloc_va);
       // cprintf("entering wmap condition\n");
       break;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     
     // ###########################################################################
 

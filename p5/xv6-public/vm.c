@@ -379,7 +379,7 @@ copyuvm(pde_t *pgdir, uint sz)
     
     // set the COW bit on the flags -> using bit-9
     // cprintf("PTE_W = %d\n",flags & PTE_W);
-    if((flags & PTE_W))
+    if((flags & PTE_W) || (flags& PTE_COW))
     {
       flags = flags | PTE_COW;              // page was READ/WRITE in past
     }
@@ -392,11 +392,9 @@ copyuvm(pde_t *pgdir, uint sz)
     flags &= ~PTE_W;
 
     // make the parent's page READ-ONLY
-    *pte = (*pte | flags);
-
+    *pte = (pa | flags);
+    // cprintf("pte in copyuvm = %x\n", *pte);
     // cprintf("PTE_COW = %d\n", (*pte)&PTE_COW);
-
-    lcr3(V2P(pgdir));
 
     // create P->V mapping in child's page table
     if(mappages(d, (void*)i, PGSIZE, pa, flags) < 0) {
@@ -407,13 +405,15 @@ copyuvm(pde_t *pgdir, uint sz)
     // increment the reference count
     // pg_ref_cnt[pa/PGSIZE]++;
     ref_cnt_incrementer(pa);
-    //cprintf("ref count of page %x in copyuvm to %d\n", pa/PGSIZE, pg_ref_cnt[pa/PGSIZE]);
+    // cprintf("ref count of page %x in copyuvm to %d\n", pa/PGSIZE, pg_ref_cnt[pa/PGSIZE]);
     
 
     
     // ########################################################
     
   }
+
+  // parent pgdir reloaded
   lcr3(V2P(pgdir));
   // cprintf("copyuvm folr loop end\n");
   return d;
@@ -665,8 +665,8 @@ int copy_mappings(struct proc* parent, struct proc *child)
     }
 
     // increment the reference count of the page
-    int index = pa/PGSIZE;
-    pg_ref_cnt [index] += 1;
+    // int index = pa/PGSIZE;
+    ref_cnt_incrementer(pa);
     // cprintf("reference count for %x is %d\n", index, pg_ref_cnt [index]);
 
   }
@@ -693,8 +693,8 @@ int remove_mappings(struct proc * child_proc)
     *pte = 0;
 
     uint pa = PTE_ADDR(*pte);
-    int index = pa/PGSIZE;
-    pg_ref_cnt [index] -= 1;
+    //int index = pa/PGSIZE;
+    ref_cnt_decrementer(pa);
   }
   lcr3(V2P(child_proc->pgdir));
   return 0;
