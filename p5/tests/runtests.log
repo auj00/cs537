@@ -59,15 +59,15 @@ objdump -t kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$/d' > kernel.sym
 dd if=/dev/zero of=xv6.img count=10000
 10000+0 records in
 10000+0 records out
-5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.0121652 s, 421 MB/s
+5120000 bytes (5.1 MB, 4.9 MiB) copied, 0.0134366 s, 381 MB/s
 dd if=bootblock of=xv6.img conv=notrunc
 1+0 records in
 1+0 records out
-512 bytes copied, 8.42e-05 s, 6.1 MB/s
+512 bytes copied, 6.0866e-05 s, 8.4 MB/s
 dd if=kernel of=xv6.img seek=1 conv=notrunc
 434+1 records in
 434+1 records out
-222372 bytes (222 kB, 217 KiB) copied, 0.000357488 s, 622 MB/s
+222532 bytes (223 kB, 217 KiB) copied, 0.000384837 s, 578 MB/s
 gcc -Werror -Wall -o mkfs mkfs.c
 gcc -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer -fno-stack-protector -fno-pie -no-pie   -c -o ulib.o ulib.c
 gcc -m32 -gdwarf-2 -Wa,-divide   -c -o usys.o usys.S
@@ -155,8 +155,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -209,8 +209,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -257,8 +257,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -308,8 +308,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -360,8 +360,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -415,8 +415,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -467,8 +467,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -525,8 +525,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -546,8 +546,7 @@ iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk...
-xv6...
+Booting from Hard Disk..xv6...
 cpu0: starting 0
 sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
 init: starting sh
@@ -634,8 +633,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -690,8 +689,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -711,7 +710,8 @@ iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk..xv6...
+Booting from Hard Disk...
+xv6...
 cpu0: starting 0
 sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
 init: starting sh
@@ -754,8 +754,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -810,8 +810,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -862,8 +862,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -915,8 +915,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -969,8 +969,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1029,8 +1029,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1050,8 +1050,7 @@ iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk...
-xv6...
+Booting from Hard Disk..xv6...
 cpu0: starting 0
 sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
 init: starting sh
@@ -1091,8 +1090,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1112,8 +1111,7 @@ iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk...
-xv6...
+Booting from Hard Disk..xv6...
 cpu0: starting 0
 sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
 init: starting sh
@@ -1130,15 +1128,15 @@ INFO: Created file big.txt with length 12288 bytes. 	Okay.
 INFO: Placed map 1 at 0x60000000 with length 12288. 	Okay.
 INFO: Placed map 2 at 0x60004000 with length 12388. 	Okay.
 INFO: Map 1 and 2 exist in Child (pid 4). 	Okay.
-INFO: Map 1 and 2 exist in Child (pid 5). 	Okay.
-INFO: Map 1 and 2 exisINFO: Map 1 and 2 exist in Child (pid 7). 	Okay.
-INFO: Map 1 and 2 exit in Child (pid 6). 	Okay.
-st in Child (pid 8). 	Okay.
-ININFO: Map 1 and 2 exist in Child (pid 10). 	Okay.
+INFO: Map 1 INFO: Map 1 and 2 exist in Child (pid 6). 	Okay.
+and 2 exist in Child (pid 5). 	Okay.
+INFO: Map 1 and 2 exist in Child (pid 8). 	Okay.
+INFO: Map 1 and 2 exist in Child (pid 9). 	Okay.
+INFO: Map 1 and 2 exist in Child (pid 10). 	Okay.
+INFO: Map 1 and 2 exist in Child (pid 7). 	Okay.
 INFO: Map 1 and 2 exist in Child (pid 11). 	Okay.
-INFO: Map 1 and 2 exist in Child (pid 12). INFO: Map 1 and 2 exist in Child (pid 13). 	Okay.
-FO: Map 1 and 2 exist in Child (pid 9). 	Okay.
-	Okay.
+INFO: Map 1 and 2 exist in Child (pid 12). 	Okay.
+INFO: Map 1 and 2 exist in Child (pid 13). 	Okay.
 INFO: Map 1 and 2 exist in Parent (pid 3). 	Okay.
 [0;32mSUCCESS:[0m TEST_17	 PASSED
 
@@ -1159,8 +1157,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1196,15 +1194,15 @@ INFO: Created file big.txt with length 8192 bytes. 	Okay.
 INFO: Placed map 1 at 0x60000000 with length 8192. 	Okay.
 INFO: Placed map 2 at 0x60003000 with length 8292. 	Okay.
 INFO: Map 1 and 2 exist in Child (pid 4). 	Okay.
-INFO: Map 1 and 2 exist in Child (pid 5). 	Okay.
-INFO: Map 1 and 2 exist in Child (pid 6). 	Okay.
-INFO: Map 1 and 2 exist in Child (pid 7)INFO: Map 1 and 2 exist in Child (pid 8). 	Okay.
-INFO: Map 1 and 2 exist in Child (pid 9). 	Oka. 	Okay.
-y.
-INFO: Map 1 and 2 exist in Child (pid 10). 	Okay.
-IINFO: Map 1 and 2 exist in Child (pid 12). 	Okay.
-NFO: Map 1 and 2 exist in Child (pid 11). 	Okay.
+INFO: Map 1 and 2 exist in Child (pid 5). 	INFO: Map 1 and 2 exist in Child (pid 6). 	Okay.
+INFO: Map 1 and 2 exist in Child (pid 7). 	Okay.
+INFO: Map 1 and 2INFO: Map 1 and 2 exist in Child (pid 9). 	Okay.
+INFO: MaINFO: Map 1 and 2 exist in Child (pid 11). 	Okay.
+INFO: Map 1 and 2 exist in Child (pid 12). 	Okay.
 INFO: Map 1 and 2 exist in Child (pid 13). 	Okay.
+Okay.
+ exist in Child (pid 8). 	Okay.
+p 1 and 2 exist in Child (pid 10). 	Okay.
 INFO: Map 1 and 2 exist in Parent (pid 3). 	Okay.
 [0;32mSUCCESS:[0m TEST_18	 PASSED
 
@@ -1225,8 +1223,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1280,8 +1278,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1301,8 +1299,7 @@ iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk...
-xv6...
+Booting from Hard Disk..xv6...
 cpu0: starting 0
 sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
 init: starting sh
@@ -1337,8 +1334,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1385,8 +1382,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1406,8 +1403,7 @@ iPXE (https://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+1FF8B4A0+1FECB4A0 CA00
 Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
 
 
-Booting from Hard Disk...
-xv6...
+Booting from Hard Disk..xv6...
 cpu0: starting 0
 sb: size 1000 nblocks 941 ninodes 200 nlog 30 logstart 2 inodestart 32 bmap start 58
 init: starting sh
@@ -1426,18 +1422,18 @@ Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
-ChilChild: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child:d: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
- sum = 1012960
 Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
+CChild: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
+hild: sum = 1012960
+Child: sum = 1012960
+INFO: Child: arr pa =INFO: Child: arr pa = 0xDFC0000
+ 0xDFC0000
 [0;32mSUCCESS:[0m TEST_22	 PASSED
 
 $ 
@@ -1457,8 +1453,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1492,43 +1488,43 @@ INFO: Parent: arr pa = 0xDFC0000
 Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: modified sum = 501460
-INFO: Child: arr new_pa = 0xDEAD000
+INFO: Child: arr new_pa = 0xDE4F000
 Child: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: modified sum = 501460
-Child: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: modified sum = 501460
-INFO: Child: arr new_pa = 0xDDB9000
-Child: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: modified sum = 501460
-INFO: Child: arr new_pa = 0xDCB5000
-ChChild: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: modified sum = 501460
 INFO: Child:Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
-Child: modified sum = 501460
-INFO: Child:Child: sum = 1012960
+Child: moChild: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: modiChild: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: modidified sum = 501460
+INFO: Child: arr new_pa = 0xDD7E000
+fied sum = 501460
+INFO: Child: arr new_pa = 0xDD79000
+fied sum = 501460
+INFO: Child: arr new_pa = 0xDD74000
+Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: modified sum = 501460
-INFO: ChilChild: sum = 1012960
+INFO: Child: arr new_pa = 0xDC8B000
+Child: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: modifiChild: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: modified sum = 501460
-INFO: Child: arr new_pa = 0xDE5A000
-INFO: Child: arr new_pa = 0xDDBE000
-Child: moild: sum = 1012960
+INFO: Child: arr new_pa = 0xDF23000
+Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: modified sum = 501460
-INFO: Child: arr  arr new_pa = 0xDE8C000
- arr new_pa = 0xDE50000
-d: arr new_pa = 0xDE55000
-dified sum = 501460
-INFO: Child: arr new_pa = 0xDCBA000
-new_pa = 0xDC9C000
+INFO: Child: arr new_pa = 0xDFFD000
+Child: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: modifi arr pa = 0xDFC0000
+Child: modified sum = 501460
+INFO: Child: arr need sum = 501460
+INFO: Child: arr new_pa = 0xDFC6000
+ed sum = 501460
+INFw_pa = 0xDFF3000
+O: Child: arr new_pa = 0xDFF8000
 [0;32mSUCCESS:[0m TEST_23	 PASSED
 
 $ 
@@ -1548,8 +1544,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1
@@ -1583,53 +1579,53 @@ INFO: Parent: arr pa = 0xDFC0000
 Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: sum = 501460
-INFO: Child: arr new_pa = 0xDED6000
-INFO: Child sz 0xF000
-Child: sum = 101296Child: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child:Child: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: sum0
+INFO: ChChild: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: sum = 501460
- sum = 501460
-INFO: Child: arr new_pa = 0xDED2000
-INFO: Child sz 0xFI000
- = 501460
-INFO: Child: arr new_pa = 0xDDE6000
-INFO: Child sz 0NFO: Child: arr new_pa = 0xDCEE000
+INFO: Child: arr new_pa = 0xDE06000
 INFO: Child sz 0xF000
-xF000
 Child: sum = 1012960
-INFO: Child: arr pa = 0xDFCChild: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: sum = Child: sum = 1012960
 INFO: Child: arr pa = 0xDFC0000
 Child: sum = 501460
-INFO: Child: arr new_pa = 0xDDE5000
-INFOChild: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: sum = Child: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: sum = 50Child: sum = 1012960
-INFO: Child: arr pa = 0xDFC0000
-Child: sum =0000
-Child: sum = 501460
-INFO: Child: arr new_pa = 0xDE14000
-501460
-INFO: Child: arr new_pa = 0xDCEA000
-INFO: Child sz 0xF000: Child sz 0xF000
-501460
-INFO: Child: arr new_pa = 0xDF23000
- 501460
-INFO: Child: arr new_pa = 0xDE0F000
-INFO: Child sz 0xINFO: Child sz 0xF000
-
-INFO: Child sz 0xF001460
-INFO: Child: arr new_pa = 0xDE0A000
+INFO: Child: arr new_pa = 0xDE02000
 INFO: Child sz 0xF000
-F000
-0
+Child: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: suild: arr new_pa = 0xDE0B000
+INFO: Child sz 0xF000
+m = 501460
+INFO: Child: arr new_pa = 0xDE06000
+INFO: Child sz 0xF000Child: sum = 1012960
+INFO: Child: arChild: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: sum Child: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: sum = 501460
+INFO: Child: arr new_pa = 0xDE53000
+INFO: Child sz 0xFChild: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: sum = Child: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: sum = 
+r pa = 0xDFC0000
+Child: sum = 5= 501460
+INFO: Child: arr new_pa = 0xDE02000
+INFO: Child sz 0xF000
+000
+501460
+INFO: Child: arr 501460
+INFO: Child: arr new_pa = 0xDE5B000
+INFO: Child sz 0xF000
+Child: sum = 1012960
+INFO: Child: arr pa = 0xDFC0000
+Child: sum = 501460
+INFO: Child: arr new_pa = 0xDE5F000
+INF01460
+INFO: Child: arr new_pa = 0xDEnew_pa = 0xDE57000
+INFO: Child sz 0xF000
+O: Child sz 0xF000
+60000
+INFO: Child sz 0xF000
 [0;32mSUCCESS:[0m TEST_24	 PASSED
 
 $ 
@@ -1649,8 +1645,8 @@ Running xv6 user progam /home/yashd/private/CS537_Team/cs537/p5/tests/ctests/tes
 DEBUG: Copying header file to project path
 Trying to build project using make
 make xv6.img fs.img
-/tmp/tmpe634__b7/p/Makefile
-/tmp/tmpe634__b7/p/Makefile.test
+/tmp/tmpqegh_q48/p/Makefile
+/tmp/tmpqegh_q48/p/Makefile.test
 make: 'xv6.img' is up to date.
 make: 'fs.img' is up to date.
 make qemu-nox CPUS=1

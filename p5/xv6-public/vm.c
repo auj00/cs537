@@ -541,6 +541,9 @@ int unmap(void)
     num_pages += 1;
   }
 
+  // store last page bytes
+  int last_page_bytes = myproc()->mapinfo[map_index].map_length % PGSIZE;
+
   int addr = myproc()->mapinfo[map_index].start_addr;
 
   // check : if file-backed only then do the following
@@ -575,7 +578,10 @@ int unmap(void)
         kill(myproc()->pid);
       }
       f->off = addr - myproc()->mapinfo[map_index].start_addr;
-      filewrite(f, (char *)addr, 4096);
+      if(i == num_pages-1 && last_page_bytes != 0)
+        filewrite(f, (char *)addr, last_page_bytes);
+      else
+        filewrite(f, (char *)addr, 4096);
     }
     addr += 4096;
 
