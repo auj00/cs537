@@ -1,0 +1,46 @@
+1. block size = 512B
+
+2. number of inodes in the file system         =  command line argument to mkfs.command
+   number of data blocks in the file system    =  command line argument to mkfs.command (multiple of 32)
+
+3. Inodes:  every inode always starts at the location divisible by 512
+            "allocate" full 512B for each inode.
+
+4. The disk is a file -> but you mmap the file -> so then you are working with memory
+
+5. @1042 : root directory inode number = 0
+
+6. @1042 : Disks are just files, so their name could (theoretically) be up to 255 characters.
+           You don't need to ensure that the superblock is less than 512 bytes. 
+
+
+
+
+
+
+
+
+
+Favourite Piazza posts for P5
+
+835
+836
+857
+859
+867
+869
+870
+882
+884
+891
+897
+898
+904
+914
+917
+923
+928
+939
+959
+963
+1020
