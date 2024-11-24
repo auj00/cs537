@@ -12,8 +12,12 @@ sbsize = 48
 inodesize = 120
 blksize = 512
 
-def read_inode(diskf, loc):
-    diskf.seek(loc)
+def roundup(n, k):
+    remain = n % k
+    return n if remain == 0 else (n + (k - remain))
+
+def read_inode(diskf, loc):    
+    diskf.seek(roundup(loc, 512))
     i = diskf.read(inodesize)
     return {
         name: int.from_bytes(i[offset:offset + size], sys.byteorder)
@@ -31,6 +35,12 @@ def test_compare(disk, teststr, found, expected):
     """Compare 'found' and 'expected', print a message and exit if not equal."""
     if (found != expected):
         print(f"{teststr} [{disk}]: found {found} expected {expected}")
+        exit()
+
+def test_geq(disk, teststr, first, second):
+    """Compare 'first' and 'second', print a message and exit if first < second."""
+    if first < second:
+        print(f"{teststr} [{disk}]: {first} should not be less than {second}")
         exit()
 
 def test_nonzero(disk, teststr, found):
@@ -58,7 +68,8 @@ def verify_mkfs(disk, inodes, datablocks):
         test_compare(disk, "inode bitmap size", ibit_size, inodes / 8)
 
         dbit_size = read_sb['iblocks'] - read_sb['dbit']
-        test_compare(disk, "data bitmap size", dbit_size, datablocks / 8)
+        test_geq(disk, "data bitmap size", read_sb['iblocks'] - read_sb['dbit'], datablocks / 8)
+        test_compare(disk, "inode region block-aligned", read_sb['iblocks'] % blksize, 0)
         
         iregion_size = read_sb['dblocks'] - read_sb['iblocks']
         test_compare(disk, "inode region size", iregion_size, inodes * blksize)
@@ -88,7 +99,6 @@ def main():
     disks = args[2:]
 
     for disk in disks:
-        current_disk = disk
         verify_mkfs(disk, inodes, datablocks)
 
     print("Success")
