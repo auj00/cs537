@@ -33,7 +33,7 @@ struct wfs_sb {
     off_t d_blocks_ptr;
     // Extend after this line
     
-    char * raid_mode;
+    int raid_mode;
     int disk_order;
     // disk order
     // int fd_disk[10];
