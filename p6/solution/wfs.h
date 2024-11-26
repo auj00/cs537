@@ -35,6 +35,7 @@ struct wfs_sb {
     
     int raid_mode;
     int disk_order;   // disk order for RAID0
+    int total_disks;
 };
 
 // Inode

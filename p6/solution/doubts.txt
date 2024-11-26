@@ -151,7 +151,25 @@ d check whether what u have written to the inode is correct
    will be striped.
 
 2. I don't understand RAID1v. Why will a block be in majority when all drives store the exact same blocks ??
+this deals with data corruption. what if 1 disk is corrupted then you need to check all disks to make sure u
+have the ryt block in majority
 
-3. number of hardlinks to the root inode in an empty filesystem
+3. number of hardlinks to the root inode in an empty filesystem. doesn't matter
+directory always has a reference to itself
 
-4. What is the output in 3.out
+no explicit dirents for . & .. 
+
+4. What is the output in 3.out. no problem
+
+5. does the root node have a directory entry ? eg. stat mnt  
+mnt is the mount point not a directory in the filesystem
+
+6. what do dirents store ? file name or full file path. filename
+
+7. will the cli args given to wfs maintain order : disks > fuse_op > mnt. No jumbling
+
+8. will paths given always be absolute paths from mnt ?
+paths start at root 
+fuse things can handle internal mkdirs search online
+
+traversal algo -> search for directory entry of the next name in the previous directory. 

@@ -11,11 +11,11 @@
 #include "wfs.h"
 
 // function to get mmap array pointer
-void create_disk_mmap(char **disk_name, int disk_num, void **disk_ptr, int disk_size, int disk_fd[])
+void create_disk_mmap(char **disk_name, int disk_cnt, void **disk_ptr, int disk_size, int disk_fd[])
 {
     // printf("test 1 \n");
     // open files & create mmap pointers
-    for (int i = 0; i < disk_num; i++)
+    for (int i = 0; i < disk_cnt; i++)
     {
         // printf("does he know\n");
         int fd = open(disk_name[i], O_RDWR, 0777);
@@ -24,6 +24,9 @@ void create_disk_mmap(char **disk_name, int disk_num, void **disk_ptr, int disk_
     }
 }
 
+/*
+Function to free memory maps & close file pointers
+*/
 void remove_disk_mmap(int disk_cnt, int disk_size, int disk_fd[], void **mmap_pointers)
 {
     for(int i=0; i<disk_cnt; i++)
@@ -190,6 +193,10 @@ int main(int argc, char *argv[])
     create_disk_mmap(disk_name, cnt_disks, mmap_pointers, disk_size, disk_fd);
 
 
+    // *s    // unint start_addr
+// tart_addr & (mask...) <-- mask shifts
+    // 0x1 -- 0x2 -- 0x4 -- 0x8 (char *) next element
+    // mask << 1
     
     
     // ###################### Write Data to Mmaps ######################
@@ -203,6 +210,7 @@ int main(int argc, char *argv[])
         sb->num_data_blocks = cnt_data_blocks;
         sb->raid_mode = raid_mode;
         sb->disk_order = i;
+        sb->total_disks = cnt_disks;
 
         // superblock bitmap pointers
         sb->i_bitmap_ptr = sizeof(struct wfs_sb);
@@ -240,7 +248,7 @@ int main(int argc, char *argv[])
         root_inode->uid = process_uid;
         root_inode->gid = process_gid;
         root_inode->size = 0;
-        root_inode->nlinks = 2;
+        root_inode->nlinks = 1;
         root_inode->atim = seconds;
         root_inode->mtim = seconds;
         root_inode->ctim = seconds;
