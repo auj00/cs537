@@ -1,13 +1,10 @@
+########################### Points from the git Repo ###########################
+
 1. block size = 512B
 
-2. Inodes:  every inode always starts at the location divisible by 512
-            "allocate" full 512B for each inode.
+2. every inode always starts at the location divisible by 512, "allocate" full 512B for each inode.
 
 4. The disk is a file -> but you mmap the file -> so then you are working with memory
-
-
-
-
 
 2. number of inodes in the file system         =  command line argument to mkfs.command
    number of data blocks in the file system    =  command line argument to mkfs.command (multiple of 32)
@@ -22,6 +19,48 @@ creating an empty file system vs mounting
 2. making it ready to be mountable
 
 mounting = going & actually using the ds within the file system
+
+
+####################### Piazza Clarifications #######################
+
+@1042 : root directory inode number = 0
+
+@1042 : Disks are just files, so their name could (theoretically) be up to 255 characters.
+           You don't need to ensure that the superblock is less than 512 bytes. 
+
+@1046 : Names of the disks are not important & can change. 
+
+@1046 : The fields you add into superblock can differ (and will differ) to store disk order
+
+@1074 : All metadata except superblock are identical on all drives.
+
+@1076 : Yes you can assume all disks are of the same size.
+
+@1084 : No entries should be allocated to "." & "..". They are virtual concepts
+
+@1108 : think of correct operation as return 0, 
+        usage errors as return 1, 
+        and runtime errors as return -1. 
+        For cases like this, just follow the behavior in the tests.
+
+@1110 : include your #define etc 30 before your fuse.h line
+
+@1114 : use man 7 inode to learn about the different inode fields
+
+@1118 : Filenames are irrelevant. What matters is the content of your filesystem. 
+        Hence you have to store as much information as you need in your filesystem.
+
+@1121 : Size of root node = 0 Reason: no allocated blocks or entries in empty FS
+
+@1121 : To assign uid & gid, use the uid & gid of the calling process
+
+@1125 : What is the max number of blocks ? 
+        It depends how large the disk file is.
+        There needs to be enough physical space in the file to fit all the requested blocks.
+
+@1130 : number of inodes have to rounded to 32, since inodes are also stored in blocks
+
+@1138 : manage memory leaks as best practice.
 
 
 Doutbts : 
@@ -72,14 +111,6 @@ unmap at the end of mkfs program
 
 
 
-####################### Piazza Clarifications #######################
-
-@1042 : root directory inode number = 0
-
-@1042 : Disks are just files, so their name could (theoretically) be up to 255 characters.
-           You don't need to ensure that the superblock is less than 512 bytes. 
-
-
 
 
 
@@ -112,3 +143,15 @@ c check whether your understanding of the inode bit map is correct
    4. set only the 1st bit LSB to 1 for the root inode
 
 d check whether what u have written to the inode is correct
+
+
+###########################################################################################################
+
+1. Every file/directory has an inode. Each directory stores dirents in its data blocks. In RAID0 these dirents 
+   will be striped.
+
+2. I don't understand RAID1v. Why will a block be in majority when all drives store the exact same blocks ??
+
+3. number of hardlinks to the root inode in an empty filesystem
+
+4. What is the output in 3.out

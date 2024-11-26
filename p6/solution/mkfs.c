@@ -11,7 +11,7 @@
 #include "wfs.h"
 
 // function to get mmap array pointer
-void create_mmap_pointers(char **disk_name, int disk_num, void **disk_ptr, int disk_size)
+void create_disk_mmap(char **disk_name, int disk_num, void **disk_ptr, int disk_size, int disk_fd[])
 {
     // printf("test 1 \n");
     // open files & create mmap pointers
@@ -19,7 +19,19 @@ void create_mmap_pointers(char **disk_name, int disk_num, void **disk_ptr, int d
     {
         // printf("does he know\n");
         int fd = open(disk_name[i], O_RDWR, 0777);
+        disk_fd[i] = fd;
         disk_ptr[i] = mmap(NULL, disk_size , PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    }
+}
+
+void remove_disk_mmap(int disk_cnt, int disk_size, int disk_fd[], void **mmap_pointers)
+{
+    for(int i=0; i<disk_cnt; i++)
+    {
+        // munmap
+        munmap(mmap_pointers[i], disk_size);
+        // free the file-descriptors
+        close(disk_fd[i]);
     }
 }
 
@@ -41,6 +53,7 @@ int main(int argc, char *argv[])
     int cnt_disks = 0;
     char *disk_name[10] = {NULL};
     void *mmap_pointers[10] = {NULL};
+    int disk_fd[10]={0};
 
     uid_t process_uid = getuid();
     gid_t process_gid = getgid();
@@ -151,7 +164,7 @@ int main(int argc, char *argv[])
     // ####################### Too many blocks Reqeusted #######################
 
     if (raid_mode == 0 && 
-    disk_size < sizeof(struct wfs_sb)+ (cnt_data_blocks+cnt_inodes)/8+ (cnt_data_blocks/2+cnt_inodes)*512)
+    disk_size < sizeof(struct wfs_sb)+ (cnt_data_blocks+cnt_inodes)/8+ (cnt_data_blocks/cnt_disks+cnt_inodes)*512)
     {
         return -1;
     }
@@ -174,7 +187,7 @@ int main(int argc, char *argv[])
     // printf("blocks = %d\n", (cnt_data_blocks+cnt_inodes)*512);
 
     // ####################### Open Disk Files & Mmap #######################
-    create_mmap_pointers(disk_name, cnt_disks, mmap_pointers, disk_size);
+    create_disk_mmap(disk_name, cnt_disks, mmap_pointers, disk_size, disk_fd);
 
 
     
@@ -227,13 +240,16 @@ int main(int argc, char *argv[])
         root_inode->uid = process_uid;
         root_inode->gid = process_gid;
         root_inode->size = 0;
-        root_inode->nlinks = 1;
+        root_inode->nlinks = 2;
         root_inode->atim = seconds;
         root_inode->mtim = seconds;
         root_inode->ctim = seconds;
         memset(root_inode->blocks,0,N_BLOCKS*(sizeof(off_t)));
     }
-    
+
+
+    // ################### Unmap & close file descriptors ###################
+    remove_disk_mmap(cnt_disks, disk_size, disk_fd, mmap_pointers);
 
     return 0;
 }
