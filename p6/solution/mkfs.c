@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
         // ----------- write the inodes -----------
         struct wfs_inode * root_inode = (struct wfs_inode *) (base + sb->i_blocks_ptr);
         root_inode->num = 0;
-        root_inode->mode = S_ISDIR(file_stat.st_mode) | 0755;
+        root_inode->mode = S_IFDIR | 0755;
         root_inode->uid = process_uid;
         root_inode->gid = process_gid;
         root_inode->size = 0;

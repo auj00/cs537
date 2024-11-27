@@ -57,5 +57,5 @@ struct wfs_inode {
 // Directory entry
 struct wfs_dentry {
     char name[MAX_NAME];
-    int num;
+    int num;            /* Inode number */
 };

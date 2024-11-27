@@ -10,11 +10,19 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <time.h>
 #include "wfs.h"
 
+// array of pointers to disk memory maps in the mkfs order
+void *ordered_disk_mmap_ptr[10] = {NULL};
+
+// global variable to store number of disks in wfs
+ int cnt_disks = 0;
+
+int raid_mode = -1;
 
 // function to get mmap array pointer
-void create_disk_mmap(char **disk_name, int disk_cnt, void **disk_ptr, int disk_size, int disk_fd[])
+void create_disk_mmap(char **disk_name, int disk_cnt, void **disk_mmap_ptr, int disk_size, int disk_fd[])
 {
     // printf("test 1 \n");
     // open files & create mmap pointers
@@ -23,7 +31,7 @@ void create_disk_mmap(char **disk_name, int disk_cnt, void **disk_ptr, int disk_
         // printf("does he know\n");
         int fd = open(disk_name[i], O_RDWR, 0777);
         disk_fd[i] = fd;
-        disk_ptr[i] = mmap(NULL, disk_size , PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        disk_mmap_ptr[i] = mmap(NULL, disk_size , PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     }
 }
 
@@ -41,6 +49,102 @@ void remove_disk_mmap(int disk_cnt, int disk_size, int disk_fd[], void **mmap_po
     }
 }
 
+// function that provides array of correctly ordered disk mmaps
+void reorder_disk_mmap(int disk_cnt, void **disk_mmap_ptr, void** ordered_disk_mmap_ptr)
+{
+    for (int i = 0; i < disk_cnt; i++)
+    {
+        struct wfs_sb * sb = (struct wfs_sb *)disk_mmap_ptr[i];
+        ordered_disk_mmap_ptr[sb->disk_order] = disk_mmap_ptr[i];
+    }
+    
+}
+
+
+// ########################################### Helper functions ##########################################
+
+// int get_raid_mode(void *disk_mmap_ptr)
+// {
+
+// }
+
+
+int path_parse(char *str, char **arg_arr, char *delims)
+{
+    int arg_cnt = 0;                        // cnt of the number of tokens
+    // using strtok()
+    // Returns pointer to first token
+    char *token = strtok(str, delims);
+
+    // Keep counting tokens while one of the
+    // delimiters present in str[].
+    while (token != NULL)
+    {
+        // printf(" % s\n", token);
+        arg_cnt++;
+        arg_arr[arg_cnt - 1] = strdup(token);
+        token = strtok(NULL, delims);
+    }
+
+    // printf("tokenization done %d\n", arg_cnt);
+    return arg_cnt;
+}
+
+
+// function to return the next inode number if available 
+int get_inode_index(void *disk_mmap_ptr)
+{
+    struct wfs_sb * sb = (struct wfs_sb *)disk_mmap_ptr;
+
+    // check sb->i_bitmap for empty spot
+    // Change type of pointer to char to make it byte addressable
+    char* base = (void*)disk_mmap_ptr;
+    
+    int inode_number = -1;
+    __u_int * i_bitmap = (__u_int *) (base + sb->i_bitmap_ptr);
+
+    for (int i = 0; i < sb->num_inodes/32; i++)
+    {
+        uint32_t mask = 1;
+        for (int j = 0; j < 32; j++)
+        {
+            if(i_bitmap[i] & mask == 0)
+            {
+                // set the inode bitmap
+                i_bitmap[i] |= mask;
+
+                // return the inode number
+                inode_number = i*32 + j;
+                return inode_number;
+            }
+            mask<<1;
+        } 
+    }
+    return inode_number;
+}
+
+// standby if needed later
+// change the get_inode_index method
+void set_inode_index(int inode_number, void *disk_mmap_ptr)
+{
+    struct wfs_sb * sb = (struct wfs_sb *)disk_mmap_ptr;
+    char* base = (void*)disk_mmap_ptr;
+    __u_int * i_bitmap = (__u_int *) (base + sb->i_bitmap_ptr);
+
+    int row = inode_number/32;
+    int col = inode_number%32;
+
+    __u_int mask =1;
+
+    for (int i = 0; i < col; i++)
+    { 
+        mask<<1;
+    }
+    // set the inode bitmap
+    i_bitmap[row] |= mask;
+}
+
+
 // ###################################### call-back functions ######################################
 
 static int wfs_getattr(const char *path, struct stat *stbuf)
@@ -48,15 +152,100 @@ static int wfs_getattr(const char *path, struct stat *stbuf)
     // Implementation of getattr function to retrieve file attributes
     // Fill stbuf structure with the attributes of the file/directory indicated by path
     printf("In getattr\n");
+
+    // For RAID1
+    struct wfs_sb * sb =  (struct wfs_sb * )ordered_disk_mmap_ptr[0];
+
+    // Change type of pointer to char to make it byte addressable
+    char* base = (void*)ordered_disk_mmap_ptr[0];
+    struct wfs_inode * root_inode = (struct wfs_inode *) (base + sb->i_blocks_ptr);
+ 
     
+    stbuf->st_uid = root_inode->uid;
+    stbuf->st_gid = root_inode->gid;
+    stbuf->st_atime = root_inode->atim;
+    stbuf->st_mtime = root_inode->mtim;
+    stbuf->st_mode = root_inode->mode;
+    stbuf->st_size = root_inode->size;
+
+    printf("end of getattr\n");
 
     return 0; // Return 0 on success
+}
+
+
+static int wfs_mkdir(const char* path, mode_t mode)
+{
+    // tokenize the path
+    char * copy_path = strdup(path);
+    char *token_arr[10];                    // Assuming that path won't have more than 10 tokens
+    int token_cnt = 0;
+    token_cnt = path_parse(copy_path, token_arr, '/');
+
+    // struct wfs_sb * sb = (struct wfs_sb *)ordered_disk_mmap_ptr[0];
+
+    int parent_inode_num = 0;
+
+    // check whether path is valid
+    for(int i=1; i<token_cnt-1; i++)
+    {
+        // later
+    }
+
+    // ------------------- get the next empty inode bitmap index -------------------
+    int inode_bmp_idx = get_inode_index(ordered_disk_mmap_ptr[0]);
+
+    if(inode_bmp_idx == -1)
+    {
+        // all inodes allcated, inode bitmap full
+        return -1;
+    }
+    
+    // -------------------------- create an inode on each disk --------------------------
+
+    // for loop to iterate over each disk
+    for (int i = 0; i < cnt_disks; i++)
+    {
+        // set the inode bit map
+        set_inode_index(inode_bmp_idx, ordered_disk_mmap_ptr[i]);
+
+        // sb pointer to access inode block offset
+        struct wfs_sb * sb = (struct wfs_sb *)ordered_disk_mmap_ptr[0];
+        int offset = sb->i_blocks_ptr;
+
+
+        char* base = (void*)ordered_disk_mmap_ptr[i];
+        struct wfs_inode* curr_inode = (struct wfs_inode *) (base + sb->i_blocks_ptr + inode_bmp_idx*BLOCK_SIZE);
+        curr_inode->num = inode_bmp_idx;
+        curr_inode->mode = S_IFDIR | 0755;
+        curr_inode->uid = getuid();
+        curr_inode->gid = getgid();
+        curr_inode->size = 0;
+        curr_inode->nlinks = 1;
+        curr_inode->atim = time(NULL);
+        curr_inode->mtim = time(NULL);
+        curr_inode->ctim = time(NULL);
+        memset(curr_inode->blocks,0,N_BLOCKS*(sizeof(off_t)));
+
+        // update parent inode 
+
+        struct wfs_inode* parent_inode = (struct wfs_inode *) (base + sb->i_blocks_ptr + parent_inode_num*BLOCK_SIZE);
+        parent_inode->size += sizeof(struct wfs_dentry);
+        parent_inode->mtim = time(NULL);
+        parent_inode->ctim = time(NULL);
+    }
+
+    
+    // update parent dirent
+    
+
+    // make a directory entry
 }
 
 static struct fuse_operations ops = {
     .getattr = wfs_getattr,
     // .mknod = wfs_mknod,
-    // .mkdir = wfs_mkdir,
+    .mkdir = wfs_mkdir,
     // .unlink = wfs_unlink,
     // .rmdir = wfs_rmdir,
     // .read = wfs_read,
@@ -70,7 +259,7 @@ int main(int argc, char *argv[])
     // int raid_mode = -1;
     // int cnt_data_blocks = 0;
     // int cnt_inodes = 0;
-    int cnt_disks = 0;
+    // int cnt_disks = 0;
     int disk_size = 0;
     char *disk_name[10] = {NULL};
     void *disk_mmap_ptr[10] = {NULL};
@@ -124,6 +313,8 @@ int main(int argc, char *argv[])
         return -1;
         remove_disk_mmap(cnt_disks, disk_size, disk_fd, disk_mmap_ptr);
     }
+
+    raid_mode = sb->raid_mode;
 
 
     // #################################### modify argc & argv ########################################
