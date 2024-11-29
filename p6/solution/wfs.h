@@ -51,11 +51,11 @@ struct wfs_inode {
     time_t mtim;      /* Time of last modification */
     time_t ctim;      /* Time of last status change */
 
-    off_t blocks[N_BLOCKS];
+    off_t blocks[N_BLOCKS];     /* Index in the Data Bitmap */
 };
 
 // Directory entry
 struct wfs_dentry {
-    char name[MAX_NAME];
-    int num;            /* Inode number */
+    char name[MAX_NAME];        /* File/Directory Name */ 
+    int num;                    /* Inode number */
 };
