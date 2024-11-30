@@ -20,7 +20,7 @@ void create_disk_mmap(char **disk_name, int disk_cnt, void **disk_ptr, int disk_
         // printf("does he know\n");
         int fd = open(disk_name[i], O_RDWR, 0777);
         disk_fd[i] = fd;
-        disk_ptr[i] = mmap(NULL, disk_size , PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        disk_ptr[i] = mmap(NULL, disk_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     }
 }
 
@@ -29,7 +29,7 @@ Function to free memory maps & close file pointers
 */
 void remove_disk_mmap(int disk_cnt, int disk_size, int disk_fd[], void **mmap_pointers)
 {
-    for(int i=0; i<disk_cnt; i++)
+    for (int i = 0; i < disk_cnt; i++)
     {
         // munmap
         munmap(mmap_pointers[i], disk_size);
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     int cnt_disks = 0;
     char *disk_name[10] = {NULL};
     void *mmap_pointers[10] = {NULL};
-    int disk_fd[10]={0};
+    int disk_fd[10] = {0};
 
     uid_t process_uid = getuid();
     gid_t process_gid = getgid();
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
     // ############### validate command line arguments ###############
 
-    if(cnt_disks <2)
+    if (cnt_disks < 2)
         return 1;
 
     if (raid_mode == -1)
@@ -152,7 +152,6 @@ int main(int argc, char *argv[])
         // printf("Number of inodes = %d\n", cnt_inodes);
     }
 
-    
     struct stat file_stat;
     long disk_size = 0;
     if (stat(disk_name[0], &file_stat) == 0)
@@ -166,19 +165,18 @@ int main(int argc, char *argv[])
 
     // ####################### Too many blocks Reqeusted #######################
 
-    if (raid_mode == 0 && 
-    disk_size < sizeof(struct wfs_sb)+ (cnt_data_blocks+cnt_inodes)/8+ (cnt_data_blocks/cnt_disks+cnt_inodes)*512)
+    if (raid_mode == 0 &&
+        disk_size < sizeof(struct wfs_sb) + (cnt_data_blocks + cnt_inodes) / 8 + (cnt_data_blocks / cnt_disks + cnt_inodes) * 512)
     {
         return -1;
     }
-    
 
     // for RAID1 & RAID1v
-    if(disk_size  < sizeof(struct wfs_sb)+ (cnt_data_blocks+cnt_inodes)/8 + (cnt_data_blocks+cnt_inodes)*512)
+    if (disk_size < sizeof(struct wfs_sb) + (cnt_data_blocks + cnt_inodes) / 8 + (cnt_data_blocks + cnt_inodes) * 512)
     {
         // todo : add the size of supernode & bitmaps to the RHS of this if condtion
         // printf("Not enough disk size\n");
-        
+
         return -1;
     }
     else
@@ -192,21 +190,24 @@ int main(int argc, char *argv[])
     // ####################### Open Disk Files & Mmap #######################
     create_disk_mmap(disk_name, cnt_disks, mmap_pointers, disk_size, disk_fd);
 
-
     // *s    // unint start_addr
-// tart_addr & (mask...) <-- mask shifts
+    // tart_addr & (mask...) <-- mask shifts
     // 0x1 -- 0x2 -- 0x4 -- 0x8 (char *) next element
     // mask << 1
-    
-    
+
+    // determine time
+
+    time_t seconds;
+    seconds = time(NULL);
+
     // ###################### Write Data to Mmaps ######################
-    //int disk_order = 0;
+    // int disk_order = 0;
     for (int i = 0; i < cnt_disks; i++)
     {
         // --------------- write the supernode ---------------
-        struct wfs_sb * sb = (struct wfs_sb *)mmap_pointers[i];
+        struct wfs_sb *sb = (struct wfs_sb *)mmap_pointers[i];
 
-        sb->num_inodes = cnt_inodes;   
+        sb->num_inodes = cnt_inodes;
         sb->num_data_blocks = cnt_data_blocks;
         sb->raid_mode = raid_mode;
         sb->disk_order = i;
@@ -214,12 +215,12 @@ int main(int argc, char *argv[])
 
         // superblock bitmap pointers
         sb->i_bitmap_ptr = sizeof(struct wfs_sb);
-        sb->d_bitmap_ptr = sb->i_bitmap_ptr + (cnt_inodes)/8;
-        
+        sb->d_bitmap_ptr = sb->i_bitmap_ptr + (cnt_inodes) / 8;
+
         // offset to the next block
         // every inode always starts at the location divisible by 512
-        int size = sb->d_bitmap_ptr +(cnt_data_blocks)/8;
-        int offset=0;
+        int size = sb->d_bitmap_ptr + (cnt_data_blocks) / 8;
+        int offset = 0;
         if (size % 512 != 0)
         {
             offset = 512 - (size % 512);
@@ -227,22 +228,17 @@ int main(int argc, char *argv[])
 
         // superblock inode pointer
         sb->i_blocks_ptr = size + offset;
-        sb->d_blocks_ptr = sb->i_blocks_ptr + cnt_inodes*BLOCK_SIZE;
-        
+        sb->d_blocks_ptr = sb->i_blocks_ptr + cnt_inodes * BLOCK_SIZE;
+
         // Change type of pointer to char to make it byte addressable
-        char* base = (void*)mmap_pointers[i];
-        
-        //Allocate bitmaps:
-        __u_int * i_bitmap = (__u_int *) (base + sb->i_bitmap_ptr);
-        i_bitmap[0] = 1;                // 1 inode for the root
+        char *base = (void *)mmap_pointers[i];
 
-        // determine time
-
-        time_t seconds;
-        seconds = time(NULL);
+        // Allocate bitmaps:
+        __u_int *i_bitmap = (__u_int *)(base + sb->i_bitmap_ptr);
+        i_bitmap[0] = 1; // 1 inode for the root
 
         // ----------- write the inodes -----------
-        struct wfs_inode * root_inode = (struct wfs_inode *) (base + sb->i_blocks_ptr);
+        struct wfs_inode *root_inode = (struct wfs_inode *)(base + sb->i_blocks_ptr);
         root_inode->num = 0;
         root_inode->mode = S_IFDIR | 0755;
         root_inode->uid = process_uid;
@@ -252,9 +248,8 @@ int main(int argc, char *argv[])
         root_inode->atim = seconds;
         root_inode->mtim = seconds;
         root_inode->ctim = seconds;
-        memset(root_inode->blocks,0,N_BLOCKS*(sizeof(off_t)));
+        memset(root_inode->blocks, 0, N_BLOCKS * (sizeof(off_t)));
     }
-
 
     // ################### Unmap & close file descriptors ###################
     remove_disk_mmap(cnt_disks, disk_size, disk_fd, mmap_pointers);

@@ -541,6 +541,10 @@ static int wfs_mkdir(const char *path, mode_t mode)
     // set the inode bit map
     set_inode_index(inode_bmp_idx, 1);
 
+    // calculate time
+    time_t seconds;
+    seconds = time(NULL);
+
     // create : new inode on each disk
     for (int i = 0; i < cnt_disks; i++)
     {
@@ -561,9 +565,9 @@ static int wfs_mkdir(const char *path, mode_t mode)
         curr_inode->gid = getgid();
         curr_inode->size = 0;
         curr_inode->nlinks = 1;
-        curr_inode->atim = time(NULL);
-        curr_inode->mtim = time(NULL);
-        curr_inode->ctim = time(NULL);
+        curr_inode->atim = seconds;
+        curr_inode->mtim = seconds;
+        curr_inode->ctim = seconds;
         memset(curr_inode->blocks, 0, N_BLOCKS * (sizeof(off_t)));
     }
     printf("Inode created for the new directory\n");
@@ -634,8 +638,8 @@ static int wfs_mkdir(const char *path, mode_t mode)
     {
         struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
         parent_inode->size += sizeof(struct wfs_dentry);
-        parent_inode->mtim = time(NULL);
-        parent_inode->ctim = time(NULL);
+        parent_inode->mtim = seconds;
+        parent_inode->ctim = seconds;
     }
 
     // tokenize the path
