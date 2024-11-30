@@ -134,7 +134,7 @@ int get_next_inode_index(void *disk_mmap_ptr)
 
 //
 //
-void set_inode_index(int inode_number, int mask)
+void set_inode_index(int inode_number, uint32_t given_mask)
 {
     for (int i = 0; i < cnt_disks; i++)
     {
@@ -145,7 +145,7 @@ void set_inode_index(int inode_number, int mask)
         int row = inode_number / 32;
         int col = inode_number % 32;
 
-        __u_int mask = 1;
+        u_int32_t mask = given_mask;
 
         for (int i = 0; i < col; i++)
         {
@@ -191,7 +191,7 @@ int get_data_index(void *disk_mmap_ptr)
 /*****************
 sets the given data bitmap index to the given mask for all disks
 ****************/
-void set_data_bmp_index(int data_block_number, int mask)
+void set_data_bmp_index(int data_block_number, uint32_t given_mask)
 {
     for (int i = 0; i < cnt_disks; i++)
     {
@@ -202,7 +202,7 @@ void set_data_bmp_index(int data_block_number, int mask)
         int row = data_block_number / 32;
         int col = data_block_number % 32;
 
-        __u_int mask = 1;
+        __u_int mask = given_mask;
 
         for (int i = 0; i < col; i++)
         {
@@ -581,6 +581,7 @@ static int wfs_mkdir(const char *path, mode_t mode)
         // check : data bitmap full
         if (d_block_index == -1)
         {
+            set_inode_index(inode_bmp_idx, 0);
             res = -ENOSPC;
             return res;
         }
@@ -611,6 +612,7 @@ static int wfs_mkdir(const char *path, mode_t mode)
         // check : Parent data blocks full
         if (get_inode_ptr(parent_inode_num, 0)->size / BLOCK_SIZE == 7)
         {
+            set_inode_index(inode_bmp_idx, 0);
             res = -ENOSPC;
             return res;
         }
@@ -712,6 +714,10 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
     // set the inode bit map
     set_inode_index(inode_bmp_idx, 1);
 
+    // calculate time
+    time_t seconds;
+    seconds = time(NULL);
+
     // create : new inode on each disk
     for (int i = 0; i < cnt_disks; i++)
     {
@@ -732,9 +738,9 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
         curr_inode->gid = getgid();
         curr_inode->size = 0;
         curr_inode->nlinks = 1;
-        curr_inode->atim = time(NULL);
-        curr_inode->mtim = time(NULL);
-        curr_inode->ctim = time(NULL);
+        curr_inode->atim = seconds;
+        curr_inode->mtim = seconds;
+        curr_inode->ctim = seconds;
         memset(curr_inode->blocks, 0, N_BLOCKS * (sizeof(off_t)));
     }
     printf("Inode created for the new directory\n");
@@ -748,6 +754,7 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
         // check : data bitmap full
         if (d_block_index == -1)
         {
+            set_inode_index(inode_bmp_idx, 0);
             res = -ENOSPC;
             return res;
         }
@@ -778,6 +785,7 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
         // check : Parent data blocks full
         if (get_inode_ptr(parent_inode_num, 0)->size / BLOCK_SIZE == 7)
         {
+            set_inode_index(inode_bmp_idx, 0);
             res = -ENOSPC;
             return res;
         }
@@ -805,8 +813,8 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
     {
         struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
         parent_inode->size += sizeof(struct wfs_dentry);
-        parent_inode->mtim = time(NULL);
-        parent_inode->ctim = time(NULL);
+        parent_inode->mtim = seconds;
+        parent_inode->ctim = seconds;
     }
     return res;
 }
