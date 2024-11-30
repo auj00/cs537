@@ -288,7 +288,7 @@ int get_child_inode_num(int inode_num, char *child_name)
                 // if match, then return the next inode block index;
                 return dentry_ptr->num;
             }
-            dentry_ptr = dentry_ptr + sizeof(struct wfs_dentry);
+            dentry_ptr = dentry_ptr + 1;
         }
     }
 
@@ -353,21 +353,20 @@ struct wfs_dentry *get_next_dentry_ptr(int inode_num, int disk_num)
     struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, disk_num);
 
     int index_in_blocks = inode_ptr->size / BLOCK_SIZE;
-    int offset = inode_ptr->size % BLOCK_SIZE-sizeof(struct wfs_dentry);
-    
+    int offset = inode_ptr->size % BLOCK_SIZE;
+
     int d_block_index = inode_ptr->blocks[index_in_blocks];
     char *dentry_ptr = (char *)get_d_block_ptr(d_block_index, disk_num);
     return (struct wfs_dentry *)(dentry_ptr + offset);
 }
 
-
-char * get_name_from_path(const char* path)
+char *get_name_from_path(const char *path)
 {
     char *copy_path = strdup(path);
     char *token_arr[10]; // Assuming that path won't have more than 10 tokens
     int token_cnt = 0;
     token_cnt = path_parse(copy_path, token_arr, "/");
-    return token_arr[token_cnt-1];
+    return token_arr[token_cnt - 1];
 }
 
 // ###################################### call-back functions ######################################
@@ -574,18 +573,20 @@ static int wfs_mkdir(const char *path, mode_t mode)
         for (int i = 0; i < cnt_disks; i++)
         {
             struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
-            parent_inode->size += sizeof(struct wfs_dentry);
-            parent_inode->mtim = time(NULL);
-            parent_inode->ctim = time(NULL);
-            for (int j = 0; j < 7; i++)
-            {
-                if(parent_inode->blocks[i] == 0)
-                {
-                    parent_inode->blocks[i] = d_block_index;
-                    break;
-                }
-            }
-            
+            // parent_inode->size += sizeof(struct wfs_dentry);
+            // parent_inode->mtim = time(NULL);
+            // parent_inode->ctim = time(NULL);
+            int index_in_blocks = parent_inode->size / BLOCK_SIZE;
+            parent_inode->blocks[index_in_blocks] = d_block_index;
+            // for (int j = 0; j < 7; i++)
+            // {
+            //     if(parent_inode->blocks[i] == 0)
+            //     {
+            //         parent_inode->blocks[i] = d_block_index;
+            //         break;
+            //     }
+            // }
+            printf("parent inode updated, size = %d\n", (int)parent_inode->size);
         }
     }
     else
@@ -599,21 +600,29 @@ static int wfs_mkdir(const char *path, mode_t mode)
     }
 
     // create : dentry in the parent
-    if(raid_mode == 0)
+    if (raid_mode == 0)
     {
-        struct wfs_dentry* dentry = get_next_dentry_ptr(parent_inode_num, 0);
+        struct wfs_dentry *dentry = get_next_dentry_ptr(parent_inode_num, 0);
         strcpy(dentry->name, get_name_from_path(path));
-        dentry->num = inode_bmp_idx; 
+        dentry->num = inode_bmp_idx;
     }
     else
     {
         for (int i = 0; i < cnt_disks; i++)
         {
-            struct wfs_dentry* dentry = get_next_dentry_ptr(parent_inode_num, i);
+            struct wfs_dentry *dentry = get_next_dentry_ptr(parent_inode_num, i);
             strcpy(dentry->name, get_name_from_path(path));
             dentry->num = inode_bmp_idx;
         }
-        
+    }
+
+    // update : parent inode
+    for (int i = 0; i < cnt_disks; i++)
+    {
+        struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
+        parent_inode->size += sizeof(struct wfs_dentry);
+        parent_inode->mtim = time(NULL);
+        parent_inode->ctim = time(NULL);
     }
 
     // tokenize the path
