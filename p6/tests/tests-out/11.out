@@ -1,1 +1,2 @@
-[Errno 2] No such file or directory: 'd2'
+Correct
+raid1 inode regions must be identical test-disk1 test-disk2
