@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/yashd/private/CS537_Team/cs537/p6/tests/./readdir-check.py", line 8, in <module>
+    foundfiles = os.listdir("mnt")
+OSError: [Errno 38] Function not implemented: 'mnt'

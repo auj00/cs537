@@ -819,14 +819,56 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
     return res;
 }
 
+
+/****************
+1. find the data block corresponding to the offset being written to
+2. copy size bytes data from the write buffer into the data block(s)
+3. writes may be split across data blocks or span multiple data-blocks
+******************/
+// static int wfs_write(const char* path, const char *buf, size_t size, off_t offset, struct fuse_file_info* fi)
+// {
+//     printf("wfs_write called on %s\n", path);
+    
+//     int res = 0;
+
+//     // check : file exists
+//     int inode_num = path_traversal(path, 0);
+//     if (inode_num != -1)
+//     {
+//         res = -ENOENT;
+//         return res;
+//     }
+
+//     // check : inode is a regular file
+//     struct wfs_inode * inode_ptr = get_inode_ptr(inode_num, 0);
+//     if(inode_ptr->mode != S_IFREG | 0755)
+//     {
+//         res = -1;
+//         return res;
+//     }
+
+//     // determine : data block to be written
+//     int index_in_blocks = offset/BLOCK_SIZE;
+//     int offset_within_block = offset%BLOCK_SIZE;
+
+//     if(index_in_blocks >= 7)
+//     {
+//         // handle indirect blocks
+//     }
+
+
+//     return res;
+// }
+
 static struct fuse_operations ops = {
     .getattr = wfs_getattr,
     .mknod   = wfs_mknod,
-    .mkdir = wfs_mkdir,
+    .mkdir   = wfs_mkdir,
+    // .write   = wfs_write,
     // .unlink = wfs_unlink,
     // .rmdir = wfs_rmdir,
     // .read = wfs_read,
-    // .write = wfs_write,
+    
     // .readdir = wfs_readdir,
 };
 

@@ -62,6 +62,8 @@ mounting = going & actually using the ds within the file system
 
 @1138 : manage memory leaks as best practice.
 
+@1200 : in wfs_dentry the num field stands for inode_num
+
 
 Doutbts : 
 
@@ -173,3 +175,14 @@ paths start at root
 fuse things can handle internal mkdirs search online
 
 traversal algo -> search for directory entry of the next name in the previous directory. 
+
+
+
+
+// Doubts post thanksgiving
+
+
+
+1. when calling write is it assumed that the file is open() with the correct permissions ?
+2. or do we need to open the file
+3. return codes in mkfs
