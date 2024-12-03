@@ -373,15 +373,34 @@ int allocate_indirect_block(int inode_num, int disk_num)
         return -1;
     }
 
+    if (raid_mode == 0)
+    {
+        set_data_bmp_index(d_block_index, 1, disk_num);
+        memset(get_d_block_ptr(d_block_index, disk_num), -1, BLOCK_SIZE * (sizeof(char)));
+        for (int i = 0; i < cnt_disks; i++)
+        {
+            // set_data_bmp_index(d_block_index, 1, i);
+
+            struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, i);
+            // put the newly allocated data-block into blocks array
+            inode_ptr->blocks[7] = d_block_index;
+        }
+    }
+
     // set the data bitmap
     // raid1
-    for (int i = 0; i < cnt_disks; i++)
+    else
     {
-        set_data_bmp_index(d_block_index, 1, i);
+        for (int i = 0; i < cnt_disks; i++)
+        {
+            set_data_bmp_index(d_block_index, 1, i);
 
-        struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, i);
-        // put the newly allocated data-block into blocks array
-        inode_ptr->blocks[7] = d_block_index;
+            struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, i);
+            // put the newly allocated data-block into blocks array
+            inode_ptr->blocks[7] = d_block_index;
+            memset(get_d_block_ptr(d_block_index, i), -1, BLOCK_SIZE * (sizeof(char)));
+
+        }
     }
     return d_block_index;
 }
@@ -416,11 +435,11 @@ int get_child_inode_num(int inode_num, char *child_name)
         return -1;
 
     // ---- step-2 : Search dirents on each data block ----
-    int search_size = 0;                     // store the bytes of data that has been searched
+    int search_size = 0; // store the bytes of data that has been searched
     for (int i = 0; i < 7; i++)
     {
         int d_block_index = curr_inode->blocks[i];
-        int disk_num = (raid_mode == 0) ? i%cnt_disks : 0;
+        int disk_num = (raid_mode == 0) ? i % cnt_disks : 0;
         void *d_block_ptr = get_d_block_ptr(d_block_index, disk_num);
 
         // check the 16 directory entries in d-block
@@ -436,7 +455,7 @@ int get_child_inode_num(int inode_num, char *child_name)
             }
             dentry_ptr = dentry_ptr + 1;
             search_size += sizeof(struct wfs_dentry);
-            if(search_size >= curr_inode->size)
+            if (search_size >= curr_inode->size)
                 return -1;
         }
     }
@@ -574,15 +593,31 @@ static int wfs_mkdir(const char *path, mode_t mode)
         curr_inode->atim = seconds;
         curr_inode->mtim = seconds;
         curr_inode->ctim = seconds;
-        memset(curr_inode->blocks, 0, N_BLOCKS * (sizeof(off_t)));
+        memset(curr_inode->blocks, -1, N_BLOCKS * (sizeof(off_t)));
     }
     printf("Inode created for the new directory\n");
 
     // check : parent inode needs new data-block to hold new dentry
     int d_block_index = -1;
+    int disk_num = -1;
+    int blocks_index = -1;
     if (alloc_d_block_to_dir(parent_inode_num))
     {
-        d_block_index = get_free_d_block_index(0);
+        // d_block_index = get_free_d_block_index(0);
+        // int blocks_index = -1;
+
+        struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, 0);
+        for(int i=0; i<7; i++)
+        {
+            if(parent_inode->blocks[i] == -1)
+            {
+                blocks_index = i;
+                break;
+            }
+        }
+        disk_num = blocks_index%cnt_disks;
+
+        d_block_index = allocate_direct_block(parent_inode_num, blocks_index, disk_num);
 
         // check : data bitmap full
         if (d_block_index == -1)
@@ -593,15 +628,15 @@ static int wfs_mkdir(const char *path, mode_t mode)
         }
 
         // update : parent inode
-        for (int i = 0; i < cnt_disks; i++)
-        {
-            set_data_bmp_index(d_block_index, 1, i);
+        // for (int i = 0; i < cnt_disks; i++)
+        // {
+        //     set_data_bmp_index(d_block_index, 1, i);
 
-            struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
-            int index_in_blocks = parent_inode->size / BLOCK_SIZE;
-            parent_inode->blocks[index_in_blocks] = d_block_index;
-            printf("parent inode updated\n");
-        }
+        //     struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
+        //     int index_in_blocks = parent_inode->size / BLOCK_SIZE;
+        //     parent_inode->blocks[index_in_blocks] = d_block_index;
+        //     printf("parent inode updated\n");
+        // }
     }
     else
     {
@@ -612,12 +647,23 @@ static int wfs_mkdir(const char *path, mode_t mode)
             res = -ENOSPC;
             return res;
         }
+
+        struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, 0);
+        for(int i=0; i<7; i++)
+        {
+            if(parent_inode->blocks[i] == -1)
+            {
+                blocks_index = i-1;
+                break;
+            }
+        }
+        disk_num = blocks_index%cnt_disks;
     }
 
     // create : dentry in the parent
     if (raid_mode == 0)
     {
-        struct wfs_dentry *dentry = get_next_dentry_ptr(parent_inode_num, 0);
+        struct wfs_dentry *dentry = get_next_dentry_ptr(parent_inode_num, disk_num);
         strcpy(dentry->name, get_name_from_path(path));
         dentry->num = inode_bmp_idx;
     }
@@ -695,15 +741,29 @@ static int wfs_mknod(const char *path, mode_t mode, dev_t rdev)
         curr_inode->atim = seconds;
         curr_inode->mtim = seconds;
         curr_inode->ctim = seconds;
-        memset(curr_inode->blocks, 0, N_BLOCKS * (sizeof(off_t)));
+        memset(curr_inode->blocks, -1, N_BLOCKS * (sizeof(off_t)));
     }
     printf("Inode created for the new file\n");
 
     // check : parent inode needs new data-block to hold new dentry
     int d_block_index = -1;
+    int disk_num = -1;
+    int blocks_index = -1;
     if (alloc_d_block_to_dir(parent_inode_num))
     {
-        d_block_index = get_free_d_block_index(0);
+
+        struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, 0);
+        for(int i=0; i<7; i++)
+        {
+            if(parent_inode->blocks[i] == -1)
+            {
+                blocks_index = i;
+                break;
+            }
+        }
+        disk_num = blocks_index%cnt_disks;
+
+        d_block_index = allocate_direct_block(parent_inode_num, blocks_index, disk_num);
 
         // check : data bitmap full
         if (d_block_index == -1)
@@ -712,17 +772,26 @@ static int wfs_mknod(const char *path, mode_t mode, dev_t rdev)
             res = -ENOSPC;
             return res;
         }
+        // d_block_index = get_free_d_block_index(0);
 
-        // update : parent inode
-        for (int i = 0; i < cnt_disks; i++)
-        {
-            set_data_bmp_index(d_block_index, 1, i);
+        // // check : data bitmap full
+        // if (d_block_index == -1)
+        // {
+        //     set_inode_index(inode_bmp_idx, 0);
+        //     res = -ENOSPC;
+        //     return res;
+        // }
 
-            struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
-            int index_in_blocks = parent_inode->size / BLOCK_SIZE;
-            parent_inode->blocks[index_in_blocks] = d_block_index;
-            printf("parent inode updated\n");
-        }
+        // // update : parent inode
+        // for (int i = 0; i < cnt_disks; i++)
+        // {
+        //     set_data_bmp_index(d_block_index, 1, i);
+
+        //     struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
+        //     int index_in_blocks = parent_inode->size / BLOCK_SIZE;
+        //     parent_inode->blocks[index_in_blocks] = d_block_index;
+        //     printf("parent inode updated\n");
+        // }
     }
     else
     {
@@ -733,12 +802,22 @@ static int wfs_mknod(const char *path, mode_t mode, dev_t rdev)
             res = -ENOSPC;
             return res;
         }
+        struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, 0);
+        for(int i=0; i<7; i++)
+        {
+            if(parent_inode->blocks[i] == -1)
+            {
+                blocks_index = i-1;
+                break;
+            }
+        }
+        disk_num = blocks_index%cnt_disks;
     }
 
     // create : dentry in the parent
     if (raid_mode == 0)
     {
-        struct wfs_dentry *dentry = get_next_dentry_ptr(parent_inode_num, 0);
+        struct wfs_dentry *dentry = get_next_dentry_ptr(parent_inode_num, disk_num);
         strcpy(dentry->name, get_name_from_path(path));
         dentry->num = inode_bmp_idx;
     }
@@ -819,7 +898,7 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
             // check if blocks[7] is allocated
             int indirect_block_index = inode_ptr->blocks[7];
             // if no then allocate it first
-            if (indirect_block_index == 0)
+            if (indirect_block_index == -1)
             {
                 indirect_block_index = allocate_indirect_block(inode_num, 0);
                 if (indirect_block_index == -1)
@@ -835,7 +914,7 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
         }
 
         // allocate a new page
-        if (d_block_index == 0)
+        if (d_block_index == -1)
         {
             // allocate a page
             d_block_index = allocate_direct_block(inode_num, index_in_blocks, 0);
