@@ -107,7 +107,6 @@ char *get_name_from_path(const char *path)
     return token_arr[token_cnt - 1];
 }
 
-
 // ################################################ Inode Helpers ################################################
 
 /****************************************
@@ -173,7 +172,6 @@ void set_inode_index(int inode_number, uint32_t given_mask)
     }
 }
 
-
 /*************************************
 // Returns pointer to inode based on
 // 1. given inode_num
@@ -188,17 +186,16 @@ struct wfs_inode *get_inode_ptr(int inode_num, int disk_num)
     return curr_inode;
 }
 
-
 // ################################################ d-block helpers ################################################
 
 // function to return the next free d-block index if available
-int get_data_index(void *disk_mmap_ptr)
+int get_free_d_block_index(int disk_num)
 {
-    struct wfs_sb *sb = (struct wfs_sb *)disk_mmap_ptr;
+    struct wfs_sb *sb = (struct wfs_sb *)ordered_disk_mmap_ptr[disk_num];
 
     // check sb->i_bitmap for empty spot
     // Change type of pointer to char to make it byte addressable
-    char *base = (void *)disk_mmap_ptr;
+    char *base = (void *)ordered_disk_mmap_ptr[disk_num];
 
     int data_block_number = -1;
     __u_int *d_bitmap = (__u_int *)(base + sb->d_bitmap_ptr);
@@ -211,7 +208,7 @@ int get_data_index(void *disk_mmap_ptr)
             if ((d_bitmap[i] & mask) == 0)
             {
                 // set the inode bitmap
-                d_bitmap[i] |= mask;
+                // d_bitmap[i] |= mask;
 
                 // return the inode number
                 data_block_number = i * 32 + j;
@@ -248,7 +245,6 @@ void set_data_bmp_index(int data_block_number, uint32_t given_mask, int disk_num
     // }
 }
 
-
 /*****************************************
  Function to set the d_block ptr:
  index of d_block based on data bitmap;
@@ -259,29 +255,27 @@ void *get_d_block_ptr(int d_block_index, int disk_num)
 {
     void *d_block_ptr = NULL;
 
-    if (raid_mode == 0)
-    {
-        disk_num = d_block_index % cnt_disks;
-    }
+    // if (raid_mode == 0)
+    // {
+    //     disk_num = d_block_index % cnt_disks;
+    // }
 
     // point to the sb of the correct disk (matters for RAID 0)
     struct wfs_sb *sb = (struct wfs_sb *)ordered_disk_mmap_ptr[disk_num];
     char *base = (void *)sb;
-    if (raid_mode == 0)
-    {
-        // point to the d_block of the first block of current inode passed
-        d_block_ptr = (void *)(base + sb->d_blocks_ptr + (d_block_index / cnt_disks) * BLOCK_SIZE);
+    // if (raid_mode == 0)
+    // {
+    //     // point to the d_block of the first block of current inode passed
+    //     d_block_ptr = (void *)(base + sb->d_blocks_ptr + (d_block_index / cnt_disks) * BLOCK_SIZE);
 
-    } // divided across disks
-    else
-    {
-        // all blocks present in the each disks
-        d_block_ptr = (void *)(base + sb->d_blocks_ptr + d_block_index * BLOCK_SIZE);
-    }
+    // } // divided across disks
+    // else
+    // {
+    // all blocks present in the each disks
+    d_block_ptr = (void *)(base + sb->d_blocks_ptr + d_block_index * BLOCK_SIZE);
+    // }
     return d_block_ptr;
 }
-
-
 
 /**************************
 returns 1 if new data block should be allocated to an inode
@@ -311,7 +305,7 @@ argument disk_num included to add raid0 support later
 *************** */
 int allocate_direct_block(int inode_num, int blocks_index, int disk_num)
 {
-    int d_block_index = get_data_index(ordered_disk_mmap_ptr[disk_num]);
+    int d_block_index = get_free_d_block_index(disk_num);
 
     // check : data bitmap full
     if (d_block_index == -1)
@@ -320,22 +314,50 @@ int allocate_direct_block(int inode_num, int blocks_index, int disk_num)
     }
 
     // set the data bitmap
-    // raid1
-    for (int i = 0; i < cnt_disks; i++)
+
+    if (raid_mode == 0)
     {
-        set_data_bmp_index(d_block_index, 1, i);
+        set_data_bmp_index(d_block_index, 1, disk_num);
 
-        struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, i);
-        // put the newly allocated data-block into blocks array
+        // update the inode
         if (blocks_index <= 6)
-            inode_ptr->blocks[blocks_index] = d_block_index;
-
+        {
+            for (int i = 0; i < cnt_disks; i++)
+            {
+                struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, i);
+                inode_ptr->blocks[blocks_index] = d_block_index;
+            }
+        }
         else
         {
+            struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, disk_num);
             int indirect_block_index = inode_ptr->blocks[7];
-            off_t *indirect_block_ptr = (off_t *)get_d_block_ptr(indirect_block_index, i);
+            int indirect_block_disk = 7 % cnt_disks; // disk that holds the indirect block
+            off_t *indirect_block_ptr = (off_t *)get_d_block_ptr(indirect_block_index, indirect_block_disk);
             int index_in_indirect_block = blocks_index - 7;
             indirect_block_ptr[index_in_indirect_block] = d_block_index;
+        }
+    }
+
+    // raid1
+    else
+    {
+        for (int i = 0; i < cnt_disks; i++)
+        {
+            set_data_bmp_index(d_block_index, 1, i);
+
+            struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, i);
+            // put the newly allocated data-block into blocks array
+            if (blocks_index <= 6)
+                inode_ptr->blocks[blocks_index] = d_block_index;
+
+            else
+            {
+                int indirect_block_index = inode_ptr->blocks[7];
+                off_t *indirect_block_ptr = (off_t *)get_d_block_ptr(indirect_block_index, i);
+                int index_in_indirect_block = blocks_index - 7;
+                indirect_block_ptr[index_in_indirect_block] = d_block_index;
+            }
         }
     }
     return d_block_index;
@@ -343,7 +365,7 @@ int allocate_direct_block(int inode_num, int blocks_index, int disk_num)
 
 int allocate_indirect_block(int inode_num, int disk_num)
 {
-    int d_block_index = get_data_index(ordered_disk_mmap_ptr[disk_num]);
+    int d_block_index = get_free_d_block_index(disk_num);
 
     // check : data bitmap full
     if (d_block_index == -1)
@@ -394,10 +416,12 @@ int get_child_inode_num(int inode_num, char *child_name)
         return -1;
 
     // ---- step-2 : Search dirents on each data block ----
+    int search_size = 0;                     // store the bytes of data that has been searched
     for (int i = 0; i < 7; i++)
     {
         int d_block_index = curr_inode->blocks[i];
-        void *d_block_ptr = get_d_block_ptr(d_block_index, 0);
+        int disk_num = (raid_mode == 0) ? i%cnt_disks : 0;
+        void *d_block_ptr = get_d_block_ptr(d_block_index, disk_num);
 
         // check the 16 directory entries in d-block
         // since each dentry is 32B and each d-block is 512B
@@ -411,6 +435,9 @@ int get_child_inode_num(int inode_num, char *child_name)
                 return dentry_ptr->num;
             }
             dentry_ptr = dentry_ptr + 1;
+            search_size += sizeof(struct wfs_dentry);
+            if(search_size >= curr_inode->size)
+                return -1;
         }
     }
 
@@ -448,9 +475,6 @@ int path_traversal(const char *path, int token_cnt_dcr)
     }
     return inode_num;
 }
-
-
-
 
 // ###################################### call-back functions ######################################
 
@@ -558,7 +582,7 @@ static int wfs_mkdir(const char *path, mode_t mode)
     int d_block_index = -1;
     if (alloc_d_block_to_dir(parent_inode_num))
     {
-        d_block_index = get_data_index(ordered_disk_mmap_ptr[0]);
+        d_block_index = get_free_d_block_index(0);
 
         // check : data bitmap full
         if (d_block_index == -1)
@@ -679,7 +703,7 @@ static int wfs_mknod(const char *path, mode_t mode, dev_t rdev)
     int d_block_index = -1;
     if (alloc_d_block_to_dir(parent_inode_num))
     {
-        d_block_index = get_data_index(ordered_disk_mmap_ptr[0]);
+        d_block_index = get_free_d_block_index(0);
 
         // check : data bitmap full
         if (d_block_index == -1)

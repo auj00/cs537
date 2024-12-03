@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
         root_inode->atim = seconds;
         root_inode->mtim = seconds;
         root_inode->ctim = seconds;
-        memset(root_inode->blocks, 0, N_BLOCKS * (sizeof(off_t)));
+        memset(root_inode->blocks, -1, N_BLOCKS * (sizeof(off_t)));
     }
 
     // ################### Unmap & close file descriptors ###################
