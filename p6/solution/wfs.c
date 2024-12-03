@@ -1049,6 +1049,7 @@ static int wfs_unlink(const char *path)
     // -------------------------------------- free the d-block bitmap --------------------------------------
     if (curr_inode->size != 0)
     {
+        // loop over all the indices in blocks array
         for (int i = 0; i < 8; i++)
         {
             if (raid_mode == 0)
@@ -1075,8 +1076,11 @@ static int wfs_unlink(const char *path)
             }
             else
             {
+                // loop over all the disks
                 for (int j = 0; j < cnt_disks; j++)
                 {
+                    curr_inode = get_inode_ptr(curr_inode_num, j);
+                    // handle indirect blocks 
                     if (i == 7)
                     {
                         int indirect_block_index = curr_inode->blocks[7];
@@ -1092,10 +1096,11 @@ static int wfs_unlink(const char *path)
                                 break;
                             }
                             set_data_bmp_index(indirect_block_ptr[k], 0, j);
-                            indirect_block_ptr[i] = -1;
+                            indirect_block_ptr[k] = -1;
                         }
                     }
                     set_data_bmp_index(curr_inode->blocks[i], 0, j);
+                    curr_inode->blocks[i] = -1;
                 }
             }
             curr_inode->blocks[i] = -1;

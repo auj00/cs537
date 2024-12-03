@@ -3,7 +3,6 @@
 import argparse
 import wfsverify
 import os
-import subprocess  # Added for hexdump function
 from stat import *
 
 def test_eq(teststr, first, second):
@@ -34,15 +33,6 @@ def roundup(n, k):
     """Roundup n by k."""
     remain = n % k
     return n if remain == 0 else (n + (k - remain))
-
-def hexdump_disk(disk):
-    """Generate a hex dump of the disk for debugging."""
-    print(f"Generating hex dump for {disk}...")
-    try:
-        subprocess.run(["xxd", "-e", "-g", "4", disk], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Hex dump failed for {disk}: {e}")
-        exit(1)
 
 def is_allocated_inode(disk, inodep, inode):
     """Given an inode position and inode dict, verify it's allocation."""
@@ -138,8 +128,6 @@ def verify_raid1(disks, expected_dirs, expected_files, expected_blocks):
         comp_region = fs.read_inode_region()
         if ref_region != comp_region:
             print(f"raid1 inode regions must be identical {ref_fs.diskname()} {fs.diskname()}")
-            hexdump_disk(ref_fs.diskname())  # Debugging the inode region of the first disk
-            hexdump_disk(fs.diskname())     # Debugging the inode region of the current disk
             exit(1)
 
     # compare data block regions on all disks
@@ -148,15 +136,12 @@ def verify_raid1(disks, expected_dirs, expected_files, expected_blocks):
         comp_region = fs.read_datablock_region()
         if ref_region != comp_region:
             print(f"raid1 datablock regions must be identical {ref_fs.diskname()} {fs.diskname()}")
-            hexdump_disk(ref_fs.diskname())  # Debugging the data block region of the first disk
-            hexdump_disk(fs.diskname())      # Debugging the data block region of the current disk
             exit(1)
 
     print("Correct")
 
-
 def verify_raid0(disks, expected_dirs, expected_files, expected_blocks, altblocks):
-    """Verify wfs formatted as raid0."""
+    """Verify wfs formatted as raid1."""
     filesystems = [wfsverify.WfsState(disk) for disk in disks]
     all_blocks = [(filesystem.list_allocated_inodes(),
                    filesystem.list_allocated_datablocks(), filesystem)
@@ -171,10 +156,7 @@ def verify_raid0(disks, expected_dirs, expected_files, expected_blocks, altblock
 
     if (altblocks != expected_blocks):
         if (total_datablocks != expected_blocks and total_datablocks != altblocks):
-            print(f"total allocated datablocks on all disks: found {total_datablocks} "
-                  f"expected either {expected_blocks} or {altblocks}.")
-            for fs in filesystems:
-                hexdump_disk(fs.diskname())  # Debugging all disks in RAID0
+            print(f"total allocated datablocks on all disks: found {total_datablocks} expected either {expected_blocks} or {altblocks}.")
             exit(1)
     else:
         test_eq("total allocated datablocks on all disks",
@@ -184,26 +166,28 @@ def verify_raid0(disks, expected_dirs, expected_files, expected_blocks, altblock
     inode_lists = [(inode_list, fs) for (inode_list, datablock_list, fs) in all_blocks]
 
     # verify inodes on all the disks
+    # slightly relaxed -- each disk must have all dir and file inodes
+    # however, inodes can be different to accomodate indirect block
     for (inode_list, ref_fs) in inode_lists:
         (dirs, files) = verify_inodes(inode_list, ref_fs)
+
         test_eq(f"wfs directory inodes", dirs, expected_dirs)
         test_eq(f"wfs regular file inodes", files, expected_files)
 
+    # TODO verify allocated data blocks are non-zero on each disk
+    # not a big deal though
     print("Correct")
 
-
-def verify_raid1v(disks, expected_dirs, expected_files, expected_blocks):
-    """Verify wfs formatted as raid1v."""
-    # TODO: Implement detailed verification
-    print("Correct")
-
-
+def unimplemented(mode):
+    print(f'{mode} verification not implemented')
+    exit()
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", help="verify mode: mkfs, raid0, raid1, raid1v")
     parser.add_argument("--inodes", help="expected number of inodes")
     parser.add_argument("--blocks", help="expected number of data blocks")
-    parser.add_argument("--altblocks", help="alternate number of acceptable data blocks")
+    parser.add_argument("--altblocks", help="some tests have an alternate number of acceptable data blocks")
     parser.add_argument("--dirs", help="expected number of directories")
     parser.add_argument("--files", help="expected number of regular files")
     parser.add_argument("--disks", nargs="+", help="list of disks")
