@@ -132,8 +132,10 @@ int get_next_inode_index(void *disk_mmap_ptr)
     return inode_number;
 }
 
-//
-//
+/****************************************
+sets the inode index for all disk
+can set or reset based on the arguments passed
+*****************************************/
 void set_inode_index(int inode_number, uint32_t given_mask)
 {
     for (int i = 0; i < cnt_disks; i++)
@@ -191,26 +193,26 @@ int get_data_index(void *disk_mmap_ptr)
 /*****************
 sets the given data bitmap index to the given mask for all disks
 ****************/
-void set_data_bmp_index(int data_block_number, uint32_t given_mask)
+void set_data_bmp_index(int data_block_number, uint32_t given_mask, int disk_num)
 {
-    for (int i = 0; i < cnt_disks; i++)
+    // for (int i = 0; i < cnt_disks; i++)
+    // {
+    struct wfs_sb *sb = (struct wfs_sb *)ordered_disk_mmap_ptr[disk_num];
+    char *base = (void *)sb;
+    __u_int *d_bitmap = (__u_int *)(base + sb->d_bitmap_ptr);
+
+    int row = data_block_number / 32;
+    int col = data_block_number % 32;
+
+    __u_int mask = given_mask;
+
+    for (int i = 0; i < col; i++)
     {
-        struct wfs_sb *sb = (struct wfs_sb *)ordered_disk_mmap_ptr[i];
-        char *base = (void *)sb;
-        __u_int *d_bitmap = (__u_int *)(base + sb->d_bitmap_ptr);
-
-        int row = data_block_number / 32;
-        int col = data_block_number % 32;
-
-        __u_int mask = given_mask;
-
-        for (int i = 0; i < col; i++)
-        {
-            mask = mask << 1;
-        }
-        // set the inode bitmap
-        d_bitmap[row] |= mask;
+        mask = mask << 1;
     }
+    // set the inode bitmap
+    d_bitmap[row] |= mask;
+    // }
 }
 
 // ################################
@@ -334,7 +336,7 @@ int path_traversal(const char *path, int token_cnt_dcr)
 returns 1 if new data block should be allocated to an inode
 only for the direct blocks
 *****************************/
-int allocate_data_block(int inode_num)
+int alloc_d_block_to_dir(int inode_num)
 {
     struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, 0);
 
@@ -349,6 +351,66 @@ int allocate_data_block(int inode_num)
     {
         return 0;
     }
+}
+
+/*************
+allocates a new data-block to the given inode
+updates the inode blocks array on all disks
+argument disk_num included to add raid0 support later
+*************** */
+int allocate_direct_block(int inode_num, int blocks_index, int disk_num)
+{
+    int d_block_index = get_data_index(ordered_disk_mmap_ptr[disk_num]);
+
+    // check : data bitmap full
+    if (d_block_index == -1)
+    {
+        return -1;
+    }
+
+    // set the data bitmap
+    // raid1
+    for (int i = 0; i < cnt_disks; i++)
+    {
+        set_data_bmp_index(d_block_index, 1, i);
+
+        struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, i);
+        // put the newly allocated data-block into blocks array
+        if (blocks_index <= 6)
+            inode_ptr->blocks[blocks_index] = d_block_index;
+
+        else
+        {
+            int indirect_block_index = inode_ptr->blocks[7];
+            off_t *indirect_block_ptr = (off_t *)get_d_block_ptr(indirect_block_index, i);
+            int index_in_indirect_block = blocks_index - 7;
+            indirect_block_ptr[index_in_indirect_block] = d_block_index;
+        }
+    }
+    return d_block_index;
+}
+
+int allocate_indirect_block(int inode_num, int disk_num)
+{
+    int d_block_index = get_data_index(ordered_disk_mmap_ptr[disk_num]);
+
+    // check : data bitmap full
+    if (d_block_index == -1)
+    {
+        return -1;
+    }
+
+    // set the data bitmap
+    // raid1
+    for (int i = 0; i < cnt_disks; i++)
+    {
+        set_data_bmp_index(d_block_index, 1, i);
+
+        struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, i);
+        // put the newly allocated data-block into blocks array
+        inode_ptr->blocks[7] = d_block_index;
+    }
+    return d_block_index;
 }
 
 struct wfs_dentry *get_next_dentry_ptr(int inode_num, int disk_num)
@@ -398,8 +460,8 @@ static int wfs_getattr(const char *path, struct stat *stbuf)
 
     // ---------------------- Path Parse -------------------------------
     int inode_num = path_traversal(path, 0);
-    
-    if(inode_num == -1)
+
+    if (inode_num == -1)
     {
         res = -ENOENT;
         return res;
@@ -574,7 +636,7 @@ static int wfs_mkdir(const char *path, mode_t mode)
 
     // check : parent inode needs new data-block to hold new dentry
     int d_block_index = -1;
-    if (allocate_data_block(parent_inode_num))
+    if (alloc_d_block_to_dir(parent_inode_num))
     {
         d_block_index = get_data_index(ordered_disk_mmap_ptr[0]);
 
@@ -585,11 +647,12 @@ static int wfs_mkdir(const char *path, mode_t mode)
             res = -ENOSPC;
             return res;
         }
-        set_data_bmp_index(d_block_index, 1);
 
         // update : parent inode
         for (int i = 0; i < cnt_disks; i++)
         {
+            set_data_bmp_index(d_block_index, 1, i);
+
             struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
             // parent_inode->size += sizeof(struct wfs_dentry);
             // parent_inode->mtim = time(NULL);
@@ -685,8 +748,7 @@ static int wfs_mkdir(const char *path, mode_t mode)
     return res;
 }
 
-
-static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
+static int wfs_mknod(const char *path, mode_t mode, dev_t rdev)
 {
     printf("wfs_mknod called on %s\n", path);
     int res = 0;
@@ -752,7 +814,7 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
 
     // check : parent inode needs new data-block to hold new dentry
     int d_block_index = -1;
-    if (allocate_data_block(parent_inode_num))
+    if (alloc_d_block_to_dir(parent_inode_num))
     {
         d_block_index = get_data_index(ordered_disk_mmap_ptr[0]);
 
@@ -763,11 +825,12 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
             res = -ENOSPC;
             return res;
         }
-        set_data_bmp_index(d_block_index, 1);
 
         // update : parent inode
         for (int i = 0; i < cnt_disks; i++)
         {
+            set_data_bmp_index(d_block_index, 1, i);
+
             struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
             // parent_inode->size += sizeof(struct wfs_dentry);
             // parent_inode->mtim = time(NULL);
@@ -828,18 +891,18 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
     return res;
 }
 
-
 /****************
 1. find the data block corresponding to the offset being written to
 2. copy size bytes data from the write buffer into the data block(s)
 3. writes may be split across data blocks or span multiple data-blocks
 ******************/
-static int wfs_write(const char* path, const char *buf, size_t size, off_t offset, struct fuse_file_info* fi)
+static int wfs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
     printf("wfs_write called on %s\n", path);
-    
+
     int res = 0;
     int copy_size = size;
+
     // check : file exists
     int inode_num = path_traversal(path, 0);
     if (inode_num == -1)
@@ -847,40 +910,24 @@ static int wfs_write(const char* path, const char *buf, size_t size, off_t offse
         res = -ENOENT;
         return res;
     }
-    printf("after path traversal\n");
+    printf("%s exists\n", path);
+
     // check : inode is a regular file
-    struct wfs_inode * inode_ptr = get_inode_ptr(inode_num, 0);
-    // if(inode_ptr->mode != (S_IFREG | 0755))
-    // {
-    //     res = -1;
-    //     return res;
-    // }
+    struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, 0);
 
     // determine : data block to be written
-    int index_in_blocks = offset/BLOCK_SIZE;
-    int offset_within_block = offset%BLOCK_SIZE;
+    int index_in_blocks = offset / BLOCK_SIZE;
+    int offset_within_block = offset % BLOCK_SIZE;
 
-    if(index_in_blocks >= 7)
-    {
-        // handle indirect blocks
-    }
+    int d_block_index = -1;
 
-    // cnt of the number of d-blocks to write
-    int loop_cnt = (offset_within_block + size+BLOCK_SIZE-1)/BLOCK_SIZE;
-
-    // loop to write the blocks
-    // 1. check if a data_block is allocated for the found index_in_blocks
-    // 2. else allocate a page
-    // 3. write to the correct offset_within_block until the end of the block or size
-    // 4. repeat
-
-    // for (int i = 0; i < cnt_disks; i++)
+    // if (index_in_blocks >= 7)
     // {
-    //     inode_ptr = get_inode_ptr(inode_num, ordered_disk_mmap_ptr[0]);
-    //     int d_block_index = inode_ptr->blocks[index_in_blocks];
-        
-    //     // no d-block allocated for the given offset
-    //     // hence allocate a new d-block
+    //     // ------------ handle indirect blocks ------------
+
+    //     // check : indirect block is allocated
+    //     d_block_index = inode_ptr->blocks[7];
+
     //     if(d_block_index == 0)
     //     {
     //         // allocate a page
@@ -894,31 +941,60 @@ static int wfs_write(const char* path, const char *buf, size_t size, off_t offse
     //         }
 
     //         // set the data bitmap
-    //         set_data_bmp_index(d_block_index, 1);
+    //         // raid1
+    //         for(int i=0; i<cnt_disks; i++)
+    //             set_data_bmp_index(d_block_index, 1, i);
 
     //         // put the newly allocated data-block into blocks array
-    //         inode_ptr->blocks[index_in_blocks] = d_block_index;
+    //         inode_ptr->blocks[7] = d_block_index;
+
+    //         // memset the newly allocated block to all zeros
     //     }
 
-    //     for (int j = 0; j < loop_cnt; j++)
-    //     {
-            
-    //     }
-        
     // }
-    
+
+    // cnt of the number of d-blocks to write
+    int loop_cnt = (offset_within_block + size + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    // loop to write the blocks
+    // 1. check if a data_block is allocated for the found index_in_blocks
+    // 2. else allocate a page
+    // 3. write to the correct offset_within_block until the end of the block or size
+    // 4. repeat
+
     printf("Before the main for loop\n");
 
-
-    for(int i=0; i<loop_cnt; i++)
+    for (int i = 0; i < loop_cnt; i++)
     {
-        int d_block_index = inode_ptr->blocks[index_in_blocks];
+        if (index_in_blocks < 7)
+        {
+            d_block_index = inode_ptr->blocks[index_in_blocks];
+        }
+        else
+        {
+            // check if blocks[7] is allocated
+            int indirect_block_index = inode_ptr->blocks[7];
+            // if no then allocate it first
+            if (indirect_block_index == 0)
+            {
+                indirect_block_index = allocate_indirect_block(inode_num, 0);
+                if (indirect_block_index == -1)
+                {
+                    res = -ENOSPC;
+                    return res;
+                }
+            }
+            // then find out the correct block in the new page
+            off_t *indirect_block_ptr = (off_t *)get_d_block_ptr(indirect_block_index, 0);
+            int index_in_indirect_block = index_in_blocks - 7;
+            d_block_index = indirect_block_ptr[index_in_indirect_block];
+        }
 
         // allocate a new page
-        if(d_block_index == 0)
+        if (d_block_index == 0)
         {
             // allocate a page
-            d_block_index = get_data_index(ordered_disk_mmap_ptr[0]);
+            d_block_index = allocate_direct_block(inode_num, index_in_blocks, 0);
 
             // check : no space to allocate new data block
             if (d_block_index == -1)
@@ -927,8 +1003,18 @@ static int wfs_write(const char* path, const char *buf, size_t size, off_t offse
                 return res;
             }
 
+            // if (index_in_blocks >= 7)
+            // {
+            //     int indirect_block_index = inode_ptr->blocks[7];
+            //     off_t *indirect_block_ptr = get_d_block_ptr(indirect_block_index, 0);
+            //     int index_in_indirect_block = index_in_blocks - 7;
+            //     d_block_index = indirect_block_ptr[index_in_indirect_block];
+            // }
+
             // set the data bitmap
-            set_data_bmp_index(d_block_index, 1);
+            // raid1
+            // for (int i = 0; i < cnt_disks; i++)
+            //     set_data_bmp_index(d_block_index, 1, i);
 
             // // put the newly allocated data-block into blocks array
             // inode_ptr->blocks[index_in_blocks] = d_block_index;
@@ -937,24 +1023,23 @@ static int wfs_write(const char* path, const char *buf, size_t size, off_t offse
         // for raid1
 
         // size to be written to the given d-block
-        int write_size=0;
+        int write_size = 0;
         for (int j = 0; j < cnt_disks; j++)
         {
             // get inode ptr for current disk
             inode_ptr = get_inode_ptr(inode_num, j);
 
             // put the newly allocated data-block into blocks array
-            inode_ptr->blocks[index_in_blocks] = d_block_index;
+            // inode_ptr->blocks[index_in_blocks] = d_block_index;
 
             // get pointer to the correct data-block
-            char * d_block_ptr = (char *)get_d_block_ptr(d_block_index, j);
+            char *d_block_ptr = (char *)get_d_block_ptr(d_block_index, j);
             d_block_ptr += offset_within_block;
 
             // the space in the chosen d-block given it has some data already on it
-            int space_in_d_block = 512-offset_within_block;
+            int space_in_d_block = 512 - offset_within_block;
 
-            
-            if(size > space_in_d_block)
+            if (size > space_in_d_block)
             {
                 write_size = space_in_d_block;
             }
@@ -963,11 +1048,16 @@ static int wfs_write(const char* path, const char *buf, size_t size, off_t offse
                 write_size = size;
             }
             memcpy(d_block_ptr, buf, write_size);
-            
+
+            // // austin
+            // offset_within_block = 0;
         }
-        buf+= write_size;
-        size-= write_size;
+        buf += write_size;
+        size -= write_size;
         index_in_blocks++;
+
+        // austin
+        offset_within_block = 0;
     }
 
     printf("after the main for loop\n");
@@ -977,13 +1067,13 @@ static int wfs_write(const char* path, const char *buf, size_t size, off_t offse
 
 static struct fuse_operations ops = {
     .getattr = wfs_getattr,
-    .mknod   = wfs_mknod,
-    .mkdir   = wfs_mkdir,
-    .write   = wfs_write,
+    .mknod = wfs_mknod,
+    .mkdir = wfs_mkdir,
+    .write = wfs_write,
     // .unlink = wfs_unlink,
     // .rmdir = wfs_rmdir,
     // .read = wfs_read,
-    
+
     // .readdir = wfs_readdir,
 };
 
