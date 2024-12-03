@@ -3,7 +3,7 @@
 import argparse
 import wfsverify
 import os
-import subprocess  # Added for hexdump function
+import subprocess
 from stat import *
 
 def test_eq(teststr, first, second):
@@ -107,10 +107,6 @@ def verify_mkfs(disks, inodes, blocks):
 
     print("Success")
 
-def verify_raid1v(disks, expected_dirs, expected_files, expected_blocks):
-    # TODO raid1v verification?
-    print("Correct")
-    
 def verify_raid1(disks, expected_dirs, expected_files, expected_blocks):
     """Verify wfs formatted as raid1."""
     filesystems = [wfsverify.WfsState(disk) for disk in disks]
@@ -138,8 +134,8 @@ def verify_raid1(disks, expected_dirs, expected_files, expected_blocks):
         comp_region = fs.read_inode_region()
         if ref_region != comp_region:
             print(f"raid1 inode regions must be identical {ref_fs.diskname()} {fs.diskname()}")
-            hexdump_disk(ref_fs.diskname())  # Debugging the inode region of the first disk
-            hexdump_disk(fs.diskname())     # Debugging the inode region of the current disk
+            hexdump_disk(ref_fs.diskname())
+            hexdump_disk(fs.diskname())
             exit(1)
 
     # compare data block regions on all disks
@@ -148,15 +144,14 @@ def verify_raid1(disks, expected_dirs, expected_files, expected_blocks):
         comp_region = fs.read_datablock_region()
         if ref_region != comp_region:
             print(f"raid1 datablock regions must be identical {ref_fs.diskname()} {fs.diskname()}")
-            hexdump_disk(ref_fs.diskname())  # Debugging the data block region of the first disk
-            hexdump_disk(fs.diskname())      # Debugging the data block region of the current disk
+            hexdump_disk(ref_fs.diskname())
+            hexdump_disk(fs.diskname())
             exit(1)
 
     print("Correct")
 
-
-def verify_raid0(disks, expected_dirs, expected_files, expected_blocks, altblocks):
-    """Verify wfs formatted as raid0."""
+def verify_raid0(disks, expected_dirs, expected_files, expected_blocks):
+    """Verify wfs formatted as raid1."""
     filesystems = [wfsverify.WfsState(disk) for disk in disks]
     all_blocks = [(filesystem.list_allocated_inodes(),
                    filesystem.list_allocated_datablocks(), filesystem)
@@ -169,41 +164,40 @@ def verify_raid0(disks, expected_dirs, expected_files, expected_blocks, altblock
                 len(inode_list), (expected_files + expected_dirs))
         total_datablocks += len(datablock_list)
 
-    if (altblocks != expected_blocks):
-        if (total_datablocks != expected_blocks and total_datablocks != altblocks):
-            print(f"total allocated datablocks on all disks: found {total_datablocks} "
-                  f"expected either {expected_blocks} or {altblocks}.")
-            for fs in filesystems:
-                hexdump_disk(fs.diskname())  # Debugging all disks in RAID0
-            exit(1)
-    else:
-        test_eq("total allocated datablocks on all disks",
-                total_datablocks, expected_blocks)
+    test_eq("total allocated datablocks on all disks",
+            total_datablocks, expected_blocks)
 
     # ensure inode allocations match their bitmap position on each disk
     inode_lists = [(inode_list, fs) for (inode_list, datablock_list, fs) in all_blocks]
 
-    # verify inodes on all the disks
-    for (inode_list, ref_fs) in inode_lists:
-        (dirs, files) = verify_inodes(inode_list, ref_fs)
-        test_eq(f"wfs directory inodes", dirs, expected_dirs)
-        test_eq(f"wfs regular file inodes", files, expected_files)
+    # verify inodes on first disk
+    (inode_list, ref_fs) = inode_lists[0]
+    (dirs, files) = verify_inodes(inode_list, ref_fs)
+
+    test_eq(f"wfs directory inodes", dirs, expected_dirs)
+    test_eq(f"wfs regular file inodes", files, expected_files)
+
+    # compare inode regions on all disks
+    ref_region = ref_fs.read_inode_region()
+    for (_, fs) in inode_lists[1:]:
+        comp_region = fs.read_inode_region()
+        if ref_region != comp_region:
+            print(f"raid1 inode regions must be identical {ref_fs.diskname()} {fs.diskname()}")
+            hexdump_disk(ref_fs.diskname())
+            hexdump_disk(fs.diskname())
+            exit(1)
 
     print("Correct")
 
-
-def verify_raid1v(disks, expected_dirs, expected_files, expected_blocks):
-    """Verify wfs formatted as raid1v."""
-    # TODO: Implement detailed verification
-    print("Correct")
-
-
+def unimplemented(mode):
+    print(f'{mode} verification not implemented')
+    exit()
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--mode", help="verify mode: mkfs, raid0, raid1, raid1v")
     parser.add_argument("--inodes", help="expected number of inodes")
     parser.add_argument("--blocks", help="expected number of data blocks")
-    parser.add_argument("--altblocks", help="alternate number of acceptable data blocks")
     parser.add_argument("--dirs", help="expected number of directories")
     parser.add_argument("--files", help="expected number of regular files")
     parser.add_argument("--disks", nargs="+", help="list of disks")
@@ -215,8 +209,6 @@ if __name__ == '__main__':
     elif args.mode == 'raid1':
         verify_raid1(args.disks, int(args.dirs), int(args.files), int(args.blocks))
     elif args.mode == 'raid0':
-        verify_raid0(args.disks, int(args.dirs), int(args.files), int(args.blocks), int(args.altblocks))
-    elif args.mode == 'raid1v':
-        verify_raid1v(args.disks, int(args.dirs), int(args.files), int(args.blocks))
+        verify_raid0(args.disks, int(args.dirs), int(args.files), int(args.blocks))
     else:
         unimplemented(args.mode)
