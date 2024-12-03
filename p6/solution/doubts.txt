@@ -186,3 +186,13 @@ traversal algo -> search for directory entry of the next name in the previous di
 1. when calling write is it assumed that the file is open() with the correct permissions ?
 2. or do we need to open the file
 3. return codes in mkfs
+
+
+
+if command line args are wrong its a usage error
+
+the -b in mkfs command line args implies the number of data blocks needed in 1 disk or the size of the d-bitmap in the disk
+
+the index of blocks array % cnt_disks gives the disk in raid mode 0
+index at 0th block will always be stored on disk 0
+index at 1st block will always be stored on disk 1

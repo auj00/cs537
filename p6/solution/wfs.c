@@ -156,7 +156,7 @@ void set_inode_index(int inode_number, uint32_t given_mask)
     }
 }
 
-// function to return the next inode number if available
+// function to return the next free d-block index if available
 int get_data_index(void *disk_mmap_ptr)
 {
     struct wfs_sb *sb = (struct wfs_sb *)disk_mmap_ptr;
@@ -444,7 +444,7 @@ static int wfs_getattr(const char *path, struct stat *stbuf)
     stbuf->st_atime = time(NULL);
     stbuf->st_mtime = curr_inode->mtim;
     stbuf->st_mode = curr_inode->mode;
-    stbuf->st_size = 1000;
+    stbuf->st_size = curr_inode->size;
 
     // For RAID1
     // struct wfs_sb *sb = (struct wfs_sb *)ordered_disk_mmap_ptr[0];
@@ -604,7 +604,7 @@ static int wfs_mkdir(const char *path, mode_t mode)
             //         break;
             //     }
             // }
-            printf("parent inode updated, size = %d\n", (int)parent_inode->size);
+            printf("parent inode updated\n");
         }
     }
     else
@@ -642,6 +642,8 @@ static int wfs_mkdir(const char *path, mode_t mode)
         parent_inode->size += sizeof(struct wfs_dentry);
         parent_inode->mtim = seconds;
         parent_inode->ctim = seconds;
+        parent_inode->nlinks++;
+        printf("parent inode updated size of parent = %d\n", (int)parent_inode->size);
     }
 
     // tokenize the path
@@ -718,6 +720,9 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
     time_t seconds;
     seconds = time(NULL);
 
+    uid_t process_uid = getuid();
+    gid_t process_gid = getgid();
+
     // create : new inode on each disk
     for (int i = 0; i < cnt_disks; i++)
     {
@@ -733,9 +738,9 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
 
         struct wfs_inode *curr_inode = get_inode_ptr(inode_bmp_idx, i);
         curr_inode->num = inode_bmp_idx;
-        curr_inode->mode = S_IFREG | 0755;
-        curr_inode->uid = getuid();
-        curr_inode->gid = getgid();
+        curr_inode->mode = mode;
+        curr_inode->uid = process_uid;
+        curr_inode->gid = process_gid;
         curr_inode->size = 0;
         curr_inode->nlinks = 1;
         curr_inode->atim = seconds;
@@ -743,7 +748,7 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
         curr_inode->ctim = seconds;
         memset(curr_inode->blocks, 0, N_BLOCKS * (sizeof(off_t)));
     }
-    printf("Inode created for the new directory\n");
+    printf("Inode created for the new file\n");
 
     // check : parent inode needs new data-block to hold new dentry
     int d_block_index = -1;
@@ -777,7 +782,7 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
             //         break;
             //     }
             // }
-            printf("parent inode updated, size = %d\n", (int)parent_inode->size);
+            printf("parent inode updated\n");
         }
     }
     else
@@ -808,13 +813,17 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
         }
     }
 
+    seconds = time(NULL);
     // update : parent inode
     for (int i = 0; i < cnt_disks; i++)
     {
         struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
         parent_inode->size += sizeof(struct wfs_dentry);
+        // parent_inode->nlinks++;
         parent_inode->mtim = seconds;
         parent_inode->ctim = seconds;
+        parent_inode->atim = seconds;
+        printf("parent inode updated, size = %d\n", (int)parent_inode->size);
     }
     return res;
 }
@@ -825,46 +834,152 @@ static int wfs_mknod(const char* path, mode_t mode, dev_t rdev)
 2. copy size bytes data from the write buffer into the data block(s)
 3. writes may be split across data blocks or span multiple data-blocks
 ******************/
-// static int wfs_write(const char* path, const char *buf, size_t size, off_t offset, struct fuse_file_info* fi)
-// {
-//     printf("wfs_write called on %s\n", path);
+static int wfs_write(const char* path, const char *buf, size_t size, off_t offset, struct fuse_file_info* fi)
+{
+    printf("wfs_write called on %s\n", path);
     
-//     int res = 0;
+    int res = 0;
+    int copy_size = size;
+    // check : file exists
+    int inode_num = path_traversal(path, 0);
+    if (inode_num == -1)
+    {
+        res = -ENOENT;
+        return res;
+    }
+    printf("after path traversal\n");
+    // check : inode is a regular file
+    struct wfs_inode * inode_ptr = get_inode_ptr(inode_num, 0);
+    // if(inode_ptr->mode != (S_IFREG | 0755))
+    // {
+    //     res = -1;
+    //     return res;
+    // }
 
-//     // check : file exists
-//     int inode_num = path_traversal(path, 0);
-//     if (inode_num != -1)
-//     {
-//         res = -ENOENT;
-//         return res;
-//     }
+    // determine : data block to be written
+    int index_in_blocks = offset/BLOCK_SIZE;
+    int offset_within_block = offset%BLOCK_SIZE;
 
-//     // check : inode is a regular file
-//     struct wfs_inode * inode_ptr = get_inode_ptr(inode_num, 0);
-//     if(inode_ptr->mode != S_IFREG | 0755)
-//     {
-//         res = -1;
-//         return res;
-//     }
+    if(index_in_blocks >= 7)
+    {
+        // handle indirect blocks
+    }
 
-//     // determine : data block to be written
-//     int index_in_blocks = offset/BLOCK_SIZE;
-//     int offset_within_block = offset%BLOCK_SIZE;
+    // cnt of the number of d-blocks to write
+    int loop_cnt = (offset_within_block + size+BLOCK_SIZE-1)/BLOCK_SIZE;
 
-//     if(index_in_blocks >= 7)
-//     {
-//         // handle indirect blocks
-//     }
+    // loop to write the blocks
+    // 1. check if a data_block is allocated for the found index_in_blocks
+    // 2. else allocate a page
+    // 3. write to the correct offset_within_block until the end of the block or size
+    // 4. repeat
+
+    // for (int i = 0; i < cnt_disks; i++)
+    // {
+    //     inode_ptr = get_inode_ptr(inode_num, ordered_disk_mmap_ptr[0]);
+    //     int d_block_index = inode_ptr->blocks[index_in_blocks];
+        
+    //     // no d-block allocated for the given offset
+    //     // hence allocate a new d-block
+    //     if(d_block_index == 0)
+    //     {
+    //         // allocate a page
+    //         d_block_index = get_data_index(ordered_disk_mmap_ptr[0]);
+
+    //         // check : no space to allocate new data block
+    //         if (d_block_index == -1)
+    //         {
+    //             res = -ENOSPC;
+    //             return res;
+    //         }
+
+    //         // set the data bitmap
+    //         set_data_bmp_index(d_block_index, 1);
+
+    //         // put the newly allocated data-block into blocks array
+    //         inode_ptr->blocks[index_in_blocks] = d_block_index;
+    //     }
+
+    //     for (int j = 0; j < loop_cnt; j++)
+    //     {
+            
+    //     }
+        
+    // }
+    
+    printf("Before the main for loop\n");
 
 
-//     return res;
-// }
+    for(int i=0; i<loop_cnt; i++)
+    {
+        int d_block_index = inode_ptr->blocks[index_in_blocks];
+
+        // allocate a new page
+        if(d_block_index == 0)
+        {
+            // allocate a page
+            d_block_index = get_data_index(ordered_disk_mmap_ptr[0]);
+
+            // check : no space to allocate new data block
+            if (d_block_index == -1)
+            {
+                res = -ENOSPC;
+                return res;
+            }
+
+            // set the data bitmap
+            set_data_bmp_index(d_block_index, 1);
+
+            // // put the newly allocated data-block into blocks array
+            // inode_ptr->blocks[index_in_blocks] = d_block_index;
+        }
+
+        // for raid1
+
+        // size to be written to the given d-block
+        int write_size=0;
+        for (int j = 0; j < cnt_disks; j++)
+        {
+            // get inode ptr for current disk
+            inode_ptr = get_inode_ptr(inode_num, j);
+
+            // put the newly allocated data-block into blocks array
+            inode_ptr->blocks[index_in_blocks] = d_block_index;
+
+            // get pointer to the correct data-block
+            char * d_block_ptr = (char *)get_d_block_ptr(d_block_index, j);
+            d_block_ptr += offset_within_block;
+
+            // the space in the chosen d-block given it has some data already on it
+            int space_in_d_block = 512-offset_within_block;
+
+            
+            if(size > space_in_d_block)
+            {
+                write_size = space_in_d_block;
+            }
+            else
+            {
+                write_size = size;
+            }
+            memcpy(d_block_ptr, buf, write_size);
+            
+        }
+        buf+= write_size;
+        size-= write_size;
+        index_in_blocks++;
+    }
+
+    printf("after the main for loop\n");
+    res = copy_size;
+    return res;
+}
 
 static struct fuse_operations ops = {
     .getattr = wfs_getattr,
     .mknod   = wfs_mknod,
     .mkdir   = wfs_mkdir,
-    // .write   = wfs_write,
+    .write   = wfs_write,
     // .unlink = wfs_unlink,
     // .rmdir = wfs_rmdir,
     // .read = wfs_read,
