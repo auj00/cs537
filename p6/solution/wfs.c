@@ -539,6 +539,8 @@ static int wfs_getattr(const char *path, struct stat *stbuf)
     stbuf->st_mode = curr_inode->mode;
     stbuf->st_size = curr_inode->size;
 
+    printf("returning from wfs_getattr\n");
+
     return res; // Return 0 on success
 }
 
@@ -557,6 +559,11 @@ static int wfs_mkdir(const char *path, mode_t mode)
         res = -EEXIST;
         return res;
     }
+
+    // if(mode == (S_IFDIR | 0755))
+    //     printf("same mode\n");
+    // else 
+    //     printf("mode is %d\n", (int)mode);
 
     // get : parent inode number
     int parent_inode_num = path_traversal(path, 1);
@@ -580,16 +587,20 @@ static int wfs_mkdir(const char *path, mode_t mode)
     time_t seconds;
     seconds = time(NULL);
 
+    uid_t process_uid = getuid();
+    gid_t process_gid = getgid();
+
     // create : new inode on each disk
     for (int i = 0; i < cnt_disks; i++)
     {
         struct wfs_inode *curr_inode = get_inode_ptr(inode_bmp_idx, i);
         curr_inode->num = inode_bmp_idx;
-        curr_inode->mode = S_IFDIR | 0755;
-        curr_inode->uid = getuid();
-        curr_inode->gid = getgid();
+        // curr_inode->mode = S_IFDIR | 0755;
+        curr_inode->mode = mode | S_IFDIR;
+        curr_inode->uid = process_uid;
+        curr_inode->gid = process_gid;
         curr_inode->size = 0;
-        curr_inode->nlinks = 1;
+        curr_inode->nlinks = 2;
         curr_inode->atim = seconds;
         curr_inode->mtim = seconds;
         curr_inode->ctim = seconds;
@@ -678,12 +689,14 @@ static int wfs_mkdir(const char *path, mode_t mode)
     }
 
     // update : parent inode
+    seconds = time(NULL);
     for (int i = 0; i < cnt_disks; i++)
     {
         struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, i);
         parent_inode->size += sizeof(struct wfs_dentry);
         parent_inode->mtim = seconds;
         parent_inode->ctim = seconds;
+        parent_inode->atim = seconds;
         parent_inode->nlinks++;
         printf("parent inode updated size of parent = %d\n", (int)parent_inode->size);
     }
