@@ -1228,6 +1228,7 @@ static int wfs_rmdir(const char *path)
             {
                 for (int j = 0; j < cnt_disks; j++)
                 {
+                    curr_inode = get_inode_ptr(curr_inode_num, j);
                     if (i == 7)
                     {
                         int indirect_block_index = curr_inode->blocks[7];
@@ -1247,6 +1248,7 @@ static int wfs_rmdir(const char *path)
                         }
                     }
                     set_data_bmp_index(curr_inode->blocks[i], 0, j);
+                    curr_inode->blocks[i] = -1;
                 }
             }
             curr_inode->blocks[i] = -1;
@@ -1327,6 +1329,176 @@ static int wfs_rmdir(const char *path)
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/******************************* 
+1. find the data block corresponding to the offset being read from, and 
+2. copy data from the data block(s) to the read buffer. 
+3. As with writes, reads may be split across data blocks, or span multiple data blocks.
+*******************************/
+static int wfs_read(const char* path, char *buf, size_t size, off_t offset, struct fuse_file_info* fi)
+{
+    printf("wfs_read called on %s\n", path);
+
+    int res = 0;
+
+    
+
+    // check : file exists
+    int curr_inode_num = path_traversal(path, 0);
+
+    // check : inode is a regular file
+    struct wfs_inode *inode_ptr = get_inode_ptr(curr_inode_num, 0);
+
+    int size_to_read = inode_ptr->size-offset;
+    if(size < size_to_read)
+    {
+        size_to_read = size;
+    }
+
+    int read_bytes = size_to_read;
+
+    // check : offset is greater than size
+    if(offset >= inode_ptr->size)
+    {
+        // return error
+        res = -1;
+        return res;
+    }
+
+    // determine : data block to be written
+    int index_in_blocks = offset / BLOCK_SIZE;
+    int offset_within_block = offset % BLOCK_SIZE;
+
+    int d_block_index = -1;
+
+    // cnt of the number of d-blocks to write
+    int loop_cnt = (offset_within_block + size_to_read + BLOCK_SIZE - 1) / BLOCK_SIZE;
+
+    printf("Before the main for loop\n");
+
+    
+
+    // loop for number of pages to be read
+    for (int i = 0; (i < loop_cnt) && (size_to_read > 0); i++)
+    {
+        if (index_in_blocks < 7)
+        {
+            d_block_index = inode_ptr->blocks[index_in_blocks];
+        }
+        else
+        {
+            // check if blocks[7] is allocated
+            int indirect_block_index = inode_ptr->blocks[7];
+            // check : indirect block is allocated
+            // if (indirect_block_index == -1)
+            // {
+                // indirect_block_index = allocate_indirect_block(inode_num, 0);
+                if (indirect_block_index == -1)
+                {
+                    // return the size of bytes read
+                    res = size_to_read;
+                    return res;
+                }
+            // }
+            // then find out the correct block in the new page
+            off_t *indirect_block_ptr = (off_t *)get_d_block_ptr(indirect_block_index, 0);
+            int index_in_indirect_block = index_in_blocks - 7;
+            d_block_index = indirect_block_ptr[index_in_indirect_block];
+        }
+
+
+        int read_size = 0;
+        // for (int j = 0; j < cnt_disks; j++)
+        // {
+            // get inode ptr for current disk
+            // inode_ptr = get_inode_ptr(inode_num, j);
+
+            // put the newly allocated data-block into blocks array
+            // inode_ptr->blocks[index_in_blocks] = d_block_index;
+
+            // get pointer to the correct data-block
+            char *d_block_ptr = (char *)get_d_block_ptr(d_block_index, 0);
+            d_block_ptr += offset_within_block;
+
+            // the space in the chosen d-block given it has some data already on it
+            int space_in_d_block = BLOCK_SIZE - offset_within_block;
+
+            if (size_to_read > space_in_d_block)
+            {
+                read_size = space_in_d_block;
+            }
+            else
+            {
+                read_size = size_to_read;
+            }
+            memcpy(buf, d_block_ptr,  read_size);
+
+            // // austin
+            // offset_within_block = 0;
+            // if (wrote_on_a_new_block)
+            // {
+            //     inode_ptr->size += write_size;
+            // }
+        // }
+        // if(wrote_on_a_new_block)
+        // {
+        //     ino
+        // }
+        buf += read_size;
+        size_to_read -= read_size;
+        index_in_blocks++;
+
+        // austin
+        offset_within_block = 0;
+    }
+    
+    printf("after the main for loop\n");
+    res = read_bytes;
+    return res;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 static struct fuse_operations ops = {
     .getattr = wfs_getattr,
     .mknod = wfs_mknod,
@@ -1334,7 +1506,7 @@ static struct fuse_operations ops = {
     .write = wfs_write,
     .unlink = wfs_unlink,
     .rmdir = wfs_rmdir,
-    // .read = wfs_read,
+    .read = wfs_read,
 
     // .readdir = wfs_readdir,
 };
