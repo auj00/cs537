@@ -773,7 +773,7 @@ static int wfs_mknod(const char *path, mode_t mode, dev_t rdev)
     {
         struct wfs_inode *curr_inode = get_inode_ptr(inode_bmp_idx, i);
         curr_inode->num = inode_bmp_idx;
-        curr_inode->mode = mode;
+        curr_inode->mode = mode | S_IFREG;
         curr_inode->uid = process_uid;
         curr_inode->gid = process_gid;
         curr_inode->size = 0;
@@ -1558,7 +1558,7 @@ static int wfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
         if (d_block_index == -1)
             break;
 
-        struct wfs_dentry *d_block_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, 0);
+        struct wfs_dentry *d_block_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, i%cnt_disks);
         for (int j = 0; j < BLOCK_SIZE / sizeof(struct wfs_dentry); j++)
         {
             if (size_read == inode_ptr->size)

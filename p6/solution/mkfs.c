@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     // ####################### Too many blocks Reqeusted #######################
 
     if (raid_mode == 0 &&
-        disk_size < sizeof(struct wfs_sb) + (cnt_data_blocks + cnt_inodes) / 8 + (cnt_data_blocks / cnt_disks + cnt_inodes) * 512)
+        disk_size < sizeof(struct wfs_sb) + (cnt_data_blocks + cnt_inodes) / 8 + (cnt_data_blocks + cnt_inodes) * 512)
     {
         return -1;
     }
