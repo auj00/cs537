@@ -12,7 +12,7 @@ Traceback (most recent call last):
   File "<frozen importlib._bootstrap_external>", line 1411, in _get_spec
   File "<frozen importlib._bootstrap_external>", line 1548, in find_spec
   File "<frozen importlib._bootstrap_external>", line 1591, in _fill_cache
-OSError: [Errno 38] Function not implemented: '/home/yashd/private/CS537_Team/cs537/p6/tests/mnt'
+OSError: [Errno 5] Input/output error: '/home/yashd/private/CS537_Team/cs537/p6/tests/mnt'
 
 Original exception was:
 Traceback (most recent call last):

@@ -1482,8 +1482,38 @@ static int wfs_read(const char* path, char *buf, size_t size, off_t offset, stru
 
 
 
+static int wfs_readdir(const char* path, void* buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info* fi)
+{
+    printf("wfs_readdir called on %s\n", path);
+    int res = 0;
 
+    int inode_num = path_traversal(path, 0);
 
+    struct wfs_inode * inode_ptr = get_inode_ptr(inode_num, 0);
+    int size_read = 0;
+    
+    for(int i=0; i<7; i++)
+    {
+        int d_block_index = inode_ptr->blocks[i];
+        if(d_block_index == -1)
+            break;
+
+        struct wfs_dentry * d_block_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, 0);
+        for(int j=0; j<BLOCK_SIZE/sizeof(struct wfs_dentry); j++)
+        {
+            if(size_read == inode_ptr->size)
+            {
+                // exit
+                return res;
+            }
+            filler(buf, d_block_ptr->name, NULL, 0);
+            d_block_ptr+=1;
+            size_read+= sizeof(struct wfs_dentry);
+        }
+    }
+
+    return res;
+}
 
 
 
@@ -1507,8 +1537,7 @@ static struct fuse_operations ops = {
     .unlink = wfs_unlink,
     .rmdir = wfs_rmdir,
     .read = wfs_read,
-
-    // .readdir = wfs_readdir,
+    .readdir = wfs_readdir,
 };
 
 int main(int argc, char *argv[])
