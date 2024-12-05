@@ -1463,6 +1463,7 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
     {
         if (index_in_blocks < 7)
         {
+            inode_ptr = get_inode_ptr(curr_inode_num, i%cnt_disks);
             d_block_index = inode_ptr->blocks[index_in_blocks];
         }
         else
@@ -1481,7 +1482,7 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
             }
             // }
             // then find out the correct block in the new page
-            off_t *indirect_block_ptr = (off_t *)get_d_block_ptr(indirect_block_index, 0);
+            off_t *indirect_block_ptr = (off_t *)get_d_block_ptr(indirect_block_index, 7%cnt_disks);
             int index_in_indirect_block = index_in_blocks - 7;
             d_block_index = indirect_block_ptr[index_in_indirect_block];
         }
@@ -1503,7 +1504,7 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
         // inode_ptr->blocks[index_in_blocks] = d_block_index;
 
         // get pointer to the correct data-block
-        char *d_block_ptr = (char *)get_d_block_ptr(d_block_index, 0);
+        char *d_block_ptr = (char *)get_d_block_ptr(d_block_index, index_in_blocks%cnt_disks);
         d_block_ptr += offset_within_block;
 
         // the space in the chosen d-block given it has some data already on it

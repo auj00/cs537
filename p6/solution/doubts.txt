@@ -129,14 +129,16 @@ unmap at the end of mkfs program
 8. mkfs: too many blocks requested
 9. mkfs: odd number of disks okay
 
-
 43. raid1 -- read: large file
 44. raid1 -- interleaved writes and readback
-47. raid0 -- rm: create previously deleted file with data
 51. raid0 -- read: small file
 52. raid0 -- read: large file
 53. raid0 -- interleaved writes and readback
 56. raid0 -- mount in other order with readback
+
+
+
+47. raid0 -- rm: create previously deleted file with data
 57. raid1v -- readback with a corrupted disk
 
 // -x-
