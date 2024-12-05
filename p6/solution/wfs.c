@@ -1315,13 +1315,13 @@ static int wfs_unlink(const char *path)
         }
     }
 
-    struct wfs_inode *parent_inode_ptr = get_inode_ptr(parent_inode_num, 0);
-    if (parent_inode_ptr->size % BLOCK_SIZE == 0)
-    {
-        // remove the last d-block allocated for dentrys/ dentry block
+    // struct wfs_inode *parent_inode_ptr = get_inode_ptr(parent_inode_num, 0);
+    // if (parent_inode_ptr->size % BLOCK_SIZE == 0)
+    // {
+    //     // remove the last d-block allocated for dentrys/ dentry block
 
-        remove_dentry_block(parent_inode_num);
-    }
+    //     remove_dentry_block(parent_inode_num);
+    // }
 
     // loop over the blocks array of the parent
     // for (int i = 0; i < 7; i++)
@@ -1368,6 +1368,13 @@ static int wfs_rmdir(const char *path)
 
     // get : current inode pointer
     struct wfs_inode *curr_inode = get_inode_ptr(curr_inode_num, 0);
+
+    // rmdir should succeed only if the directory is empty
+    if(curr_inode->size != 0)
+    {
+        res = -1;
+        return res;
+    }
 
     // -------------------------------------- free the d-block bitmap --------------------------------------
     if (curr_inode->size != 0)
