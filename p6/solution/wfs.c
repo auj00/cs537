@@ -930,7 +930,7 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
     for (int i = 0; i < loop_cnt; i++)
     {
         // flag : set if you allocate a new d-block to write
-        int wrote_on_a_new_block = 0;
+        // int wrote_on_a_new_block = 0;
         if (index_in_blocks < 7)
         {
             d_block_index = inode_ptr->blocks[index_in_blocks];
@@ -967,7 +967,7 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
                 res = -ENOSPC;
                 return res;
             }
-            wrote_on_a_new_block = 1;
+            // wrote_on_a_new_block = 1;
         }
 
         // for raid1
@@ -991,14 +991,14 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
             }
             memcpy(d_block_ptr, buf, write_size);
 
-            if (wrote_on_a_new_block)
-            {
+            // if (wrote_on_a_new_block)
+            // {
                 for (int j = 0; j < cnt_disks; j++)
                 {
                     inode_ptr = get_inode_ptr(inode_num, j);
                     inode_ptr->size += write_size;
                 }
-            }
+            // }
         }
         else
         {
@@ -1029,10 +1029,10 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
 
                 // // austin
                 // offset_within_block = 0;
-                if (wrote_on_a_new_block)
-                {
+                // if (wrote_on_a_new_block)
+                // {
                     inode_ptr->size += write_size;
-                }
+                // }
             }
         }
         // if(wrote_on_a_new_block)
@@ -1421,6 +1421,7 @@ static int wfs_rmdir(const char *path)
 static int wfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi)
 {
     printf("wfs_read called on %s\n", path);
+    printf("offset is %d\n", (int)offset);
 
     int res = 0;
 
@@ -1430,7 +1431,7 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
     // check : inode is a regular file
     struct wfs_inode *inode_ptr = get_inode_ptr(curr_inode_num, 0);
 
-    int size_to_read = inode_ptr->size - offset;
+    int size_to_read = inode_ptr->size - offset+1;
     if (size < size_to_read)
     {
         size_to_read = size;
@@ -1442,7 +1443,7 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
     if (offset >= inode_ptr->size)
     {
         // return error
-        res = -1;
+        res = 0;
         return res;
     }
 
@@ -1456,7 +1457,7 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
     int loop_cnt = (offset_within_block + size_to_read + BLOCK_SIZE - 1) / BLOCK_SIZE;
 
     printf("Before the main for loop\n");
-
+    
     // loop for number of pages to be read
     for (int i = 0; (i < loop_cnt) && (size_to_read > 0); i++)
     {
@@ -1530,7 +1531,7 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
         //     ino
         // }
         buf += read_size;
-        size_to_read -= read_size;
+        size_to_read =size_to_read- read_size;
         index_in_blocks++;
 
         // austin

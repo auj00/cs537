@@ -130,6 +130,14 @@ unmap at the end of mkfs program
 9. mkfs: odd number of disks okay
 
 
+43. raid1 -- read: large file
+44. raid1 -- interleaved writes and readback
+47. raid0 -- rm: create previously deleted file with data
+51. raid0 -- read: small file
+52. raid0 -- read: large file
+53. raid0 -- interleaved writes and readback
+56. raid0 -- mount in other order with readback
+57. raid1v -- readback with a corrupted disk
 
 // -x-
 
@@ -196,3 +204,4 @@ the -b in mkfs command line args implies the number of data blocks needed in 1 d
 the index of blocks array % cnt_disks gives the disk in raid mode 0
 index at 0th block will always be stored on disk 0
 index at 1st block will always be stored on disk 1
+
