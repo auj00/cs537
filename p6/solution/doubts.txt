@@ -216,4 +216,5 @@ index at 1st block will always be stored on disk 1
 current case : 1 dentry in dentry-block -> it is removed -> but directory holds onto the dentry block -> new file created 
 -> new dentry block assigned because condition is only to check size 
 currently i remove the dentry block unless it is blocks[0]
-
+3. empty directory but multiple allocated data blocks for dentrys that were cleared in the past
+4. tc 36 & 39 want 1 d-block inspite of no dentry

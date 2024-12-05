@@ -461,18 +461,48 @@ void remove_dentry_block(int inode_num)
             }
         }
     }
-    if(index_in_blocks != 0)
-    {if (raid_mode == 0)
+    if (index_in_blocks != 0)
     {
-        set_data_bmp_index(d_block_index, 0, index_in_blocks % cnt_disks);
-    }
-    else
-    {
-        for (int i = 0; i < cnt_disks; i++)
+        if (raid_mode == 0)
         {
-            set_data_bmp_index(d_block_index, 0, i);
+            set_data_bmp_index(d_block_index, 0, index_in_blocks % cnt_disks);
         }
-    }}
+        else
+        {
+            for (int i = 0; i < cnt_disks; i++)
+            {
+                set_data_bmp_index(d_block_index, 0, i);
+            }
+        }
+    }
+}
+
+/******************
+// ONLY called in read for RAID1V
+returns the disk which has the data-block with the correct data
+***********************/
+int get_correct_disk_num(int d_block_index, int read_size)
+{
+    int maxcount = 0;
+    int disk_num_having_max_freq = 0;
+    for (int i = 0; i < cnt_disks; i++)
+    {
+        int count = 0;
+        char *curr_disk_d_block_ptr = (char *)get_d_block_ptr(d_block_index, i);
+        for (int j = 0; j < cnt_disks; j++)
+        {
+            char * next_disk_d_block_ptr = (char *)get_d_block_ptr(d_block_index, j);
+            if (memcmp(curr_disk_d_block_ptr, next_disk_d_block_ptr, read_size) == 0)
+                count++;
+        }
+
+        if (count > maxcount)
+        {
+            maxcount = count;
+            disk_num_having_max_freq = i;
+        }
+    }
+    return disk_num_having_max_freq;
 }
 
 // ###################################### Traversal ######################################
@@ -497,7 +527,7 @@ int get_child_inode_num(int inode_num, char *child_name)
     for (int i = 0; i < 7; i++)
     {
         int d_block_index = curr_inode->blocks[i];
-        if(d_block_index == -1)
+        if (d_block_index == -1)
             return -1;
         int disk_num = (raid_mode == 0) ? i % cnt_disks : 0;
         void *d_block_ptr = get_d_block_ptr(d_block_index, disk_num);
@@ -1574,6 +1604,12 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
         else
         {
             read_size = size_to_read;
+        }
+        int disk_num = 0;
+        if(raid_mode == 2)
+        {
+            disk_num = get_correct_disk_num(d_block_index, read_bytes);
+            d_block_ptr = get_d_block_ptr(d_block_index, disk_num);
         }
         memcpy(buf, d_block_ptr, read_size);
 
