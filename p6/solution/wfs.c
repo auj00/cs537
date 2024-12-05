@@ -457,7 +457,7 @@ int get_child_inode_num(int inode_num, char *child_name)
         return -1;
 
     // ---- step-2 : Search dirents on each data block ----
-    int search_size = 0; // store the bytes of data that has been searched
+    // int search_size = 0; // store the bytes of data that has been searched
     for (int i = 0; i < 7; i++)
     {
         int d_block_index = curr_inode->blocks[i];
@@ -476,9 +476,9 @@ int get_child_inode_num(int inode_num, char *child_name)
                 return dentry_ptr->num;
             }
             dentry_ptr = dentry_ptr + 1;
-            search_size += sizeof(struct wfs_dentry);
-            if (search_size >= curr_inode->size)
-                return -1;
+            // search_size += sizeof(struct wfs_dentry);
+            // if (search_size >= curr_inode->size)
+            //     return -1;
         }
     }
 
@@ -791,7 +791,7 @@ static int wfs_mknod(const char *path, mode_t mode, dev_t rdev)
     int blocks_index = -1;
     if (alloc_d_block_to_dir(parent_inode_num))
     {
-
+        printf("new data block allocated for dentries\n");
         struct wfs_inode *parent_inode = get_inode_ptr(parent_inode_num, 0);
         for (int i = 0; i < 7; i++)
         {
@@ -1110,6 +1110,7 @@ static int wfs_unlink(const char *path)
                 set_data_bmp_index(curr_inode->blocks[i], 0, i % cnt_disks);
                 for (int j = 0; j < cnt_disks; j++)
                 {
+                    curr_inode = get_inode_ptr(curr_inode_num, j%cnt_disks);
                     curr_inode->blocks[i] = -1;
                 }
             }
@@ -1173,7 +1174,17 @@ static int wfs_unlink(const char *path)
                     // for (int k = 0; k < cnt_disks; k++)
                     // {
                     // dentry_ptr = get_dentry_ptr(parent_inode_num, k, j);
-                    struct wfs_dentry *last_dentry_ptr = get_dentry_ptr(parent_inode_num, parent_inode_ptr->size / BLOCK_SIZE, 1);
+                    int disk_num = 0;
+                    for(int k=1; k<8; k++)
+                    {
+                        if(parent_inode_ptr->blocks[i] == -1)
+                        {
+                            disk_num = (i-1)%cnt_disks;
+                            break;
+                        }
+                    }
+
+                    struct wfs_dentry *last_dentry_ptr = get_dentry_ptr(parent_inode_num, disk_num, 1);
                     strcpy(dentry_ptr->name, last_dentry_ptr->name);
                     dentry_ptr->num = last_dentry_ptr->num;
                     // parent_inode_ptr = get_inode_ptr(parent_inode_num, k);

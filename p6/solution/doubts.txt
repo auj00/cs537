@@ -207,3 +207,12 @@ the index of blocks array % cnt_disks gives the disk in raid mode 0
 index at 0th block will always be stored on disk 0
 index at 1st block will always be stored on disk 1
 
+
+
+/// DOUBTS ////
+
+1. size manipulation for overwriting files
+2. when i clear dentry should i check if the d-block is empty ?
+current case : 1 dentry in dentry-block -> it is removed -> but directory holds onto the dentry block -> new file created 
+-> new dentry block assigned because condition is only to check size 
+
