@@ -293,7 +293,22 @@ int alloc_d_block_to_dir(int inode_num)
 {
     struct wfs_inode *inode_ptr = get_inode_ptr(inode_num, 0);
 
-    if (((inode_ptr->size == 0) && (inode_ptr->blocks[0] == -1)) || ((inode_ptr->size % BLOCK_SIZE == 0) && (inode_ptr->size / BLOCK_SIZE != 7)))
+    // loop over all indexes in blocks
+    int cnt_allocated_blocks = 0;
+    for(int i=0; i<7; i++)
+    {
+        if(inode_ptr->blocks[i] != -1)
+            cnt_allocated_blocks++;
+    }
+
+    // if(!(inode_ptr->size < (cnt_allocated_blocks*BLOCK_SIZE)))
+    // {
+    //     return 1;
+    // }
+
+    if (((inode_ptr->size == 0) && (inode_ptr->blocks[0] == -1)) || 
+        ((inode_ptr->size % BLOCK_SIZE == 0) && (inode_ptr->size / BLOCK_SIZE != 7)) ||
+        (!(inode_ptr->size < (cnt_allocated_blocks*BLOCK_SIZE))))
     {
         return 1;
     }
