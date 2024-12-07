@@ -295,9 +295,9 @@ int alloc_d_block_to_dir(int inode_num)
 
     // loop over all indexes in blocks
     int cnt_allocated_blocks = 0;
-    for(int i=0; i<7; i++)
+    for (int i = 0; i < 7; i++)
     {
-        if(inode_ptr->blocks[i] != -1)
+        if (inode_ptr->blocks[i] != -1)
             cnt_allocated_blocks++;
     }
 
@@ -306,9 +306,9 @@ int alloc_d_block_to_dir(int inode_num)
     //     return 1;
     // }
 
-    if (((inode_ptr->size == 0) && (inode_ptr->blocks[0] == -1)) || 
+    if (((inode_ptr->size == 0) && (inode_ptr->blocks[0] == -1)) ||
         ((inode_ptr->size % BLOCK_SIZE == 0) && (inode_ptr->size / BLOCK_SIZE != 7)) ||
-        (!(inode_ptr->size < (cnt_allocated_blocks*BLOCK_SIZE))))
+        (!(inode_ptr->size < (cnt_allocated_blocks * BLOCK_SIZE))))
     {
         return 1;
     }
@@ -506,7 +506,7 @@ int get_correct_disk_num(int d_block_index, int read_size)
         char *curr_disk_d_block_ptr = (char *)get_d_block_ptr(d_block_index, i);
         for (int j = 0; j < cnt_disks; j++)
         {
-            char * next_disk_d_block_ptr = (char *)get_d_block_ptr(d_block_index, j);
+            char *next_disk_d_block_ptr = (char *)get_d_block_ptr(d_block_index, j);
             if (memcmp(curr_disk_d_block_ptr, next_disk_d_block_ptr, read_size) == 0)
                 count++;
         }
@@ -979,7 +979,7 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
     printf("wfs_write called on %s\n", path);
 
     int res = 0;
-    int copy_size = size;
+    //int copy_size = size;
 
     // check : file exists
     int inode_num = path_traversal(path, 0);
@@ -1007,6 +1007,9 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
     // 2. else allocate a page
     // 3. write to the correct offset_within_block until the end of the block or size
     // 4. repeat
+
+    // variable to store the number of bytes written to file in 1 function call
+    int total_bytes_written = 0;
 
     printf("Before the main for loop\n");
 
@@ -1076,11 +1079,11 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
 
             // if (wrote_on_a_new_block)
             // {
-            for (int j = 0; j < cnt_disks; j++)
-            {
-                inode_ptr = get_inode_ptr(inode_num, j);
-                inode_ptr->size += write_size;
-            }
+            // for (int j = 0; j < cnt_disks; j++)
+            // {
+            //     inode_ptr = get_inode_ptr(inode_num, j);
+            //     inode_ptr->size += write_size;
+            // }
             // }
         }
         else
@@ -1110,11 +1113,37 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
                 }
                 memcpy(d_block_ptr, buf, write_size);
 
-                // // austin
-                // offset_within_block = 0;
-                // if (wrote_on_a_new_block)
+                // ------------------------ handling overwriting ------------------------
+
+                printf("inode_ptr->size = %d\n", (int)inode_ptr->size);
+                printf("offset = %d\n", (int)offset);
+                printf("write_size = %d\n", write_size);
+
+                printf("size being written %d\n", write_size);
+                // if (offset < inode_ptr->size)
                 // {
-                inode_ptr->size += write_size;
+                //     printf("if case in write\n");
+                //     if (write_size + offset > inode_ptr->size)
+                //     {
+                //         // spill case
+                //         printf("spill case\n");
+                //         inode_ptr->size = (write_size + offset);
+                //     }
+                //     else if (write_size + offset < inode_ptr->size)
+                //     {
+                //         // do nothing
+                //         printf("entered else if\n");
+                //     }
+                //     else
+                //     {
+                //         printf("no spill case\n");
+                //         inode_ptr->size += write_size;
+                //     }
+                // }
+                // else
+                // {
+                //     printf("else case in write\n");
+                //     inode_ptr->size += write_size;
                 // }
             }
         }
@@ -1126,12 +1155,46 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
         size -= write_size;
         index_in_blocks++;
 
+        total_bytes_written += write_size;
+
         // austin
         offset_within_block = 0;
     }
 
+    
+    // loop to change size within inode
+    for (int i = 0; i < cnt_disks; i++)
+    {
+        inode_ptr = get_inode_ptr(inode_num, i);
+        if (offset <= inode_ptr->size)
+        {
+            printf("if case in write\n");
+            if (total_bytes_written + offset > inode_ptr->size)
+            {
+                // spill case
+                printf("spill case\n");
+                inode_ptr->size = (total_bytes_written + offset);
+            }
+            // else if (total_bytes_written + offset < inode_ptr->size)
+            // {
+            //     // do nothing
+            //     printf("entered else if\n");
+            // }
+            // else
+            // {
+            //     printf("no spill case\n");
+            //     inode_ptr->size += total_bytes_written;
+            // }
+        }
+        else
+        {
+            printf("else case in write\n");
+            inode_ptr->size += total_bytes_written;
+        }
+    }
+
     printf("after the main for loop\n");
-    res = copy_size;
+    res = total_bytes_written;
     return res;
 }
 
@@ -1385,7 +1448,7 @@ static int wfs_rmdir(const char *path)
     struct wfs_inode *curr_inode = get_inode_ptr(curr_inode_num, 0);
 
     // rmdir should succeed only if the directory is empty
-    if(curr_inode->size != 0)
+    if (curr_inode->size != 0)
     {
         res = -1;
         return res;
@@ -1628,7 +1691,7 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
             read_size = size_to_read;
         }
         int disk_num = 0;
-        if(raid_mode == 2)
+        if (raid_mode == 2)
         {
             disk_num = get_correct_disk_num(d_block_index, read_bytes);
             d_block_ptr = get_d_block_ptr(d_block_index, disk_num);
