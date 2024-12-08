@@ -101,7 +101,7 @@ int path_parse(char *str, char **arg_arr, char *delims)
 char *get_name_from_path(const char *path)
 {
     char *copy_path = strdup(path);
-    char *token_arr[10]; // Assuming that path won't have more than 10 tokens
+    char *token_arr[100]; // Assuming that path won't have more than 10 tokens
     int token_cnt = 0;
     token_cnt = path_parse(copy_path, token_arr, "/");
     return token_arr[token_cnt - 1];
@@ -576,7 +576,7 @@ Returns the inode_num of the last element in path
 int path_traversal(const char *path, int token_cnt_dcr)
 {
     char *copy_path = strdup(path);
-    char *token_arr[10]; // Assuming that path won't have more than 10 tokens
+    char *token_arr[100]; // Assuming that path won't have more than 10 tokens
     int token_cnt = 0;
     token_cnt = path_parse(copy_path, token_arr, "/");
 
@@ -705,7 +705,7 @@ static int wfs_mkdir(const char *path, mode_t mode)
         curr_inode->uid = process_uid;
         curr_inode->gid = process_gid;
         curr_inode->size = 0;
-        curr_inode->nlinks = 2;
+        curr_inode->nlinks = 1;
         curr_inode->atim = seconds;
         curr_inode->mtim = seconds;
         curr_inode->ctim = seconds;
@@ -964,6 +964,7 @@ static int wfs_mknod(const char *path, mode_t mode, dev_t rdev)
         parent_inode->mtim = seconds;
         parent_inode->ctim = seconds;
         parent_inode->atim = seconds;
+        parent_inode->nlinks++;
         printf("parent inode updated, size = %d\n", (int)parent_inode->size);
     }
     return res;
@@ -979,7 +980,7 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
     printf("wfs_write called on %s\n", path);
 
     int res = 0;
-    //int copy_size = size;
+    // int copy_size = size;
 
     // check : file exists
     int inode_num = path_traversal(path, 0);
@@ -1161,7 +1162,6 @@ static int wfs_write(const char *path, const char *buf, size_t size, off_t offse
         offset_within_block = 0;
     }
 
-    
     // loop to change size within inode
     for (int i = 0; i < cnt_disks; i++)
     {
@@ -1338,6 +1338,7 @@ static int wfs_unlink(const char *path)
                     {
                         parent_inode_ptr = get_inode_ptr(parent_inode_num, k);
                         parent_inode_ptr->size -= sizeof(struct wfs_dentry);
+                        parent_inode_ptr->nlinks--;
                     }
 
                     memset(last_dentry_ptr, 0, sizeof(struct wfs_dentry));
@@ -1380,6 +1381,7 @@ static int wfs_unlink(const char *path)
                         dentry_ptr->num = last_dentry_ptr->num;
                         // parent_inode_ptr = get_inode_ptr(parent_inode_num, k);
                         parent_inode_ptr->size -= sizeof(struct wfs_dentry);
+                        parent_inode_ptr->nlinks--;
                         memset(last_dentry_ptr, 0, sizeof(struct wfs_dentry));
                         // }
                         // return res;
@@ -1517,15 +1519,16 @@ static int wfs_rmdir(const char *path)
 
     // -------------------------------------- remove the dentry --------------------------------------
 
-    for (int k = 0; k < cnt_disks; k++)
+    if (raid_mode == 0)
     {
-        struct wfs_inode *parent_inode_ptr = get_inode_ptr(parent_inode_num, k);
+        // get : pointer to parent inode
+        struct wfs_inode *parent_inode_ptr = get_inode_ptr(parent_inode_num, 0);
 
-        // loop over the blocks array of the parent
         for (int i = 0; i < 7; i++)
         {
             int d_block_index = parent_inode_ptr->blocks[i];
-            struct wfs_dentry *dentry_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, k);
+
+            struct wfs_dentry *dentry_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, i % cnt_disks);
             // struct wfs_dentry *last_dentry_ptr = get_dentry_ptr(parent_inode_num, 0, 1);
 
             // loop over all possible dentrys in a d-block
@@ -1538,11 +1541,27 @@ static int wfs_rmdir(const char *path)
                     // for (int k = 0; k < cnt_disks; k++)
                     // {
                     // dentry_ptr = get_dentry_ptr(parent_inode_num, k, j);
-                    struct wfs_dentry *last_dentry_ptr = get_dentry_ptr(parent_inode_num, k, 1);
+                    int disk_num = 0;
+                    for (int k = 1; k < 8; k++)
+                    {
+                        if (parent_inode_ptr->blocks[i] == -1)
+                        {
+                            disk_num = (i - 1) % cnt_disks;
+                            break;
+                        }
+                    }
+
+                    struct wfs_dentry *last_dentry_ptr = get_dentry_ptr(parent_inode_num, disk_num, 1);
                     strcpy(dentry_ptr->name, last_dentry_ptr->name);
                     dentry_ptr->num = last_dentry_ptr->num;
                     // parent_inode_ptr = get_inode_ptr(parent_inode_num, k);
-                    parent_inode_ptr->size -= sizeof(struct wfs_dentry);
+                    for (int k = 0; k < cnt_disks; k++)
+                    {
+                        parent_inode_ptr = get_inode_ptr(parent_inode_num, k);
+                        parent_inode_ptr->size -= sizeof(struct wfs_dentry);
+                        parent_inode_ptr->nlinks--;
+                    }
+
                     memset(last_dentry_ptr, 0, sizeof(struct wfs_dentry));
                     // }
                     // return res;
@@ -1552,6 +1571,48 @@ static int wfs_rmdir(const char *path)
             }
             if (j < BLOCK_SIZE / sizeof(struct wfs_dentry))
                 break;
+        }
+    }
+
+    else
+    {
+        for (int k = 0; k < cnt_disks; k++)
+        {
+            struct wfs_inode *parent_inode_ptr = get_inode_ptr(parent_inode_num, k);
+
+            // loop over the blocks array of the parent
+            for (int i = 0; i < 7; i++)
+            {
+                int d_block_index = parent_inode_ptr->blocks[i];
+                struct wfs_dentry *dentry_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, k);
+                // struct wfs_dentry *last_dentry_ptr = get_dentry_ptr(parent_inode_num, 0, 1);
+
+                // loop over all possible dentrys in a d-block
+                int j = 0;
+                for (j = 0; j < BLOCK_SIZE / sizeof(struct wfs_dentry); j++)
+                {
+                    // struct wfs_dentry *dentry_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, j);
+                    if (dentry_ptr->num == curr_inode_num)
+                    {
+                        // for (int k = 0; k < cnt_disks; k++)
+                        // {
+                        // dentry_ptr = get_dentry_ptr(parent_inode_num, k, j);
+                        struct wfs_dentry *last_dentry_ptr = get_dentry_ptr(parent_inode_num, k, 1);
+                        strcpy(dentry_ptr->name, last_dentry_ptr->name);
+                        dentry_ptr->num = last_dentry_ptr->num;
+                        // parent_inode_ptr = get_inode_ptr(parent_inode_num, k);
+                        parent_inode_ptr->size -= sizeof(struct wfs_dentry);
+                        parent_inode_ptr->nlinks--;
+                        memset(last_dentry_ptr, 0, sizeof(struct wfs_dentry));
+                        // }
+                        // return res;
+                        break;
+                    }
+                    dentry_ptr += 1;
+                }
+                if (j < BLOCK_SIZE / sizeof(struct wfs_dentry))
+                    break;
+            }
         }
     }
 
@@ -1690,6 +1751,10 @@ static int wfs_read(const char *path, char *buf, size_t size, off_t offset, stru
         {
             read_size = size_to_read;
         }
+
+        ///////////////////////////////
+        // RAID1v
+        //////////////////////////////
         int disk_num = 0;
         if (raid_mode == 2)
         {
@@ -1738,7 +1803,18 @@ static int wfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
         if (d_block_index == -1)
             break;
 
-        struct wfs_dentry *d_block_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, i % cnt_disks);
+        int disk_num = i % cnt_disks;
+
+        ///////////////////////////////
+        // RAID1v
+        //////////////////////////////
+        // if(raid_mode == 2)
+        // {
+        //     disk_num = get_correct_disk_num(d_block_index, BLOCK_SIZE);
+        //     // d_block_ptr = get_d_block_ptr(d_block_index, disk_num);
+        
+        // }
+        struct wfs_dentry *d_block_ptr = (struct wfs_dentry *)get_d_block_ptr(d_block_index, disk_num);
         for (int j = 0; j < BLOCK_SIZE / sizeof(struct wfs_dentry); j++)
         {
             if (size_read == inode_ptr->size)

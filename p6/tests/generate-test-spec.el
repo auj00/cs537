@@ -1,3 +1,4 @@
+(eval-when-compile (require 'subr-x))
 (defun write-test-files (test testnum)
   "Write all the files for a test."
   (let ((testdir "tests"))
